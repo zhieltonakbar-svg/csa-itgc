@@ -1058,6 +1058,9 @@
                     <tr>
                         <th class="col-ctrlid sortable">Control ID</th>
                         <th class="col-desc">Control Description</th>
+                        <th class="col-frekuensi">Keterangan Frekuensi</th>
+                        <th class="col-upti">UPTI</th>
+                        <th class="col-keyctrl">Key Control</th>
                         <th class="col-filetype" style="width: 15%;">File Type</th>
                         <th class="col-status th-center">Status Control</th>
                         <th class="col-actions">Actions</th>
@@ -1069,19 +1072,16 @@
                         $scKey  = $ctrl->status_control ?? 'not_started';
                         $scInfo = $scBadgeMap[$scKey] ?? $scBadgeMap['not_started'];
                         
-                        // Get file type from the first evidence (since all evidences for a control share the same file type)
-                        $fileType = '—';
-                        if (isset($ctrl->evidences) && $ctrl->evidences->count() > 0) {
-                            $firstEv = $ctrl->evidences->first();
-                            if (!empty($firstEv->file_type)) {
-                                $fileType = $firstEv->file_type;
-                            }
-                        }
+                        $fileType = $ctrl->file_type ?? '—';
                     @endphp
                     <tr
                         data-id="{{ $ctrl->id ?? '' }}"
                         data-ctrl-id="{{ $ctrl->it_control_id ?? '' }}"
                         data-ctrl-desc="{{ addslashes($ctrl->control_description ?? '') }}"
+                        data-ctrl-frek="{{ $ctrl->keterangan_frekuensi ?? '' }}"
+                        data-ctrl-upti="{{ $ctrl->upti ?? '' }}"
+                        data-ctrl-keyctrl="{{ $ctrl->key_control ?? '' }}"
+                        data-ctrl-file-type="{{ $ctrl->file_type ?? '' }}"
                         data-ctrl-status="{{ $ctrl->status_control ?? 'not_started' }}"
                         data-cat-status="{{ $ctrl->status_it_category ?? 'not_completed' }}"
                         data-app-id="{{ $ctrl->application_id }}"
@@ -1120,6 +1120,15 @@
                                 </div>
                             @endif
                         </td>
+                        <td class="col-frekuensi">
+                            {{ $ctrl->keterangan_frekuensi ?? '—' }}
+                        </td>
+                        <td class="col-upti">
+                            {{ $ctrl->upti ?? '—' }}
+                        </td>
+                        <td class="col-keyctrl">
+                            {{ $ctrl->key_control ?? '—' }}
+                        </td>
                         <td class="col-filetype">
                             @if($fileType !== '—')
                                 <span style="background:#e0e7ff; color:#3730a3; font-size:12px; font-weight:600; padding:3px 8px; border-radius:4px; border:1px solid #c7d2fe;">
@@ -1139,12 +1148,12 @@
                         </td>
                         <td class="col-actions">
                             <div class="row-act-group">
-                                {{-- 1. Edit Control --}}
+                                {{-- 1. Edit Control / Upload Evidence --}}
                                 <button type="button"
                                         class="row-act-btn row-act-edit btn-edit-ctrl"
-                                        title="Edit Control Record"
-                                        aria-label="Edit {{ $ctrl->it_control_id }}">
-                                    <i class="bi bi-pencil-fill"></i>
+                                        title="Upload Evidence"
+                                        aria-label="Upload Evidence {{ $ctrl->it_control_id }}">
+                                    <i class="bi bi-upload"></i>
                                 </button>
 
                                 {{-- 3. Delete Control --}}
@@ -1209,39 +1218,8 @@
                 <input type="hidden" name="year" value="{{ $year }}">
                 <input type="hidden" name="quarter" value="{{ $quarter }}">
 
-                <div class="modal-form-row">
-
-                    <div class="modal-form-group">
-                        <label class="modal-label" for="mc-application">
-                            Application <span class="required">*</span>
-                        </label>
-                        <select class="modal-select" id="mc-application" name="application_id" required>
-                            <option value="">— Select Application —</option>
-                            @foreach ($allApplications as $app)
-                                <option value="{{ $app->id }}"
-                                    {{ $app->id === $application->id ? 'selected' : '' }}>
-                                    {{ $app->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <div class="modal-form-group">
-                        <label class="modal-label" for="mc-category">
-                            IT Category <span class="required">*</span>
-                        </label>
-                        <select class="modal-select" id="mc-category" name="it_category_id" required>
-                            <option value="">— Select Category —</option>
-                            @foreach ($allCategories as $cat)
-                                <option value="{{ $cat->id }}"
-                                    {{ $cat->id === $category->id ? 'selected' : '' }}>
-                                    {{ $cat->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                </div>
+                <input type="hidden" id="mc-application" name="application_id" value="{{ $application->id }}">
+                <input type="hidden" id="mc-category" name="it_category_id" value="{{ $category->id }}">
 
                 <div class="modal-form-row">
 
@@ -1271,10 +1249,47 @@
                               required></textarea>
                 </div>
 
+                <div class="modal-form-row">
+                    <div class="modal-form-group">
+                        <label class="modal-label" for="mc-frekuensi">Keterangan Frekuensi</label>
+                        <select class="modal-input" id="mc-frekuensi" name="keterangan_frekuensi">
+                            <option value="">-- Pilih --</option>
+                            <option value="Per Project">Per Project</option>
+                            <option value="Quarterly">Quarterly</option>
+                            <option value="Twice a year">Twice a year</option>
+                            <option value="Yearly">Yearly</option>
+                        </select>
+                    </div>
+                    <div class="modal-form-group">
+                        <label class="modal-label" for="mc-upti">UPTI</label>
+                        <select class="modal-input" id="mc-upti" name="upti">
+                            <option value="">-- Pilih --</option>
+                            <option value="Unit ITSM">Unit ITSM</option>
+                            <option value="Unit ESS">Unit ESS</option>
+                            <option value="Unit BSS">Unit BSS</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="modal-form-group">
+                    <label class="modal-label" for="mc-key-control">Key Control</label>
+                    <select class="modal-input" id="mc-key-control" name="key_control">
+                        <option value="">-- Select --</option>
+                        <option value="YES">YES</option>
+                        <option value="NO">NO</option>
+                    </select>
+                </div>
+
                 <div class="modal-form-group">
                     <label class="modal-label" for="mc-file-type">File Type</label>
-                    <input type="text" class="modal-input" id="mc-file-type"
-                           name="file_type" placeholder="e.g. Population Data, Approval Email">
+                    <select class="modal-input" id="mc-file-type" name="file_type">
+                        <option value="">-- Select File Type --</option>
+                        <option value="Population Data">Population Data</option>
+                        <option value="Approval Email">Approval Email</option>
+                        <option value="System Screenshot">System Screenshot</option>
+                        <option value="Memo/Policy">Memo/Policy</option>
+                        <option value="Other">Other</option>
+                    </select>
                 </div>
 
                 <div class="modal-form-group">
@@ -1318,9 +1333,9 @@
         <div class="itc-modal-head">
             <h2 class="itc-modal-head-title" id="editControlTitle">
                 <span class="modal-title-icon" style="background:linear-gradient(135deg,#2563eb,#1d4ed8);">
-                    <i class="bi bi-pencil-fill"></i>
+                    <i class="bi bi-upload"></i>
                 </span>
-                Edit Control Record
+                Upload Evidence
             </h2>
             <button class="itc-modal-close-btn" id="editControlClose" type="button" aria-label="Close">
                 <i class="bi bi-x-lg"></i>
@@ -1333,26 +1348,9 @@
                 @csrf
                 <input type="hidden" id="ec-id" name="id">
 
-                <div class="modal-form-row">
-                    <div class="modal-form-group">
-                        <label class="modal-label" for="ec-application">Application</label>
-                        <select class="modal-select" id="ec-application" name="application_id">
-                            <option value="">— Select Application —</option>
-                            @foreach ($allApplications as $app)
-                                <option value="{{ $app->id }}">{{ $app->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="modal-form-group">
-                        <label class="modal-label" for="ec-category">IT Category</label>
-                        <select class="modal-select" id="ec-category" name="it_category_id">
-                            <option value="">— Select Category —</option>
-                            @foreach ($allCategories as $cat)
-                                <option value="{{ $cat->id }}">{{ $cat->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                </div>
+                <input type="hidden" id="ec-application" name="application_id" value="{{ $application->id }}">
+                <input type="hidden" id="ec-category" name="it_category_id" value="{{ $category->id }}">
+                <input type="hidden" id="ec-status-control" name="status_control">
 
                 <div class="modal-form-row">
                     <div class="modal-form-group">
@@ -1369,10 +1367,47 @@
                               placeholder="Control description..."></textarea>
                 </div>
 
+                <div class="modal-form-row">
+                    <div class="modal-form-group">
+                        <label class="modal-label" for="ec-frekuensi">Keterangan Frekuensi</label>
+                        <select class="modal-input" id="ec-frekuensi" name="keterangan_frekuensi">
+                            <option value="">-- Pilih --</option>
+                            <option value="Per Project">Per Project</option>
+                            <option value="Quarterly">Quarterly</option>
+                            <option value="Twice a year">Twice a year</option>
+                            <option value="Yearly">Yearly</option>
+                        </select>
+                    </div>
+                    <div class="modal-form-group">
+                        <label class="modal-label" for="ec-upti">UPTI</label>
+                        <select class="modal-input" id="ec-upti" name="upti">
+                            <option value="">-- Pilih --</option>
+                            <option value="Unit ITSM">Unit ITSM</option>
+                            <option value="Unit ESS">Unit ESS</option>
+                            <option value="Unit BSS">Unit BSS</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="modal-form-group">
+                    <label class="modal-label" for="ec-key-control">Key Control</label>
+                    <select class="modal-input" id="ec-key-control" name="key_control">
+                        <option value="">-- Select --</option>
+                        <option value="YES">YES</option>
+                        <option value="NO">NO</option>
+                    </select>
+                </div>
+
                 <div class="modal-form-group">
                     <label class="modal-label" for="ec-file-type">File Type</label>
-                    <input type="text" class="modal-input" id="ec-file-type"
-                           name="file_type" placeholder="e.g. Population Data, Approval Email">
+                    <select class="modal-input" id="ec-file-type" name="file_type">
+                        <option value="">-- Select File Type --</option>
+                        <option value="Population Data">Population Data</option>
+                        <option value="Approval Email">Approval Email</option>
+                        <option value="System Screenshot">System Screenshot</option>
+                        <option value="Memo/Policy">Memo/Policy</option>
+                        <option value="Other">Other</option>
+                    </select>
                 </div>
 
                 {{-- Upload / Replace Evidence --}}
@@ -1716,6 +1751,9 @@
         var id       = row.dataset.id       || '';
         var ctrlId   = row.dataset.ctrlId   || '';
         var ctrlDesc = row.dataset.ctrlDesc  || '';
+        var ctrlFrek = row.dataset.ctrlFrek  || '';
+        var ctrlUpti = row.dataset.ctrlUpti  || '';
+        var ctrlKeyCtrl = row.dataset.ctrlKeyctrl || '';
         var ctrlSt   = row.dataset.ctrlStatus || 'not_started';
         var catSt    = row.dataset.catStatus  || 'not_completed';
         var appId    = row.dataset.appId     || '';
@@ -1726,15 +1764,25 @@
         var ecCat    = document.getElementById('ec-category');
         var ecId     = document.getElementById('ec-ctrl-id');
         var ecDesc   = document.getElementById('ec-description');
+        var ecFrek   = document.getElementById('ec-frekuensi');
+        var ecUpti   = document.getElementById('ec-upti');
+        var ecKeyCtrl = document.getElementById('ec-key-control');
+        var ecSt     = document.getElementById('ec-status-control');
 
+        var ctrlFileType = row.dataset.ctrlFileType || '';
+        
         if (ecDbId)   ecDbId.value   = id;
         if (ecApp)    ecApp.value    = appId;
         if (ecCat)    ecCat.value    = catId;
         if (ecId)     ecId.value     = ctrlId;
         if (ecDesc)   ecDesc.value   = ctrlDesc.replace(/\\/g, '');
+        if (ecFrek)   ecFrek.value   = ctrlFrek;
+        if (ecUpti)   ecUpti.value   = ctrlUpti;
+        if (ecKeyCtrl) ecKeyCtrl.value = ctrlKeyCtrl;
+        if (ecSt)     ecSt.value     = ctrlSt;
 
         var ecFileType = document.getElementById('ec-file-type');
-        if (ecFileType) ecFileType.value = '';
+        if (ecFileType) ecFileType.value = ctrlFileType;
 
         var ecFiles  = document.getElementById('ec-existing-files');
         var ecEvInput = document.getElementById('ec-evidences');
@@ -1747,8 +1795,8 @@
                 if (evidences.length === 0) {
                     ecFiles.innerHTML = '<li style="font-size:12px; color:#9ca3af; font-style:italic;">No evidence files currently attached.</li>';
                 } else {
-                    var ecFileType = document.getElementById('ec-file-type');
-                    if (ecFileType && evidences[0].file_type) {
+                    // Update fallback fileType if it was empty on the control but exists in evidence
+                    if (!ecFileType.value && evidences[0].file_type) {
                         ecFileType.value = evidences[0].file_type;
                     }
 
@@ -1862,7 +1910,8 @@
                 method: 'POST',
                 headers: {
                     'X-CSRF-TOKEN': csrfToken,
-                    'Accept': 'application/json'
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
                 },
                 body: formData
             })
@@ -1940,7 +1989,8 @@
                 method: 'POST',
                 headers: {
                     'X-CSRF-TOKEN': csrfToken,
-                    'Accept': 'application/json'
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
                 },
                 body: formData
             })

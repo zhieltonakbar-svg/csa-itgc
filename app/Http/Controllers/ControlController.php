@@ -22,6 +22,8 @@ class ControlController extends Controller
             'year'                => 'required|integer',
             'quarter'             => 'required|string',
             'status_control'      => 'nullable|in:not_started,ongoing_review,ongoing_approval,completed',
+            'keterangan_frekuensi'=> 'nullable|string|max:255',
+            'upti'                => 'nullable|string|max:255',
             'evidences.*'         => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx|max:10240',
             'file_type'           => 'nullable|string|max:255',
             'file_types.*'        => 'nullable|string|max:255',
@@ -48,6 +50,10 @@ class ControlController extends Controller
             'control_description' => $request->control_description,
             'status_control'      => $request->status_control ?? 'not_started',
             'status_it_category'  => 'not_completed',
+            'keterangan_frekuensi'=> $request->keterangan_frekuensi,
+            'upti'                => $request->upti,
+            'key_control'         => $request->key_control,
+            'file_type'           => $request->file_type,
             'year'                => $request->year,
             'quarter'             => $request->quarter,
         ]);
@@ -106,17 +112,31 @@ class ControlController extends Controller
      */
     public function update(Request $request, Control $control)
     {
-        $request->validate([
-            'application_id'      => 'required|exists:applications,id',
-            'it_category_id'      => 'required|exists:it_categories,id',
-            'it_control_id'       => 'required|string|max:255',
-            'status_control'      => 'required|in:not_started,ongoing_review,ongoing_approval,completed',
-            'control_description' => 'required|string',
-            'evidences.*'         => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx|max:10240',
-            'file_type'           => 'nullable|string|max:255',
-            'file_types.*'        => 'nullable|string|max:255',
-            'existing_file_types.*' => 'nullable|string|max:255',
-        ]);
+        \Illuminate\Support\Facades\Log::info('Update Control Request:', $request->all());
+        
+        try {
+            $request->validate([
+                'application_id'      => 'required|exists:applications,id',
+                'it_category_id'      => 'required|exists:it_categories,id',
+                'it_control_id'       => 'required|string|max:255',
+                'status_control'      => 'required|in:not_started,ongoing_review,ongoing_approval,completed',
+                'keterangan_frekuensi'=> 'nullable|string|max:255',
+                'upti'                => 'nullable|string|max:255',
+                'key_control'         => 'nullable|string|max:255',
+                'control_description' => 'required|string',
+                'evidences.*'         => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx|max:10240',
+                'file_type'           => 'nullable|string|max:255',
+                'file_types.*'        => 'nullable|string|max:255',
+                'existing_file_types.*' => 'nullable|string|max:255',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            \Illuminate\Support\Facades\Log::error('Validation Failed:', $e->errors());
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation Error',
+                'errors' => $e->errors()
+            ], 422);
+        }
 
         // Prevent duplicate Control ID within the same application/year/quarter
         $exists = Control::where('application_id', $request->application_id)
@@ -138,6 +158,10 @@ class ControlController extends Controller
             'it_category_id'      => $request->it_category_id,
             'it_control_id'       => $request->it_control_id,
             'status_control'      => $request->status_control,
+            'keterangan_frekuensi'=> $request->keterangan_frekuensi,
+            'upti'                => $request->upti,
+            'key_control'         => $request->key_control,
+            'file_type'           => $request->file_type,
             'control_description' => $request->control_description,
         ]);
 

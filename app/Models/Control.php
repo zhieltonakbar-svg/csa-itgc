@@ -15,6 +15,10 @@ class Control extends Model
         'control_description',
         'status_control',
         'status_it_category',
+        'keterangan_frekuensi',
+        'upti',
+        'file_type',
+        'key_control',
         'year',
         'quarter',
     ];

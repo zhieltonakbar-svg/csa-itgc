@@ -1029,6 +1029,13 @@
     $authUser = auth()->user();
     $authRole = $authUser->role ?? 'creator';
 
+    // Role permissions:
+    // Admin   = manage control data
+    // Officer = upload evidence only
+    // Reviewer/Approver = workflow status actions
+    $isOfficer = in_array($authRole, ['creator', 'officer'], true);
+    $isReviewerOrApprover = in_array($authRole, ['reviewer', 'approver'], true);
+
     // Extract the numeric suffix from existing control IDs (e.g. "C-IT-03" -> 3)
     $usedControlNumbers = $controls->map(function($c) {
         if (preg_match('/C-IT-(\d+)/i', $c->it_control_id ?? '', $m)) {
@@ -1351,30 +1358,34 @@
                             {{-- Read-only status badge --}}
                             <span class="sc-badge {{ $scInfo['cls'] }}">{{ $scInfo['label'] }}</span>
 
-                            {{-- Workflow action buttons — role-based --}}
-                            @php
-                                $wfActions = $ctrl->availableActions($authUser);
-                            @endphp
-                            @if(count($wfActions) > 0)
-                                <div class="wf-action-group">
-                                    @foreach($wfActions as $wfAct)
-                                        <button type="button"
-                                                class="wf-btn {{ $wfAct['class'] }} btn-wf-action"
-                                                data-ctrl-id="{{ $ctrl->id }}"
-                                                data-to-status="{{ $wfAct['to'] }}"
-                                                data-label="{{ $wfAct['label'] }}"
-                                                title="{{ $wfAct['label'] }}">
-                                            @if($wfAct['action'] === 'approve')<i class="bi bi-check-lg"></i>@elseif($wfAct['action'] === 'reject')<i class="bi bi-x-lg"></i>@elseif($wfAct['action'] === 'start')<i class="bi bi-play-fill"></i>@else<i class="bi bi-send-fill"></i>@endif
-                                            {{ $wfAct['label'] }}
-                                        </button>
-                                    @endforeach
-                                </div>
+                            {{-- Workflow status actions are ONLY available to Reviewer and Approver.
+                                 Officer/Creator can see the current status but cannot change it. --}}
+                            @if($isReviewerOrApprover)
+                                @php
+                                    $wfActions = $ctrl->availableActions($authUser);
+                                @endphp
+                                @if(count($wfActions) > 0)
+                                    <div class="wf-action-group">
+                                        @foreach($wfActions as $wfAct)
+                                            <button type="button"
+                                                    class="wf-btn {{ $wfAct['class'] }} btn-wf-action"
+                                                    data-ctrl-id="{{ $ctrl->id }}"
+                                                    data-to-status="{{ $wfAct['to'] }}"
+                                                    data-label="{{ $wfAct['label'] }}"
+                                                    title="{{ $wfAct['label'] }}">
+                                                @if($wfAct['action'] === 'approve')<i class="bi bi-check-lg"></i>@elseif($wfAct['action'] === 'reject')<i class="bi bi-x-lg"></i>@elseif($wfAct['action'] === 'start')<i class="bi bi-play-fill"></i>@else<i class="bi bi-send-fill"></i>@endif
+                                                {{ $wfAct['label'] }}
+                                            </button>
+                                        @endforeach
+                                    </div>
+                                @endif
                             @endif
                         </td>
                         @endif
                         <td class="col-actions">
                             <div class="row-act-group">
-                                {{-- 1. Edit Control (admin-rcm) / View (admin-dashboard) / Add File (creator) --}}
+                                {{-- 1. Admin can edit control data.
+                                     Officer/Creator can ONLY view and upload evidence. --}}
                                 @if(auth()->user()->isAdmin())
                                     @if($source === 'rcm')
                                     {{-- Admin via IT RCM: show full Edit button --}}
@@ -1393,29 +1404,22 @@
                                         <i class="bi bi-eye-fill"></i>
                                     </button>
                                     @endif
-                                @elseif(auth()->user()->isCreator())
-                                    {{-- Always show View Details (Eye icon) --}}
+                                @elseif($isOfficer)
+                                    {{-- Officer/Creator: view details only --}}
                                     <button type="button"
                                             class="row-act-btn btn-edit-ctrl row-act-view"
-                                            title="View Details"
+                                            title="View Control"
                                             aria-label="View Control {{ $ctrl->it_control_id }}">
                                         <i class="bi bi-eye-fill"></i>
                                     </button>
 
-                                    {{-- If editable, also show Tambah/Edit File button --}}
-                                    @if(in_array($ctrl->status_control, ['not_started', 'drafting', 'return_to_officer', 'ongoing_review', 'return_to_reviewer']))
-                                    @php
-                                        $hasUploadedFiles = isset($ctrl->evidences) && $ctrl->evidences->filter(fn($e) => $e->file_type !== 'Berita Acara')->count() > 0;
-                                    @endphp
+                                    {{-- Officer/Creator: upload evidence only, never edit control data --}}
+                                    @if(in_array($ctrl->status_control, ['not_started', 'drafting', 'return_to_officer']))
                                     <button type="button"
                                             class="row-act-btn btn-edit-ctrl row-act-edit"
-                                            title="{{ $hasUploadedFiles ? 'Edit File' : 'Tambah File' }}"
-                                            aria-label="Edit File {{ $ctrl->it_control_id }}">
-                                        @if($hasUploadedFiles)
-                                            <i class="bi bi-pencil-square"></i>
-                                        @else
-                                            <i class="bi bi-file-earmark-plus-fill"></i>
-                                        @endif
+                                            title="Upload Evidence"
+                                            aria-label="Upload Evidence {{ $ctrl->it_control_id }}">
+                                        <i class="bi bi-cloud-arrow-up-fill"></i>
                                     </button>
                                     @endif
                                 @else
@@ -1662,16 +1666,16 @@
 
         <div class="itc-modal-head">
             <h2 class="itc-modal-head-title" id="editControlTitle">
-                <span class="modal-title-icon" style="background:linear-gradient(135deg,{{ auth()->user()->isAdmin() ? '#2563eb,#1d4ed8' : (auth()->user()->isCreator() ? '#059669,#047857' : '#0891b2,#0e7490') }});">
+                <span class="modal-title-icon" style="background:linear-gradient(135deg,{{ auth()->user()->isAdmin() ? '#2563eb,#1d4ed8' : ($isOfficer ? '#059669,#047857' : '#0891b2,#0e7490') }});">
                     @if(auth()->user()->isAdmin())
                         <i class="bi bi-pencil-square"></i>
-                    @elseif(auth()->user()->isCreator())
+                    @elseif($isOfficer)
                         <i class="bi bi-cloud-arrow-up-fill"></i>
                     @else
                         <i class="bi bi-eye-fill"></i>
                     @endif
                 </span>
-                @if(auth()->user()->isAdmin()) Edit Control @elseif(auth()->user()->isCreator()) Upload Evidence @else View Control @endif
+                @if(auth()->user()->isAdmin()) Edit Control @elseif($isOfficer) Upload Evidence @else View Control @endif
             </h2>
             <button class="itc-modal-close-btn" id="editControlClose" type="button" aria-label="Close">
                 <i class="bi bi-x-lg"></i>
@@ -1755,8 +1759,8 @@
                 {{-- Officer only: file_type is set per-file at upload time (hidden field, no UI for non-creator) --}}
                 <input type="hidden" id="ec-file-type" name="file_type" value="">
 
-                @if(auth()->user()->role === 'creator')
-                {{-- Upload / Replace Evidence — per-file type selection --}}
+                @if($isOfficer)
+                {{-- Officer/Creator: Upload / Replace Evidence only. Control data remains read-only. --}}
                 <div class="modal-form-group" id="ec-upload-section" style="background-color: #f0fdf4; border: 2px dashed #34d399; padding: 15px; border-radius: 8px; margin-top: 10px; margin-bottom: 20px;">
                     <label class="modal-label" for="ec-evidences" style="color: #065f46; font-size: 14px; font-weight: 700; margin-bottom: 8px;"><i class="bi bi-cloud-arrow-up-fill me-1"></i> Upload Evidence (PDF, Word, Excel)</label>
                     <div style="font-size:12px; color:#047857; margin-bottom:10px;">Select files, then specify the <strong>File Type</strong> for each file you upload.</div>
@@ -1768,7 +1772,14 @@
 
                 {{-- Currently Attached Evidence List --}}
                 <div class="modal-form-group">
-                    <label class="modal-label" style="font-weight:600;">Currently Attached Evidence Files &amp; File Types</label>
+                    <label class="modal-label" style="font-weight:600;">
+                        Currently Attached Evidence Files &amp; File Types
+                        @if($isOfficer)
+                            <span style="font-size:10.5px; color:#6b7280; font-weight:400;">
+                                (read-only)
+                            </span>
+                        @endif
+                    </label>
                     <ul id="ec-existing-files" style="list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:8px;">
                         <!-- JS populated from MySQL -->
                     </ul>
@@ -1778,7 +1789,7 @@
         </div>
 
         <div class="itc-modal-foot">
-            @if((auth()->user()->isAdmin() && $source === 'rcm') || auth()->user()->isCreator())
+            @if((auth()->user()->isAdmin() && $source === 'rcm') || $isOfficer)
             <span class="modal-foot-note" id="ec-save-msg">
                 <i class="bi bi-info-circle"></i> Ready to save
             </span>
@@ -1795,7 +1806,7 @@
                                box-shadow:0 2px 8px rgba(37,99,235,.25);">
                     <i class="bi bi-send-fill me-1"></i> Save Changes
                 </button>
-                @elseif(auth()->user()->isCreator())
+                @elseif($isOfficer)
                 <button type="button" class="modal-btn-save" id="btn-save-control"
                         style="background:linear-gradient(135deg,#059669,#047857);
                                box-shadow:0 2px 8px rgba(5,150,105,.25);">
@@ -2149,15 +2160,17 @@
         if (ecEvInput) ecEvInput.value = '';
 
         // Handle visibility of upload section and save button for creator / admin-rcm
-        var isCreator = @json(auth()->user()->role === 'creator');
+        var isOfficer = @json($isOfficer);
         var isAdmin   = @json(auth()->user()->isAdmin());
         var pageSource = @json($source);
         var ecUploadSection = document.getElementById('ec-upload-section');
         var btnSaveControl = document.getElementById('btn-save-control');
         var saveMsg = document.getElementById('ec-save-msg');
 
-        if (isCreator) {
-            var editableStatuses = ['not_started', 'drafting', 'return_to_officer', 'ongoing_review', 'return_to_reviewer'];
+        if (isOfficer) {
+            // Officer may upload evidence only before submission,
+            // or when the control is explicitly returned to the officer.
+            var editableStatuses = ['not_started', 'drafting', 'return_to_officer'];
             var canEdit = editableStatuses.includes(ctrlSt);
 
             if (ecUploadSection) {
@@ -2183,7 +2196,7 @@
                 } else {
                     evidences.forEach(function(ev) {
                         var li = document.createElement('li');
-                        var isCreator = @json(auth()->user()->role === 'creator');
+                        var isOfficer = @json($isOfficer);
                         var ftOptions = [
                             { value: '',                               label: '-- File Type --' },
                             { value: 'Population Data',                label: 'Population Data' },
@@ -2198,9 +2211,9 @@
 
                         // File type display: editable for creator, badge for admin
                         var ftHtml = '';
-                        var isEditableByCreator = isCreator && ['not_started', 'drafting', 'return_to_officer', 'ongoing_review', 'return_to_reviewer'].includes(ctrlSt);
                         var isEditableByAdmin = @json(auth()->user()->isAdmin());
-                        if (isEditableByCreator || isEditableByAdmin) {
+
+                        if (isEditableByAdmin) {
                             ftHtml = `<select name="existing_file_types[${ev.id}]" class="existing-file-type-select" data-original="${ev.file_type || ''}"
                                 style="font-size:11.5px; padding:3px 7px; border:1px solid #d1d5db; border-radius:5px; background:#fff; color:#111827; cursor:pointer; min-width:160px; max-width:200px;"
                                 title="Edit file type for this file">${optHtml}</select>`;
@@ -2222,7 +2235,7 @@
                                 <span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:180px;" title="${ev.original_name}">${ev.original_name}</span>
                             </a>`;
 
-                        var canDeleteEv = isEditableByAdmin || (isCreator && ['not_started', 'drafting', 'return_to_officer', 'ongoing_review', 'return_to_reviewer'].includes(ctrlSt));
+                        var canDeleteEv = isEditableByAdmin || (isOfficer && ['not_started', 'drafting', 'return_to_officer'].includes(ctrlSt));
 
                         li.style.cssText = 'background:#f8fafc; padding:8px 12px; border-radius:6px; border:1px solid #e2e8f0; display:flex; align-items:center; gap:8px;';
                         li.innerHTML = `
@@ -2234,25 +2247,13 @@
                         `;
                         ecFiles.appendChild(li);
 
-                        // If admin is editing and the control is submitted, attach confirmation
+                        // Admin may edit existing File Type.
+                        // Officer/Creator sees the existing File Type as read-only.
                         if (isEditableByAdmin && !['not_started', 'drafting', 'return_to_officer'].includes(ctrlSt)) {
                             var selectEl = li.querySelector('.existing-file-type-select');
                             if (selectEl) {
-                                selectEl.addEventListener('change', function(e) {
-                                    if (!confirm('Changing the File Type will return this Control to the review and approval workflow (Return to Reviewer status). Are you sure you want to proceed?')) {
-                                        // Revert the select change
-                                        this.value = this.dataset.original;
-                                    } else {
-                                        this.dataset.original = this.value;
-                                    }
-                                });
-                            }
-                        } else if (isCreator && ['ongoing_review', 'return_to_reviewer'].includes(ctrlSt)) {
-                            var selectEl = li.querySelector('.existing-file-type-select');
-                            if (selectEl) {
-                                selectEl.addEventListener('change', function(e) {
-                                    if (!confirm('Changing the File Type will revert this Control to Drafting. You will need to click "Send to Manager" again to let the manager see it. Are you sure you want to proceed?')) {
-                                        // Revert the select change
+                                selectEl.addEventListener('change', function() {
+                                    if (!confirm('Changing the File Type will return this Control to the review and approval workflow. Continue?')) {
                                         this.value = this.dataset.original;
                                     } else {
                                         this.dataset.original = this.value;
@@ -2343,8 +2344,8 @@
     }
 
     setupFilePickerPreview('mc-evidences', 'mc-selected-files-list', false);
-    // Creator (officer): show per-file File Type dropdown
-    setupFilePickerPreview('ec-evidences', 'ec-selected-files-list', {{ auth()->user()->role === 'creator' ? 'true' : 'false' }});
+    // Officer/Creator: show per-file File Type dropdown only for newly uploaded files.
+    setupFilePickerPreview('ec-evidences', 'ec-selected-files-list', {{ $isOfficer ? 'true' : 'false' }});
 
     // Custom Notification helper
     function showNotification(message, type = 'success') {
@@ -2872,6 +2873,9 @@
     document.addEventListener('click', function(e) {
         var btn = e.target.closest('.btn-wf-action');
         if (!btn) return;
+
+        var isOfficer = @json($isOfficer);
+        if (isOfficer) return;
 
         var controlId = btn.dataset.ctrlId;
         var toStatus  = btn.dataset.toStatus;

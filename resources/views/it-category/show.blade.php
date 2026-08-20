@@ -1264,26 +1264,21 @@
                 <input type="hidden" id="mc-application" name="application_id" value="{{ $application->id }}">
                 <input type="hidden" id="mc-category" name="it_category_id" value="{{ $category->id }}">
 
-                <div class="modal-form-row">
-
-                    <div class="modal-form-group">
-                        <label class="modal-label" for="mc-ctrl-seq">
-                            Control ID (Sequence) <span class="required">*</span>
-                        </label>
-                        <div style="display: flex; align-items: center;">
-                            <span style="background: #e5e7eb; border: 1px solid #d1d5db; border-right: none; padding: 10px 12px; border-radius: 8px 0 0 8px; color: #4b5563; font-weight: 600; white-space: nowrap;">C-IT-</span>
-                            <input type="number"
-                                   class="modal-input"
-                                   id="mc-ctrl-seq"
-                                   name="it_control_sequence"
-                                   placeholder="e.g. 1"
-                                   min="1"
-                                   style="border-radius: 0 8px 8px 0;"
-                                   required>
+                <div class="modal-form-group">
+                    <label class="modal-label">Control ID</label>
+                    <div id="mc-generated-control-ids"
+                         style="display:flex; flex-direction:column; gap:8px;
+                                border:1px solid var(--border-color,#d1d5db);
+                                border-radius:8px; padding:10px;
+                                background:var(--bg-body,#f9fafb);">
+                        <div style="font-size:12.5px; color:#6b7280;">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Select one or more UPTI to generate Control ID automatically.
                         </div>
-                        <div id="mc-ctrl-id-feedback" style="font-size:11.5px; margin-top:4px; min-height:16px;"></div>
                     </div>
-
+                    <div style="font-size:11.5px; color:#6b7280; margin-top:6px; line-height:1.5;">
+                        Each selected UPTI receives its own Control ID sequence. The sequence is independent of Year and Quarter.
+                    </div>
                 </div>
 
                 <div class="modal-form-group">
@@ -1778,40 +1773,177 @@
     if (addBtn) addBtn.addEventListener('click', function () { openModal(addModal); });
     wireClose('addControlModal', 'addControlClose', 'addControlCancel');
 
-    var ctrlSeqInput = document.getElementById('mc-ctrl-seq');
-    var ctrlSeqFeedback = document.getElementById('mc-ctrl-id-feedback');
+    /* ── Automatic Control ID Preview + Add Control ───────── */
+    var generatedIdsBox = document.getElementById('mc-generated-control-ids');
+    var uptiList = document.getElementById('mc-uptis-list');
     var btnSaveAddControl = document.getElementById('btn-save-add-control');
+    var addControlForm = document.getElementById('addControlForm');
 
-    if (ctrlSeqInput) {
-        ctrlSeqInput.addEventListener('input', function() {
-            var val = parseInt(this.value, 10);
-            if (isNaN(val) || val < 1) {
-                ctrlSeqFeedback.innerHTML = '';
-                if (btnSaveAddControl) btnSaveAddControl.disabled = false;
+    function escapeHtml(value) {
+        return String(value)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    async function refreshGeneratedControlIds() {
+        if (!generatedIdsBox || !uptiList) return;
+
+        var selectedUptis = Array.from(
+            uptiList.querySelectorAll('input[name="uptis[]"]:checked')
+        ).map(function (input) { return input.value; });
+
+        if (selectedUptis.length === 0) {
+            generatedIdsBox.innerHTML = `
+                <div style="font-size:12.5px; color:#6b7280;">
+                    <i class="bi bi-info-circle me-1"></i>
+                    Select one or more UPTI to generate Control ID automatically.
+                </div>
+            `;
+            return;
+        }
+
+        generatedIdsBox.innerHTML = `
+            <div style="font-size:12.5px; color:#6b7280; display:flex; align-items:center; gap:7px;">
+                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                Generating Control IDs...
+            </div>
+        `;
+
+        var params = new URLSearchParams();
+        selectedUptis.forEach(function (upti) {
+            params.append('uptis[]', upti);
+        });
+
+        try {
+            var response = await fetch(
+                `{{ route('controls.nextIds') }}?${params.toString()}`,
+                {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                }
+            );
+
+            var data = await parseJsonResponse(response);
+
+            if (!data.success || !data.control_ids) {
+                throw new Error(data.message || 'Failed to generate Control IDs.');
+            }
+
+            generatedIdsBox.innerHTML = Object.entries(data.control_ids).map(function (entry) {
+                var upti = entry[0];
+                var controlId = entry[1];
+
+                return `
+                    <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; padding:8px 10px; background:#fff; border:1px solid #e2e8f0; border-radius:7px;">
+                        <span style="font-size:12.5px; font-weight:600; color:#334155;">${escapeHtml(upti)}</span>
+                        <span style="display:inline-flex; align-items:center; padding:4px 10px; border-radius:5px; background:#ecfdf5; color:#15803d; border:1px solid #bbf7d0; font-size:12px; font-weight:700;">${escapeHtml(controlId)}</span>
+                    </div>
+                `;
+            }).join('');
+
+        } catch (error) {
+            generatedIdsBox.innerHTML = `
+                <div style="color:#dc2626; font-size:12.5px; font-weight:600;">
+                    <i class="bi bi-exclamation-triangle me-1"></i>
+                    ${escapeHtml(error.message)}
+                </div>
+            `;
+        }
+    }
+
+    if (uptiList) {
+        uptiList.addEventListener('change', function (event) {
+            if (event.target && event.target.matches('input[name="uptis[]"]')) {
+                refreshGeneratedControlIds();
+            }
+        });
+    }
+
+    if (addBtn) {
+        addBtn.addEventListener('click', function () {
+            if (addControlForm) addControlForm.reset();
+
+            /* Restore Dashboard context. */
+            var applicationField = document.getElementById('mc-application');
+            var categoryField = document.getElementById('mc-category');
+
+            if (applicationField) applicationField.value = '{{ $application->id }}';
+            if (categoryField) categoryField.value = '{{ $category->id }}';
+
+            /* Restore the Application's mapped UPTI as the default selection. */
+            var defaultUpti = @json($application?->upti?->name);
+
+            if (uptiList) {
+                uptiList.querySelectorAll('input[name="uptis[]"]').forEach(function (checkbox) {
+                    checkbox.checked = defaultUpti && checkbox.value === defaultUpti;
+                });
+            }
+
+            refreshGeneratedControlIds();
+        });
+    }
+
+    if (btnSaveAddControl && addControlForm) {
+        btnSaveAddControl.addEventListener('click', async function () {
+            if (!addControlForm.checkValidity()) {
+                addControlForm.reportValidity();
                 return;
             }
 
-            var usedNums = [];
-            document.querySelectorAll('tr[data-ctrl-id]').forEach(function(row) {
-                var cid = row.getAttribute('data-ctrl-id');
-                if (cid && cid.startsWith('C-IT-')) {
-                    var n = parseInt(cid.replace('C-IT-', ''), 10);
-                    if (!isNaN(n)) usedNums.push(n);
+            var selectedUptis = Array.from(
+                document.querySelectorAll('#mc-uptis-list input[name="uptis[]"]:checked')
+            );
+
+            if (selectedUptis.length === 0) {
+                showNotification('Please select at least one UPTI.', 'danger');
+                return;
+            }
+
+            var msg = document.getElementById('mc-save-msg');
+            if (msg) msg.innerHTML = '<i class="bi bi-hourglass-split"></i> Saving...';
+            btnSaveAddControl.disabled = true;
+
+            try {
+                var formData = new FormData(addControlForm);
+
+                /* Never send a manually-entered Control ID. The server generates it. */
+                formData.delete('it_control_id');
+                formData.delete('it_control_sequence');
+
+                var response = await fetch('{{ route("controls.store") }}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: formData
+                });
+
+                var data = await parseJsonResponse(response);
+
+                if (!data.success) {
+                    throw new Error(data.message || 'Failed to create control.');
                 }
-            });
 
-            var maxNum = usedNums.length > 0 ? Math.max(...usedNums) : 0;
+                showNotification(data.message, 'success');
+                closeModal(addModal);
 
-            if (usedNums.includes(val)) {
-                ctrlSeqFeedback.innerHTML = '<span style="color: #ef4444; font-weight: 600;"><i class="bi bi-exclamation-triangle-fill"></i> Control ID is already in use!</span>';
-                if (btnSaveAddControl) btnSaveAddControl.disabled = true;
-            } else if (val > maxNum + 1) {
-                var nextExpected = maxNum + 1;
-                ctrlSeqFeedback.innerHTML = '<span style="color: #ef4444; font-weight: 600;"><i class="bi bi-exclamation-triangle-fill"></i> Control ID is out of sequence! (Next expected: ' + nextExpected + ')</span>';
-                if (btnSaveAddControl) btnSaveAddControl.disabled = true;
-            } else {
-                ctrlSeqFeedback.innerHTML = '<span style="color: #10b981; font-weight: 600;"><i class="bi bi-check-circle-fill"></i> Control ID is available.</span>';
-                if (btnSaveAddControl) btnSaveAddControl.disabled = false;
+                setTimeout(function () {
+                    window.location.reload();
+                }, 400);
+
+            } catch (error) {
+                showNotification(error.message || 'An error occurred while saving.', 'danger');
+            } finally {
+                btnSaveAddControl.disabled = false;
+                if (msg) msg.innerHTML = '<i class="bi bi-info-circle"></i> Ready to save';
             }
         });
     }

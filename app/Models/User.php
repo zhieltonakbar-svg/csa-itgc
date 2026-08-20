@@ -30,6 +30,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password'          => 'hashed',
+            'is_active'         => 'boolean',
         ];
     }
 
@@ -53,6 +54,64 @@ class User extends Authenticatable
     public function isApprover(): bool
     {
         return $this->role === 'approver';
+    }
+
+    /**
+     * Officer / Creator helper.
+     */
+    public function isOfficer(): bool
+    {
+        return $this->role === 'creator' || $this->role === 'officer';
+    }
+
+    /**
+     * Check whether user is allowed to edit Control master data.
+     *
+     * Only Admin.
+     */
+    public function canEditControl(): bool
+    {
+        return $this->isAdmin();
+    }
+
+    /**
+     * Check whether user is allowed to change Control status.
+     *
+     * Only Reviewer and Approver.
+     */
+    public function canChangeControlStatus(): bool
+    {
+        return $this->isReviewer() || $this->isApprover();
+    }
+
+    /**
+     * Check whether user is allowed to upload evidence.
+     *
+     * Creator/Officer and Admin.
+     */
+    public function canUploadEvidence(): bool
+    {
+        return $this->isAdmin() || $this->isOfficer();
+    }
+
+    /**
+     * Check whether user is allowed to add Control.
+     *
+     * Only Admin.
+     */
+    public function canAddControl(): bool
+    {
+        return $this->isAdmin();
+    }
+
+    /**
+     * Check whether user is allowed to delete Control.
+     *
+     * Only Admin.
+     */
+    public function canDeleteControl(): bool
+    {
+        return $this->isAdmin();
     }
 
     /* ── Relationships ────────────────────────────────────── */

@@ -637,6 +637,9 @@
     box-shadow: 0 24px 64px rgba(0,0,0,.18);
     width: 100%;
     max-width: 520px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
     overflow: hidden;
     animation: modal-enter .22s cubic-bezier(.4,0,.2,1) both;
 }
@@ -695,6 +698,8 @@
 /* Modal body */
 .itc-modal-body {
     padding: 22px 24px 8px;
+    overflow-y: auto;
+    flex: 1;
 }
 .modal-ui-notice {
     display: flex;
@@ -1058,17 +1063,23 @@
                     <tr>
                         <th class="col-ctrlid sortable">Control ID</th>
                         <th class="col-desc">Control Description</th>
-                        <th class="col-frekuensi">Keterangan Frekuensi</th>
+                        <th class="col-frekuensi">Frequency Description</th>
                         <th class="col-upti">UPTI</th>
                         <th class="col-keyctrl">Key Control</th>
-                        <th class="col-filetype" style="width: 15%;">File Type</th>
                         <th class="col-status th-center">Status Control</th>
                         <th class="col-actions">Actions</th>
                     </tr>
                 </thead>
                 <tbody id="itc-tbody">
+                    @php $prevUpti = null; @endphp
                     @foreach ($controls as $ctrl)
                     @php
+                        // Add dashed line separator when UPTI changes
+                        if ($prevUpti !== null && $prevUpti !== $ctrl->upti) {
+                            echo '<tr aria-hidden="true" style="border-top: 1px dashed #cbd5e1;"><td colspan="8" style="padding:0; height:8px;"></td></tr>';
+                        }
+                        $prevUpti = $ctrl->upti;
+
                         $scKey  = $ctrl->status_control ?? 'not_started';
                         $scInfo = $scBadgeMap[$scKey] ?? $scBadgeMap['not_started'];
                         
@@ -1096,6 +1107,7 @@
                             @if(isset($ctrl->evidences) && $ctrl->evidences->count() > 0)
                                 <div class="evidence-pill-list" style="display:flex; flex-wrap:wrap; gap:6px; margin-top:6px;">
                                     @foreach($ctrl->evidences as $ev)
+                                        @if($ev->file_type === 'Berita Acara') @continue @endif
                                         @php
                                             $ext = strtolower(pathinfo($ev->original_name, PATHINFO_EXTENSION));
                                             $icon = 'bi-paperclip';
@@ -1115,8 +1127,28 @@
                                         <a href="{{ route('evidence.show', $ev->id) }}" target="_blank" class="evidence-pill" style="display:inline-flex; align-items:center; gap:5px; background:#f8fafc; border:1px solid #e2e8f0; padding:2px 8px; border-radius:4px; font-size:11px; color:#334155; text-decoration:none;">
                                             <i class="bi {{ $icon }}" style="color:{{ $iconColor }};"></i>
                                             <span style="font-weight:500;" title="{{ $ev->original_name }}">{{ Str::limit($ev->original_name, 26) }}</span>
+                                            @if(!empty($ev->file_type))
+                                                <span style="background:#e0e7ff; color:#3730a3; font-size:10px; font-weight:700; padding:1px 5px; border-radius:3px; border:1px solid #c7d2fe; white-space:nowrap; margin-left:2px;">{{ $ev->file_type }}</span>
+                                            @endif
                                         </a>
                                     @endforeach
+                                </div>
+                            @endif
+                            
+                            @if($ctrl->reviewer_notes || $ctrl->approver_notes)
+                                <div class="ctrl-notes-container" style="margin-top:8px; border-top:1px dashed #e2e8f0; padding-top:6px; font-size:11px;">
+                                    @if($ctrl->reviewer_notes)
+                                        <div style="background:#fef3c7; color:#92400e; padding:4px 8px; border-radius:4px; margin-bottom:4px; border-left:3px solid #f59e0b;">
+                                            <strong>Manager Notes:</strong> 
+                                            <span style="font-style:italic;">"{{ $ctrl->reviewer_notes }}"</span>
+                                        </div>
+                                    @endif
+                                    @if($ctrl->approver_notes)
+                                        <div style="background:#e0e7ff; color:#3730a3; padding:4px 8px; border-radius:4px; border-left:3px solid #6366f1;">
+                                            <strong>Senior Manager Notes:</strong> 
+                                            <span style="font-style:italic;">"{{ $ctrl->approver_notes }}"</span>
+                                        </div>
+                                    @endif
                                 </div>
                             @endif
                         </td>
@@ -1127,34 +1159,45 @@
                             {{ $ctrl->upti ?? '—' }}
                         </td>
                         <td class="col-keyctrl">
-                            {{ $ctrl->key_control ?? '—' }}
-                        </td>
-                        <td class="col-filetype">
-                            @if($fileType !== '—')
-                                <span style="background:#e0e7ff; color:#3730a3; font-size:12px; font-weight:600; padding:3px 8px; border-radius:4px; border:1px solid #c7d2fe;">
-                                    {{ $fileType }}
-                                </span>
-                            @else
-                                <span style="color: #9ca3af; font-style: italic;">—</span>
-                            @endif
+                            {{ $ctrl->key_control === null ? '—' : ($ctrl->key_control ? 'Yes' : 'No') }}
                         </td>
                         <td class="col-status td-center">
-                            <select class="status-quick-select" data-id="{{ $ctrl->id }}" style="padding: 4px 8px; font-size: 11.5px; font-weight: 600; border-radius: 6px; border: 1px solid #e2e8f0; background-color: #f8fafc; color: #475569; cursor: pointer; outline: none; width: 100%; text-align: center;">
-                                <option value="not_started" {{ $scKey === 'not_started' ? 'selected' : '' }}>Not Started Yet</option>
-                                <option value="ongoing_review" {{ $scKey === 'ongoing_review' ? 'selected' : '' }}>On Going Review</option>
-                                <option value="ongoing_approval" {{ $scKey === 'ongoing_approval' ? 'selected' : '' }}>On Going Approval</option>
-                                <option value="completed" {{ $scKey === 'completed' ? 'selected' : '' }}>Completed</option>
-                            </select>
+                            @if(auth()->user()->isAdmin())
+                                <span class="status-badge {{ $scInfo['cls'] }}">
+                                    {{ $scInfo['label'] }}
+                                </span>
+                            @else
+                                <select class="status-quick-select" data-id="{{ $ctrl->id }}" style="padding: 4px 8px; font-size: 11.5px; font-weight: 600; border-radius: 6px; border: 1px solid #e2e8f0; background-color: #f8fafc; color: #475569; cursor: pointer; outline: none; width: 100%; text-align: center;">
+                                    <option value="not_started" {{ $scKey === 'not_started' ? 'selected' : '' }}>Not Started Yet</option>
+                                    <option value="ongoing_review" {{ $scKey === 'ongoing_review' ? 'selected' : '' }}>On Going Review</option>
+                                    <option value="ongoing_approval" {{ $scKey === 'ongoing_approval' ? 'selected' : '' }}>On Going Approval</option>
+                                    <option value="completed" {{ $scKey === 'completed' ? 'selected' : '' }}>Completed</option>
+                                </select>
+                            @endif
                         </td>
                         <td class="col-actions">
                             <div class="row-act-group">
                                 {{-- 1. Edit Control / Upload Evidence --}}
                                 <button type="button"
                                         class="row-act-btn row-act-edit btn-edit-ctrl"
-                                        title="Upload Evidence"
-                                        aria-label="Upload Evidence {{ $ctrl->it_control_id }}">
-                                    <i class="bi bi-upload"></i>
+                                        title="{{ auth()->user()->isAdmin() ? 'Edit Control' : 'Upload Evidence' }}"
+                                        aria-label="Action Control {{ $ctrl->it_control_id }}">
+                                    @if(auth()->user()->isAdmin())
+                                        <i class="bi bi-pencil-fill"></i>
+                                    @else
+                                        <i class="bi bi-upload"></i>
+                                    @endif
                                 </button>
+
+                                {{-- 2. Download Berita Acara --}}
+                                @if($ctrl->status_control === 'completed')
+                                <a href="{{ route('controls.beritaAcara', $ctrl->id) }}"
+                                   class="row-act-btn row-act-pdf"
+                                   title="Download Berita Acara"
+                                   target="_blank">
+                                    <i class="bi bi-file-earmark-pdf-fill" style="color: #e11d48;"></i>
+                                </a>
+                                @endif
 
                                 {{-- 3. Delete Control --}}
                                 <button type="button"
@@ -1224,17 +1267,42 @@
                 <div class="modal-form-row">
 
                     <div class="modal-form-group">
-                        <label class="modal-label" for="mc-ctrl-id">
-                            Control ID <span class="required">*</span>
+                        <label class="modal-label" for="mc-ctrl-seq">
+                            Control ID (Sequence) <span class="required">*</span>
                         </label>
-                        <input type="text"
-                               class="modal-input"
-                               id="mc-ctrl-id"
-                               name="it_control_id"
-                               placeholder="e.g. C-IT-01"
-                               required>
+                        <div style="display: flex; align-items: center;">
+                            <span style="background: #e5e7eb; border: 1px solid #d1d5db; border-right: none; padding: 10px 12px; border-radius: 8px 0 0 8px; color: #4b5563; font-weight: 600; white-space: nowrap;">C-IT-</span>
+                            <input type="number"
+                                   class="modal-input"
+                                   id="mc-ctrl-seq"
+                                   name="it_control_sequence"
+                                   placeholder="e.g. 1"
+                                   min="1"
+                                   style="border-radius: 0 8px 8px 0;"
+                                   required>
+                        </div>
+                        <div id="mc-ctrl-id-feedback" style="font-size:11.5px; margin-top:4px; min-height:16px;"></div>
                     </div>
 
+                </div>
+
+                <div class="modal-form-group">
+                    <label class="modal-label">
+                        UPTI <span class="required">*</span>
+                        <span style="font-size:11px; font-weight:400; color:#6b7280;">(pilih satu atau lebih)</span>
+                    </label>
+                    <div id="mc-uptis-list" style="display:flex; flex-direction:column; gap:6px; max-height:160px; overflow-y:auto;
+                                                  border:1px solid var(--border-color,#d1d5db); border-radius:8px; padding:10px;
+                                                  background:var(--input-bg,#f9fafb);">
+                        @foreach($allUptis as $u)
+                        <label style="display:flex; align-items:center; gap:8px; font-size:13px; cursor:pointer; font-weight:400;">
+                            <input type="checkbox" name="uptis[]" value="{{ $u->name }}"
+                                   style="width:15px; height:15px; cursor:pointer;"
+                                   {{ ($application && $application->upti && $application->upti->name == $u->name) ? 'checked' : '' }}>
+                            <span>{{ $u->name }}</span>
+                        </label>
+                        @endforeach
+                    </div>
                 </div>
 
                 <div class="modal-form-group">
@@ -1260,15 +1328,6 @@
                             <option value="Yearly">Yearly</option>
                         </select>
                     </div>
-                    <div class="modal-form-group">
-                        <label class="modal-label" for="mc-upti">UPTI</label>
-                        <select class="modal-input" id="mc-upti" name="upti">
-                            <option value="">-- Pilih --</option>
-                            <option value="Unit ITSM">Unit ITSM</option>
-                            <option value="Unit ESS">Unit ESS</option>
-                            <option value="Unit BSS">Unit BSS</option>
-                        </select>
-                    </div>
                 </div>
 
                 <div class="modal-form-group">
@@ -1280,23 +1339,8 @@
                     </select>
                 </div>
 
-                <div class="modal-form-group">
-                    <label class="modal-label" for="mc-file-type">File Type</label>
-                    <select class="modal-input" id="mc-file-type" name="file_type">
-                        <option value="">-- Select File Type --</option>
-                        <option value="Population Data">Population Data</option>
-                        <option value="Approval Email">Approval Email</option>
-                        <option value="System Screenshot">System Screenshot</option>
-                        <option value="Memo/Policy">Memo/Policy</option>
-                        <option value="Other">Other</option>
-                    </select>
-                </div>
 
-                <div class="modal-form-group">
-                    <label class="modal-label" for="mc-evidences">Upload Evidence (PDF, Word, Excel)</label>
-                    <input type="file" class="modal-input" id="mc-evidences" name="evidences[]" multiple accept=".pdf,.doc,.docx,.xls,.xlsx" style="padding: 6px;">
-                    <div style="font-size:11px; color:var(--text-tertiary); margin-top:4px;">Max 10MB per file. You can select multiple files.</div>
-                </div>
+
 
             </form>
         </div>
@@ -1333,9 +1377,13 @@
         <div class="itc-modal-head">
             <h2 class="itc-modal-head-title" id="editControlTitle">
                 <span class="modal-title-icon" style="background:linear-gradient(135deg,#2563eb,#1d4ed8);">
-                    <i class="bi bi-upload"></i>
+                    @if(auth()->user()->isAdmin())
+                        <i class="bi bi-pencil-fill"></i>
+                    @else
+                        <i class="bi bi-upload"></i>
+                    @endif
                 </span>
-                Upload Evidence
+                {{ auth()->user()->isAdmin() ? 'Edit Control' : 'Upload Evidence' }}
             </h2>
             <button class="itc-modal-close-btn" id="editControlClose" type="button" aria-label="Close">
                 <i class="bi bi-x-lg"></i>
@@ -1382,9 +1430,9 @@
                         <label class="modal-label" for="ec-upti">UPTI</label>
                         <select class="modal-input" id="ec-upti" name="upti">
                             <option value="">-- Pilih --</option>
-                            <option value="Unit ITSM">Unit ITSM</option>
-                            <option value="Unit ESS">Unit ESS</option>
-                            <option value="Unit BSS">Unit BSS</option>
+                            @foreach($allUptis as $u)
+                                <option value="{{ $u->name }}">{{ $u->name }}</option>
+                            @endforeach
                         </select>
                     </div>
                 </div>
@@ -1393,29 +1441,21 @@
                     <label class="modal-label" for="ec-key-control">Key Control</label>
                     <select class="modal-input" id="ec-key-control" name="key_control">
                         <option value="">-- Select --</option>
-                        <option value="YES">YES</option>
-                        <option value="NO">NO</option>
+                        <option value="1">YES</option>
+                        <option value="0">NO</option>
                     </select>
                 </div>
 
-                <div class="modal-form-group">
-                    <label class="modal-label" for="ec-file-type">File Type</label>
-                    <select class="modal-input" id="ec-file-type" name="file_type">
-                        <option value="">-- Select File Type --</option>
-                        <option value="Population Data">Population Data</option>
-                        <option value="Approval Email">Approval Email</option>
-                        <option value="System Screenshot">System Screenshot</option>
-                        <option value="Memo/Policy">Memo/Policy</option>
-                        <option value="Other">Other</option>
-                    </select>
+                @if(!auth()->user()->isAdmin())
+                {{-- Upload / Replace Evidence - per-file type selection --}}
+                <div class="modal-form-group" id="ec-upload-section" style="background-color: #f0fdf4; border: 2px dashed #34d399; padding: 15px; border-radius: 8px; margin-top: 10px; margin-bottom: 20px;">
+                    <label class="modal-label" for="ec-evidences" style="color: #065f46; font-size: 14px; font-weight: 700; margin-bottom: 8px;"><i class="bi bi-cloud-arrow-up-fill me-1"></i> Upload Evidence (PDF, Word, Excel)</label>
+                    <div style="font-size:12px; color:#047857; margin-bottom:10px;">Select files, then specify the <strong>File Type</strong> for each file you upload.</div>
+                    <input type="file" class="modal-input" id="ec-evidences" name="evidences[]" multiple accept=".pdf,.doc,.docx,.xls,.xlsx" style="padding: 10px; background: #fff; border: 1px solid #6ee7b7; cursor: pointer;">
+                    <div style="font-size:11px; color:#059669; margin-top:6px;"><i class="bi bi-info-circle"></i> Max 10MB per file. You can upload multiple files at once.</div>
+                    <div id="ec-selected-files-list" style="margin-top:12px; display:flex; flex-direction:column; gap:8px;"></div>
                 </div>
-
-                {{-- Upload / Replace Evidence --}}
-                <div class="modal-form-group">
-                    <label class="modal-label" for="ec-evidences">Upload / Replace Evidence (PDF, Word, Excel)</label>
-                    <input type="file" class="modal-input" id="ec-evidences" name="evidences[]" multiple accept=".pdf,.doc,.docx,.xls,.xlsx" style="padding: 6px;">
-                    <div style="font-size:11px; color:var(--text-tertiary); margin-top:4px;">Max 10MB per file. You can select multiple files to upload or replace existing files.</div>
-                </div>
+                @endif
 
                 {{-- Currently Attached Evidence List --}}
                 <div class="modal-form-group">
@@ -1738,6 +1778,44 @@
     if (addBtn) addBtn.addEventListener('click', function () { openModal(addModal); });
     wireClose('addControlModal', 'addControlClose', 'addControlCancel');
 
+    var ctrlSeqInput = document.getElementById('mc-ctrl-seq');
+    var ctrlSeqFeedback = document.getElementById('mc-ctrl-id-feedback');
+    var btnSaveAddControl = document.getElementById('btn-save-add-control');
+
+    if (ctrlSeqInput) {
+        ctrlSeqInput.addEventListener('input', function() {
+            var val = parseInt(this.value, 10);
+            if (isNaN(val) || val < 1) {
+                ctrlSeqFeedback.innerHTML = '';
+                if (btnSaveAddControl) btnSaveAddControl.disabled = false;
+                return;
+            }
+
+            var usedNums = [];
+            document.querySelectorAll('tr[data-ctrl-id]').forEach(function(row) {
+                var cid = row.getAttribute('data-ctrl-id');
+                if (cid && cid.startsWith('C-IT-')) {
+                    var n = parseInt(cid.replace('C-IT-', ''), 10);
+                    if (!isNaN(n)) usedNums.push(n);
+                }
+            });
+
+            var maxNum = usedNums.length > 0 ? Math.max(...usedNums) : 0;
+
+            if (usedNums.includes(val)) {
+                ctrlSeqFeedback.innerHTML = '<span style="color: #ef4444; font-weight: 600;"><i class="bi bi-exclamation-triangle-fill"></i> Control ID is already in use!</span>';
+                if (btnSaveAddControl) btnSaveAddControl.disabled = true;
+            } else if (val > maxNum + 1) {
+                var nextExpected = maxNum + 1;
+                ctrlSeqFeedback.innerHTML = '<span style="color: #ef4444; font-weight: 600;"><i class="bi bi-exclamation-triangle-fill"></i> Control ID is out of sequence! (Next expected: ' + nextExpected + ')</span>';
+                if (btnSaveAddControl) btnSaveAddControl.disabled = true;
+            } else {
+                ctrlSeqFeedback.innerHTML = '<span style="color: #10b981; font-weight: 600;"><i class="bi bi-check-circle-fill"></i> Control ID is available.</span>';
+                if (btnSaveAddControl) btnSaveAddControl.disabled = false;
+            }
+        });
+    }
+
     /* ── Edit Control Modal ──────────────────────────────── */
     var editModal = document.getElementById('editControlModal');
     wireClose('editControlModal', 'editControlClose', 'editControlCancel');
@@ -1795,14 +1873,26 @@
                 if (evidences.length === 0) {
                     ecFiles.innerHTML = '<li style="font-size:12px; color:#9ca3af; font-style:italic;">No evidence files currently attached.</li>';
                 } else {
-                    // Update fallback fileType if it was empty on the control but exists in evidence
-                    if (!ecFileType.value && evidences[0].file_type) {
-                        ecFileType.value = evidences[0].file_type;
-                    }
-
                     evidences.forEach(function(ev) {
                         var li = document.createElement('li');
                         li.style.cssText = 'background:#f8fafc; padding:10px 12px; border-radius:6px; border:1px solid #e2e8f0; display:flex; flex-direction:column; gap:8px;';
+                        
+                        var ftOptions = [
+                            { value: '',                               label: '-- File Type --' },
+                            { value: 'Population Data',                label: 'Population Data' },
+                            { value: 'Information provided by Entity', label: 'Information provided by Entity' },
+                            { value: 'Supporting Document',            label: 'Supporting Document' },
+                            { value: 'Others',                         label: 'Others' },
+                        ];
+                        var optHtml = ftOptions.map(function(o) {
+                            var sel = (o.value === (ev.file_type || '')) ? ' selected' : '';
+                            return '<option value="' + o.value + '"' + sel + '>' + o.label + '</option>';
+                        }).join('');
+
+                        var ftHtml = `<select name="existing_file_types[${ev.id}]" class="existing-file-type-select" data-original="${ev.file_type || ''}"
+                                style="font-size:11.5px; padding:3px 7px; border:1px solid #d1d5db; border-radius:5px; background:#fff; color:#111827; cursor:pointer; min-width:160px; max-width:200px;"
+                                title="Edit file type for this file">${optHtml}</select>`;
+
                         var ftVal = (ev.file_type || '').replace(/"/g, '&quot;');
                         li.innerHTML = `
                             <div style="display:flex; align-items:center; justify-content:space-between;">
@@ -1810,7 +1900,8 @@
                                     <i class="bi bi-file-earmark-text text-primary" style="font-size:16px;"></i>
                                     <span style="font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:240px;" title="${ev.original_name}">${ev.original_name}</span>
                                 </div>
-                                <div style="display:flex; gap:6px;">
+                                <div style="display:flex; align-items:center; gap:6px;">
+                                    ${ftHtml}
                                     <button type="button" class="btn-delete-ev btn-sm" data-id="${ev.id}" style="color:#dc2626; background:#fef2f2; border:none; padding:4px 8px; border-radius:4px; cursor:pointer; font-size:11.5px;"><i class="bi bi-trash3-fill"></i> Delete</button>
                                 </div>
                             </div>
@@ -1895,6 +1986,37 @@
     if (btnSaveAddControl) {
         btnSaveAddControl.addEventListener('click', function() {
             var form = document.getElementById('addControlForm');
+
+            // Format control ID from sequence and validate
+            var seq = form.querySelector('input[name="it_control_sequence"]').value;
+            var num = parseInt(seq, 10);
+
+            if (!num || num < 1) {
+                showNotification('Please enter a valid number for the Control ID.', 'danger');
+                return;
+            }
+
+            // Extract used numbers from existing table rows
+            var usedNums = [];
+            document.querySelectorAll('tr[data-ctrl-id]').forEach(function(row) {
+                var cid = row.getAttribute('data-ctrl-id');
+                if (cid && cid.startsWith('C-IT-')) {
+                    var n = parseInt(cid.replace('C-IT-', ''), 10);
+                    if (!isNaN(n)) usedNums.push(n);
+                }
+            });
+
+            var maxNum = usedNums.length > 0 ? Math.max(...usedNums) : 0;
+
+            if (usedNums.includes(num)) {
+                showNotification('Control ID is already in use!', 'danger');
+                return;
+            } else if (num > maxNum + 1) {
+                var nextExpected = maxNum + 1;
+                showNotification('Control ID is out of sequence! (Next expected: ' + nextExpected + ')', 'danger');
+                return;
+            }
+
             if (!form.checkValidity()) {
                 form.reportValidity();
                 return;
@@ -1905,6 +2027,9 @@
             btnSaveAddControl.disabled = true;
 
             var formData = new FormData(form);
+
+            var paddedSeq = num.toString().padStart(2, '0');
+            formData.append('it_control_id', 'C-IT-' + paddedSeq);
 
             fetch('{{ route("controls.store") }}', {
                 method: 'POST',
@@ -1970,11 +2095,29 @@
     if (btnSaveControl) {
         btnSaveControl.addEventListener('click', function() {
             var form = document.getElementById('editControlForm');
-            if (!form.checkValidity()) {
-                form.reportValidity();
+
+            // Manual validation instead of form.checkValidity() to avoid hidden browser popups
+            var ctrlIdVal = document.getElementById('ec-ctrl-id');
+            if (ctrlIdVal && !ctrlIdVal.value.trim()) {
+                showNotification('Control ID is required.', 'danger');
+                ctrlIdVal.focus();
                 return;
             }
-            
+
+            // Validate file types for newly selected files
+            var fileTypeSelects = form.querySelectorAll('#ec-selected-files-list select[name="file_types[]"]');
+            var fileInput = document.getElementById('ec-evidences');
+            if (fileInput && fileInput.files.length > 0 && fileTypeSelects.length > 0) {
+                var allTypesSelected = true;
+                fileTypeSelects.forEach(function(sel) {
+                    if (!sel.value) allTypesSelected = false;
+                });
+                if (!allTypesSelected) {
+                    showNotification('Please select a File Type for each uploaded file.', 'danger');
+                    return;
+                }
+            }
+
             var id = document.getElementById('ec-id').value;
             if (!id) return;
             
@@ -1984,6 +2127,11 @@
 
             var formData = new FormData(form);
             formData.append('_method', 'PUT');
+
+            // If no files are selected, do not send empty evidences[]
+            if (fileInput && fileInput.files.length === 0) {
+                formData.delete('evidences[]');
+            }
 
             fetch('/controls/' + id, {
                 method: 'POST',
@@ -2043,6 +2191,67 @@
         if (dlFallback && evidenceId) dlFallback.href = '/evidence/' + evidenceId;
         veShowPanel('error');
     }
+
+    // Dynamic Multi-File Selection Preview Helper
+    function setupFilePickerPreview(inputId, previewListId) {
+        var input = document.getElementById(inputId);
+        var container = document.getElementById(previewListId);
+        if (!input || !container) return;
+
+        var FILE_TYPE_OPTIONS = [
+            { value: '',                               label: '-- Select File Type *' },
+            { value: 'Population Data',                label: 'Population Data' },
+            { value: 'Information provided by Entity', label: 'Information provided by Entity' },
+            { value: 'Supporting Document',            label: 'Supporting Document' },
+            { value: 'Others',                         label: 'Others' },
+        ];
+
+        input.addEventListener('change', function () {
+            container.innerHTML = '';
+            if (!this.files || this.files.length === 0) return;
+
+            if (this.files.length > 10) {
+                alert('You can only upload a maximum of 10 files at once.');
+                input.value = '';
+                return;
+            }
+
+            Array.from(this.files).forEach(function (file, idx) {
+                if (file.size > 10 * 1024 * 1024) {
+                    alert('File "' + file.name + '" is too large. Maximum allowed size is 10MB.');
+                    input.value = '';
+                    container.innerHTML = '';
+                    return;
+                }
+                var sizeMb = (file.size / (1024 * 1024)).toFixed(2);
+                var div = document.createElement('div');
+
+                div.style.cssText = 'background:#f0fdf4; border:1px solid #bbf7d0; padding:8px 12px; border-radius:8px; display:flex; flex-direction:column; gap:6px; font-size:12px;';
+
+                var optionsHtml = FILE_TYPE_OPTIONS.map(function(o) {
+                    return '<option value="' + o.value + '">' + o.label + '</option>';
+                }).join('');
+
+                div.innerHTML = `
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <i class="bi bi-file-earmark-arrow-up-fill text-success" style="font-size:15px; flex-shrink:0;"></i>
+                        <span style="font-weight:600; text-overflow:ellipsis; overflow:hidden; white-space:nowrap; max-width:220px;" title="${file.name}">${file.name}</span>
+                        <span style="font-size:11px; color:#6b7280; margin-left:auto; white-space:nowrap;">(${sizeMb} MB)</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <label style="font-size:11.5px; font-weight:600; color:#374151; white-space:nowrap; min-width:70px;">File Type <span style="color:#dc2626;">*</span></label>
+                        <select name="file_types[]" required
+                            style="flex:1; font-size:12px; padding:4px 8px; border:1px solid #d1d5db; border-radius:6px; background:#fff; color:#111827; min-width:0; cursor:pointer;">
+                            ${optionsHtml}
+                        </select>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        });
+    }
+
+    setupFilePickerPreview('ec-evidences', 'ec-selected-files-list');
 
     /* Load a file into the iframe */
     function veLoadInFrame(evidenceId, evidenceName, evidenceType) {

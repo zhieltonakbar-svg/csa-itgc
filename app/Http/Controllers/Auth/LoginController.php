@@ -30,6 +30,13 @@ class LoginController extends Controller
         $remember    = $request->boolean('remember');
 
         if (Auth::attempt($credentials, $remember)) {
+            if (!Auth::user()->is_active) {
+                Auth::logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+                return redirect()->route('pending.approval');
+            }
+
             $request->session()->regenerate();
             return redirect()->intended(route('dashboard'));
         }

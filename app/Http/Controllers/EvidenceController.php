@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Control;
 use App\Models\ControlEvidence;
+use App\Models\User;
+use App\Notifications\ControlWorkflowNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -13,6 +16,8 @@ class EvidenceController extends Controller
      */
     public function show(ControlEvidence $evidence)
     {
+        $this->checkEvidenceAccess($evidence);
+
         $path = Storage::disk('public')->path($evidence->file_path);
 
         if (!file_exists($path)) {
@@ -40,6 +45,8 @@ class EvidenceController extends Controller
      */
     public function preview(ControlEvidence $evidence)
     {
+        $this->checkEvidenceAccess($evidence);
+
         $path = Storage::disk('public')->path($evidence->file_path);
 
         if (!file_exists($path)) {
@@ -62,6 +69,8 @@ class EvidenceController extends Controller
      */
     public function streamPreviewPdf(ControlEvidence $evidence)
     {
+        $this->checkEvidenceAccess($evidence);
+
         $path = Storage::disk('public')->path($evidence->file_path);
 
         if (!file_exists($path)) {
@@ -112,13 +121,56 @@ class EvidenceController extends Controller
      */
     public function update(Request $request, ControlEvidence $evidence)
     {
+        $this->checkEvidenceAccess($evidence);
+        
+        $user = auth()->user();
+        $control = $evidence->control;
+        $creatorEditableStatuses = ['not_started', 'drafting', 'return_to_officer', 'ongoing_review', 'return_to_reviewer'];
+        $isEditableStatus = in_array($control->status_control, ['not_started', 'drafting', 'return_to_officer']);
+        
+        if (!$user->isAdmin()) {
+            if (!$user->isCreator() || !in_array($control->status_control, $creatorEditableStatuses, true)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'You do not have permission to edit the file type of this evidence.',
+                ], 403);
+            }
+        }
+
         $request->validate([
             'file_type' => 'nullable|string|max:255',
         ]);
 
+        $oldFileType = $evidence->file_type;
+        $newFileType = $request->file_type;
+
         $evidence->update([
-            'file_type' => $request->file_type,
+            'file_type' => $newFileType,
         ]);
+        
+        if ($user->isAdmin() && $oldFileType !== $newFileType && !$isEditableStatus) {
+            $control->status_control = 'return_to_reviewer';
+            $control->save();
+            
+            $managers = User::where('role', 'reviewer')->get();
+            $url = route('dashboard');
+            if ($control->application) {
+                $url = route('dashboard.controls', [
+                    'category'       => $control->it_category_id,
+                    'upti_id'        => $control->application->upti_id ?? 1,
+                    'application_id' => $control->application_id,
+                    'year'           => $control->year,
+                    'quarter'        => $control->quarter,
+                ]);
+            }
+            $message = "Control {$control->it_control_id} has been returned by Admin (File Type changed) for re-review.";
+            \Illuminate\Support\Facades\Notification::send($managers, new ControlWorkflowNotification($message, $url, $control->id));
+        }
+
+        if ($user->isCreator() && $oldFileType !== $newFileType && in_array($control->status_control, ['ongoing_review', 'return_to_reviewer'], true)) {
+            $control->status_control = 'drafting';
+            $control->save();
+        }
 
         return response()->json([
             'success'  => true,
@@ -132,15 +184,102 @@ class EvidenceController extends Controller
      */
     public function destroy(ControlEvidence $evidence)
     {
+        $this->checkEvidenceAccess($evidence);
+
+        $user = auth()->user();
+        $control = Control::find($evidence->control_id);
+        
+        $creatorEditableStatuses = ['not_started', 'drafting', 'return_to_officer', 'ongoing_review', 'return_to_reviewer'];
+        $canDelete = $user->isAdmin() || ($user->isCreator() && $control && in_array($control->status_control, $creatorEditableStatuses, true));
+
+        if (!$canDelete) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You do not have permission to delete this evidence.',
+            ], 403);
+        }
+
         if (Storage::disk('public')->exists($evidence->file_path)) {
             Storage::disk('public')->delete($evidence->file_path);
         }
 
         $evidence->delete();
 
+        // Revert control status back to officer so they can re-upload
+        if ($control) {
+            $remainingCount = $control->evidences()->count();
+            if ($remainingCount === 0) {
+                $control->status_control = 'not_started';
+                $control->save();
+                
+                $message = 'Evidence deleted. Control status returned to Not Started.';
+                $newStatus = 'not_started';
+            } else {
+                if ($user->isCreator()) {
+                    $control->status_control = 'drafting';
+                    $control->save();
+                    
+                    $message = 'Evidence deleted. Control status returned to Drafting.';
+                    $newStatus = 'drafting';
+                } else {
+                    // Admin
+                    $control->status_control = 'return_to_officer';
+                    $control->save();
+
+                    $url = route('applications.index');
+                    if ($control->assigned_to) {
+                        $assignedUser = User::find($control->assigned_to);
+                        if ($assignedUser) {
+                            $msgStr = "Control {$control->it_control_id} has been returned for correction because Admin deleted an evidence file.";
+                            $assignedUser->notify(new ControlWorkflowNotification($msgStr, $url, $control->id));
+                        }
+                    } else {
+                        $users = User::where('role', 'creator')->get();
+                        $msgStr = "Control {$control->it_control_id} has been returned for correction because Admin deleted an evidence file.";
+                        \Illuminate\Support\Facades\Notification::send($users, new ControlWorkflowNotification($msgStr, $url, $control->id));
+                    }
+                    
+                    $message = 'Evidence deleted. Control status returned to Officer.';
+                    $newStatus = 'return_to_officer';
+                }
+            }
+        } else {
+            $message = 'Evidence deleted.';
+            $newStatus = null;
+        }
+
         return response()->json([
-            'success' => true,
-            'message' => 'Evidence deleted successfully.'
+            'success'    => true,
+            'message'    => $message,
+            'new_status' => $newStatus,
         ]);
+    }
+
+    /**
+     * Check if the authenticated user has access to the given evidence based on their UPTI.
+     */
+    private function checkEvidenceAccess(ControlEvidence $evidence)
+    {
+        $user = auth()->user();
+        if (!$user->isAdmin()) {
+            $evidence->load('control');
+            
+            // Check UPTI access
+            if (!$user->upti || stripos($evidence->control->upti, $user->upti->name) === false) {
+                abort(403, 'Unauthorized access to this evidence.');
+            }
+
+            // Check workflow status visibility
+            $status = $evidence->control->status_control;
+            if ($user->isReviewer()) {
+                if (in_array($status, ['not_started', 'drafting', 'return_to_officer'])) {
+                    abort(403, 'Evidence is not yet available for review.');
+                }
+            } elseif ($user->isApprover()) {
+                if (!in_array($status, ['ongoing_approval', 'completed'])) {
+                    abort(403, 'Evidence is not yet available for approval.');
+                }
+            }
+        }
     }
 }

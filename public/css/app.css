@@ -229,20 +229,14 @@ body {
 }
 
 .sidebar-brand .brand-icon {
-    width: 38px;
-    height: 38px;
-    background: var(--primary-gradient);
+    width: 42px;
+    height: 42px;
     border-radius: var(--radius-sm);
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    box-shadow: 0 2px 8px rgba(25, 135, 84, 0.3);
-}
-
-.sidebar-brand .brand-icon i {
-    font-size: 18px;
-    color: white;
+    overflow: hidden;
 }
 
 .sidebar-brand .brand-text {
@@ -1869,20 +1863,14 @@ body {
 }
 
 .header-brand-logo {
-    width: 44px;
-    height: 44px;
-    background: var(--primary-gradient);
-    border-radius: var(--radius-sm);
+    width: 42px;
+    height: 42px;
+    background: transparent;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    box-shadow: 0 2px 8px rgba(25, 135, 84, 0.25);
-}
-
-.header-brand-logo i {
-    font-size: 22px;
-    color: white;
+    overflow: hidden;
 }
 
 .header-brand-text {

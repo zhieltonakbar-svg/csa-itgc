@@ -20,7 +20,7 @@
             {{-- Brand --}}
             <div class="minimal-brand">
                 <div class="minimal-brand-icon">
-                    <i class="bi bi-shield-check"></i>
+                    <x-logo />
                 </div>
                 <div class="minimal-brand-text">
                     <span class="minimal-brand-name">CSA - ITGC</span>

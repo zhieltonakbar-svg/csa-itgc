@@ -16,7 +16,7 @@
             {{-- Logo & Title --}}
             <div class="login-logo">
                 <div class="logo-icon">
-                    <i class="bi bi-shield-check"></i>
+                    <x-logo />
                 </div>
                 <h1>CSA - ITGC</h1>
                 <p>Control Self Assessment<br>IT General Control</p>

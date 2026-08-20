@@ -14,6 +14,10 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
+        'upti_id',
+        'is_active',
+        'profile_photo_path',
     ];
 
     protected $hidden = [
@@ -25,7 +29,41 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            'password'          => 'hashed',
         ];
+    }
+
+    /* ── Role helpers ─────────────────────────────────────── */
+
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    public function isCreator(): bool
+    {
+        return $this->role === 'creator';
+    }
+
+    public function isReviewer(): bool
+    {
+        return $this->role === 'reviewer';
+    }
+
+    public function isApprover(): bool
+    {
+        return $this->role === 'approver';
+    }
+
+    /* ── Relationships ────────────────────────────────────── */
+
+    public function assignedControls()
+    {
+        return $this->hasMany(Control::class, 'assigned_to');
+    }
+
+    public function upti()
+    {
+        return $this->belongsTo(Upti::class, 'upti_id');
     }
 }

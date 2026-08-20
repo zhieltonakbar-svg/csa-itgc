@@ -7,7 +7,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Application extends Model
 {
-    protected $fillable = ['name', 'description', 'is_active'];
+    protected $fillable = ['name', 'description', 'is_active', 'upti_id'];
+
+    public function upti()
+    {
+        return $this->belongsTo(Upti::class);
+    }
 
     /**
      * The IT categories that belong to this application,

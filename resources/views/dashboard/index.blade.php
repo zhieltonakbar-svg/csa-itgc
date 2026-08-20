@@ -354,7 +354,7 @@
         </div>
         <div>
             <h3>Assessment Filter</h3>
-            <p>Select the assessment parameters to explore IT Categories.</p>
+            <p>Select the assessment parameters to explore IT RCM.</p>
         </div>
     </div>
 
@@ -436,7 +436,7 @@
     {{-- Default empty / prompt state --}}
     <div class="category-empty-state" id="category-empty-state">
         <i class="bi bi-funnel empty-icon"></i>
-        <p>Select a <strong>Year</strong>, <strong>Quarter</strong>, and <strong>Application</strong> above, then click <strong>Search</strong> to view IT Categories.</p>
+        <p>Select a <strong>Year</strong>, <strong>Quarter</strong>, and <strong>Application</strong> above, then click <strong>Search</strong> to view IT RCM.</p>
     </div>
 
     {{-- Cards grid — populated by JavaScript --}}
@@ -499,7 +499,7 @@
 
     function buildCard(cat) {
         const status  = STATUS_MAP[cat.completion_status] ?? STATUS_MAP['not_complete'];
-        const href    = `${categoryBaseUrl}/${encodeURIComponent(currentAppId)}/${encodeURIComponent(cat.id)}?year=${encodeURIComponent(currentYear)}&quarter=${encodeURIComponent(currentQtr)}`;
+        const href    = `${categoryBaseUrl}/${encodeURIComponent(cat.id)}/controls?application_id=${encodeURIComponent(currentAppId)}&year=${encodeURIComponent(currentYear)}&quarter=${encodeURIComponent(currentQtr)}&source=dashboard`;
         return `
         <div class="col-12 col-sm-6 col-xl-3">
             <a href="${href}" class="it-category-card">
@@ -525,7 +525,7 @@
             cardsGrid.innerHTML = '';
             hideGrid();
             emptyState.querySelector('p').textContent =
-                'No IT Categories found for the selected application.';
+                'No IT RCM found for the selected application.';
             emptyState.style.display = '';
             return;
         }
@@ -604,8 +604,7 @@
         // Show skeletons immediately
         showSkeletons(4);
 
-        // ── FUTURE BACKEND IMPLEMENTATION ────────────────────────────────────
-        /*
+        // ── BACKEND FETCH ─────────────────────────────────────────────────
         const url = `{{ route('dashboard.categories') }}?application_id=${encodeURIComponent(appId)}&year=${encodeURIComponent(year)}&quarter=${encodeURIComponent(quarter)}`;
         fetch(url, {
             headers: {
@@ -622,46 +621,9 @@
             console.error('Dashboard categories fetch error:', err);
             cardsGrid.innerHTML = '';
             hideGrid();
-            emptyState.querySelector('p').textContent = 'An error occurred while loading IT Categories. Please try again.';
+            emptyState.querySelector('p').textContent = 'An error occurred while loading IT RCM. Please try again.';
             emptyState.style.display = '';
         });
-        */
-        // ─────────────────────────────────────────────────────────────────────
-
-        // ── UI-ONLY MOCK DATA ──────────────────────────────────────────────
-        setTimeout(() => {
-            const mockCategories = [
-                {
-                    id: 1,
-                    name: "Access to Programs & Data",
-                    icon: "bi-shield-lock",
-                    description: "Manage and monitor user access, privileges, and authentication.",
-                    completion_status: "partial"
-                },
-                {
-                    id: 2,
-                    name: "Program Change",
-                    icon: "bi-arrow-left-right",
-                    description: "Ensure changes to systems are authorized, tested, and approved.",
-                    completion_status: "not_complete"
-                },
-                {
-                    id: 3,
-                    name: "Computer Operations",
-                    icon: "bi-pc-display-horizontal",
-                    description: "Monitor backup, recovery, and batch processing schedules.",
-                    completion_status: "complete"
-                },
-                {
-                    id: 4,
-                    name: "Program Development",
-                    icon: "bi-code-slash",
-                    description: "Governance over new system development and acquisitions.",
-                    completion_status: "not_complete"
-                }
-            ];
-            renderCards(mockCategories);
-        }, 400);
     }
 
     // ── Search button click ───────────────────────────────────────────────
@@ -690,7 +652,7 @@
             hideGrid();
             if (selApp) selApp.value = '';
             emptyState.querySelector('p').textContent =
-                'Select a Year, Quarter, and Application above, then click Search to view IT Categories.';
+                'Select a Year, Quarter, and Application above, then click Search to view IT RCM.';
             emptyState.style.display = '';
         });
     }

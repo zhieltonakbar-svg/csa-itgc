@@ -15,12 +15,27 @@ class DatabaseSeeder extends Seeder
         // ---------------------------------------------------------------
         // Users
         // ---------------------------------------------------------------
-        User::firstOrCreate(
-            ['email'    => 'zhielton.akbar@gmail.com'],
-            [
-                'name'     => 'Zhielton Akbar',
-                'password' => Hash::make('password123'),
-            ]
+        // ---------------------------------------------------------------
+        // Users — 4 roles
+        // ---------------------------------------------------------------
+        User::updateOrCreate(
+            ['email' => 'admin@gmail.com'],
+            ['name' => 'Admin User', 'password' => Hash::make('password123'), 'role' => 'admin']
+        );
+
+        User::updateOrCreate(
+            ['email' => 'officer@gmail.com'],
+            ['name' => 'Officer (Creator)', 'password' => Hash::make('password123'), 'role' => 'creator']
+        );
+
+        User::updateOrCreate(
+            ['email' => 'manager@gmail.com'],
+            ['name' => 'Manager (Reviewer)', 'password' => Hash::make('password123'), 'role' => 'reviewer']
+        );
+
+        User::updateOrCreate(
+            ['email' => 'seniormanager@gmail.com'],
+            ['name' => 'Senior Manager (Approver)', 'password' => Hash::make('password123'), 'role' => 'approver']
         );
 
         // ---------------------------------------------------------------
@@ -86,8 +101,7 @@ class DatabaseSeeder extends Seeder
             ItCategory::where('name', 'Program Change')->first()->id             => ['completion_status' => 'partial'],
         ]);
         // ---------------------------------------------------------------
-        // Control rows (Excel template data)
+        // (Data Control ditiadakan agar user bisa upload sendiri)
         // ---------------------------------------------------------------
-        $this->call(ControlSeeder::class);
     }
 }

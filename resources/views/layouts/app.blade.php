@@ -109,13 +109,7 @@
             }
         });
 
-        // Auto-dismiss alerts after 5 seconds
-        document.querySelectorAll('.alert-dismissible').forEach(function(alert) {
-            setTimeout(function() {
-                const bsAlert = bootstrap.Alert.getOrCreateInstance(alert);
-                bsAlert.close();
-            }, 5000);
-        });
+        // Auto-dismiss disabled so users can close them manually
 
         // ── IT CATEGORY LINKS — use filter stored in sessionStorage ────────────
         (function () {
@@ -130,25 +124,84 @@
             document.querySelectorAll('.nav-submenu .nav-link[data-category-id]').forEach(function (link) {
                 link.addEventListener('click', function (e) {
                     var filter = getFilter();
-                    if (!filter || !filter.appId) {
-                        // No filter set — navigate to Dashboard so user can choose
+                    if (!filter || !filter.year || !filter.quarter || !filter.appId) {
+                        // No complete filter set — navigate to Dashboard so user can choose
                         e.preventDefault();
                         window.location.href = '{{ route("dashboard") }}';
                         return;
                     }
-                    // Build the correct URL if href is a placeholder
-                    if (this.getAttribute('href') === '#' || this.getAttribute('href') === '') {
-                        e.preventDefault();
-                        var catId = this.getAttribute('data-category-id');
-                        window.location.href = '/it-category/' + encodeURIComponent(filter.appId) + '/' + encodeURIComponent(catId)
-                            + '?year=' + encodeURIComponent(filter.year)
-                            + '&quarter=' + encodeURIComponent(filter.quarter);
-                    }
+                    // Prevent default and use the JS route to ensure sessionStorage values are passed
+                    e.preventDefault();
+                    var catId = this.getAttribute('data-category-id');
+                    window.location.href = '/it-category/' + encodeURIComponent(catId) + '/controls'
+                        + '?year=' + encodeURIComponent(filter.year)
+                        + '&quarter=' + encodeURIComponent(filter.quarter)
+                        + '&application_id=' + encodeURIComponent(filter.appId);
                 });
             });
         }());
         // ──────────────────────────────────────────────────────────────────────
     </script>
+
+    @if(auth()->check())
+    <script>
+        window.APP_USER_ID = {{ auth()->id() }};
+    </script>
+    @vite(['resources/js/app.js'])
+    <script type="module">
+        if (window.Echo) {
+            window.Echo.private('App.Models.User.' + window.APP_USER_ID)
+                .notification((notification) => {
+                    // Update bell count
+                    let dropdownBtn = document.getElementById('notificationDropdown');
+                    if (dropdownBtn) {
+                        let badge = dropdownBtn.querySelector('.badge.bg-danger');
+                        if (!badge) {
+                            badge = document.createElement('span');
+                            badge.className = 'position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger';
+                            badge.style.fontSize = '0.65rem';
+                            badge.style.padding = '0.25em 0.5em';
+                            dropdownBtn.appendChild(badge);
+                        }
+                        let currentCount = parseInt(badge.innerText) || 0;
+                        let newCount = currentCount + 1;
+                        badge.innerHTML = newCount > 9 ? '9+ <span class="visually-hidden">unread notifications</span>' : newCount + ' <span class="visually-hidden">unread notifications</span>';
+                        badge.style.display = 'inline-block';
+                    }
+                    
+                    // Show a toast
+                    let toastContainer = document.getElementById('toast-container');
+                    if (!toastContainer) {
+                        toastContainer = document.createElement('div');
+                        toastContainer.id = 'toast-container';
+                        toastContainer.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+                        toastContainer.style.zIndex = '1090';
+                        document.body.appendChild(toastContainer);
+                    }
+                    
+                    let toastId = 'toast-' + Date.now();
+                    let toastHtml = `
+                        <div id="${toastId}" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                            <div class="toast-header bg-primary text-white">
+                                <i class="bi bi-bell-fill me-2"></i>
+                                <strong class="me-auto">New Notification</strong>
+                                <small>Just now</small>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+                            </div>
+                            <div class="toast-body">
+                                ${notification.message}
+                            </div>
+                        </div>
+                    `;
+                    toastContainer.insertAdjacentHTML('beforeend', toastHtml);
+                    let toastEl = document.getElementById(toastId);
+                    let toast = new bootstrap.Toast(toastEl, { delay: 5000 });
+                    toast.show();
+                });
+        }
+    </script>
+    @endif
+
     @stack('scripts')
 </body>
 </html>

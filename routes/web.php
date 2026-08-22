@@ -97,22 +97,6 @@ Route::middleware('auth')->group(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | IT RCM Management
-    |--------------------------------------------------------------------------
-    */
-
-    Route::get('/rcm', [
-        DashboardController::class,
-        'rcmIndex'
-    ])->name('rcm.index');
-
-    Route::get('/rcm/{category}/controls', [
-        DashboardController::class,
-        'showRcmControls'
-    ])->name('rcm.controls');
-
-    /*
-    |--------------------------------------------------------------------------
     | Settings
     |--------------------------------------------------------------------------
     */

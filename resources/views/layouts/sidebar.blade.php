@@ -2,12 +2,11 @@
     $user         = auth()->user();
     $currentRoute = request()->route() ? request()->route()->getName() : '';
 
-    // Detect if we are on an IT Category or IT RCM detail page
+    // Detect if we are on an IT Category detail page
     $isOnCategoryPage = in_array($currentRoute, ['dashboard.controls', 'it-category.show']);
-    $isOnRcmPage      = in_array($currentRoute, ['rcm.controls', 'rcm.index']);
     $activeCategoryId = null;
 
-    if ($isOnCategoryPage || $isOnRcmPage) {
+    if ($isOnCategoryPage) {
         $activeCategoryId = request()->route('category') ? (is_object(request()->route('category')) ? request()->route('category')->id : request()->route('category')) : null;
     }
 
@@ -44,35 +43,28 @@
 
         <div class="nav-section">Modules</div>
 
-        {{-- IT RCM (Admin) / IT Category (Officer, Reviewer, Approver) → submenu with categories --}}
+        {{-- IT RCM Management (Admin) / IT Category (Officer, Reviewer, Approver) → submenu with categories --}}
         <div class="nav-item">
             <a href="#" class="nav-link nav-toggle"
                style="color: #ffffff !important;"
-               aria-expanded="{{ $isOnCategoryPage || $isOnRcmPage ? 'true' : 'false' }}">
+               aria-expanded="{{ $isOnCategoryPage ? 'true' : 'false' }}">
                 <i class="bi bi-shield-lock"></i>
                 <span class="nav-text">{{ $user->isAdmin() ? 'IT RCM Management' : 'IT Category' }}</span>
                 <i class="bi bi-chevron-right nav-arrow"></i>
             </a>
-            <ul class="nav-submenu {{ $isOnCategoryPage || $isOnRcmPage ? 'show' : '' }}">
+            <ul class="nav-submenu {{ $isOnCategoryPage ? 'show' : '' }}">
                 @foreach($sidebarCategories as $cat)
                     <li>
-                        @if($user->isAdmin())
-                            {{-- Admin: full IT RCM management, no period filter, all applications --}}
-                            <a href="{{ route('rcm.controls', ['category' => $cat->id]) }}"
-                               class="nav-link {{ $activeCategoryId == $cat->id ? 'sub-active' : '' }}"
-                               data-category-id="{{ $cat->id }}"
-                               data-category-name="{{ $cat->name }}">
-                                {{ $cat->name }}
-                            </a>
-                        @else
-                            {{-- Officer / Reviewer / Approver: filtered by year, quarter, application (via Dashboard filter) --}}
-                            <a href="{{ route('dashboard.controls', ['category' => $cat->id]) . '?' . http_build_query(request()->only('year', 'quarter', 'upti_id', 'application_id')) }}"
-                               class="nav-link {{ $activeCategoryId == $cat->id ? 'sub-active' : '' }}"
-                               data-category-id="{{ $cat->id }}"
-                               data-category-name="{{ $cat->name }}">
-                                {{ $cat->name }}
-                            </a>
-                        @endif
+                        {{-- Same page/route for every role. Access & edit rights inside
+                             it-category.show are controlled by role (Admin vs Officer/
+                             Reviewer/Approver), filtered by year, quarter, and application
+                             selected on the Dashboard. --}}
+                        <a href="{{ route('dashboard.controls', ['category' => $cat->id]) . '?' . http_build_query(request()->only('year', 'quarter', 'upti_id', 'application_id')) }}"
+                           class="nav-link {{ $activeCategoryId == $cat->id ? 'sub-active' : '' }}"
+                           data-category-id="{{ $cat->id }}"
+                           data-category-name="{{ $cat->name }}">
+                            {{ $cat->name }}
+                        </a>
                     </li>
                 @endforeach
             </ul>

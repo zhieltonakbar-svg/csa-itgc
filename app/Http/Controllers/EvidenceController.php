@@ -22,12 +22,14 @@ class EvidenceController extends Controller
 
         if (!file_exists($path)) {
             $path = storage_path('app/public/' . $evidence->file_path);
+
             if (!file_exists($path)) {
                 abort(404, 'File not found.');
             }
         }
 
         $mime = $evidence->mime_type ?: (mime_content_type($path) ?: 'application/octet-stream');
+
         if (str_contains(strtolower($mime), 'pdf')) {
             return response()->file($path, [
                 'Content-Type' => 'application/pdf',
@@ -51,6 +53,7 @@ class EvidenceController extends Controller
 
         if (!file_exists($path)) {
             $path = storage_path('app/public/' . $evidence->file_path);
+
             if (!file_exists($path)) {
                 abort(404, 'File not found.');
             }
@@ -65,7 +68,8 @@ class EvidenceController extends Controller
     }
 
     /**
-     * Stream PDF preview directly in browser (converts Word/Excel on-the-fly or uses cached PDF).
+     * Stream PDF preview directly in browser
+     * (converts Word/Excel on-the-fly or uses cached PDF).
      */
     public function streamPreviewPdf(ControlEvidence $evidence)
     {
@@ -75,38 +79,61 @@ class EvidenceController extends Controller
 
         if (!file_exists($path)) {
             $path = storage_path('app/public/' . $evidence->file_path);
+
             if (!file_exists($path)) {
                 abort(404, 'File not found.');
             }
         }
 
-        $extension = strtolower(pathinfo($evidence->original_name, PATHINFO_EXTENSION));
+        $extension = strtolower(
+            pathinfo($evidence->original_name, PATHINFO_EXTENSION)
+        );
 
         // If already PDF, serve directly
         if ($extension === 'pdf') {
             return response()->file($path, [
                 'Content-Type' => 'application/pdf',
-                'Content-Disposition' => 'inline; filename="' . rawurlencode($evidence->original_name) . '"'
+                'Content-Disposition' => 'inline; filename="' .
+                    rawurlencode($evidence->original_name) . '"'
             ]);
         }
 
-        // Check if converted preview PDF already exists in storage/app/public/evidence/previews
+        // Check if converted preview PDF already exists
+        // in storage/app/public/evidence/previews
         $previewFilename = 'preview_' . $evidence->id . '.pdf';
         $previewRelativePath = 'evidence/previews/' . $previewFilename;
-        $previewFullPath = Storage::disk('public')->path($previewRelativePath);
+        $previewFullPath = Storage::disk('public')->path(
+            $previewRelativePath
+        );
 
         if (!file_exists($previewFullPath)) {
-            $pdfContent = \App\Services\DocumentConverter::convertToPdf($path, $extension);
+            $pdfContent = \App\Services\DocumentConverter::convertToPdf(
+                $path,
+                $extension
+            );
+
             if ($pdfContent) {
-                Storage::disk('public')->put($previewRelativePath, $pdfContent);
-                $previewFullPath = Storage::disk('public')->path($previewRelativePath);
+                Storage::disk('public')->put(
+                    $previewRelativePath,
+                    $pdfContent
+                );
+
+                $previewFullPath = Storage::disk('public')->path(
+                    $previewRelativePath
+                );
             }
         }
 
         if (file_exists($previewFullPath)) {
             return response()->file($previewFullPath, [
                 'Content-Type' => 'application/pdf',
-                'Content-Disposition' => 'inline; filename="' . rawurlencode(pathinfo($evidence->original_name, PATHINFO_FILENAME) . '.pdf') . '"'
+                'Content-Disposition' => 'inline; filename="' .
+                    rawurlencode(
+                        pathinfo(
+                            $evidence->original_name,
+                            PATHINFO_FILENAME
+                        ) . '.pdf'
+                    ) . '"'
             ]);
         }
 
@@ -118,42 +145,94 @@ class EvidenceController extends Controller
 
     /**
      * Update evidence file type.
+     *
+     * ONLY ADMIN can update the File Type
+     * of an existing evidence.
+     *
+     * Officer / Creator can:
+     * - upload new evidence
+     * - choose File Type when uploading new evidence
+     *
+     * Officer / Creator CANNOT:
+     * - edit File Type of existing evidence
      */
     public function update(Request $request, ControlEvidence $evidence)
     {
         $this->checkEvidenceAccess($evidence);
-        
+
         $user = auth()->user();
         $control = $evidence->control;
-        $creatorEditableStatuses = ['not_started', 'drafting', 'return_to_officer', 'ongoing_review', 'return_to_reviewer'];
-        $isEditableStatus = in_array($control->status_control, ['not_started', 'drafting', 'return_to_officer']);
-        
+
+        /*
+         * ============================================================
+         * PERMISSION
+         * ============================================================
+         *
+         * Existing evidence File Type can ONLY be changed by Admin.
+         *
+         * This is intentionally checked on the backend so that
+         * Officer cannot bypass the restriction through DevTools,
+         * Postman, direct HTTP request, etc.
+         */
         if (!$user->isAdmin()) {
-            if (!$user->isCreator() || !in_array($control->status_control, $creatorEditableStatuses, true)) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'You do not have permission to edit the file type of this evidence.',
-                ], 403);
-            }
+            return response()->json([
+                'success' => false,
+                'message' => 'Officer tidak memiliki izin untuk mengubah File Type evidence yang sudah ada.',
+            ], 403);
         }
 
+        /*
+         * ============================================================
+         * VALIDATION
+         * ============================================================
+         */
         $request->validate([
             'file_type' => 'nullable|string|max:255',
         ]);
 
+        /*
+         * ============================================================
+         * UPDATE FILE TYPE
+         * ============================================================
+         */
         $oldFileType = $evidence->file_type;
         $newFileType = $request->file_type;
 
         $evidence->update([
             'file_type' => $newFileType,
         ]);
-        
-        if ($user->isAdmin() && $oldFileType !== $newFileType && !$isEditableStatus) {
+
+        /*
+         * ============================================================
+         * ADMIN CHANGES FILE TYPE
+         * ============================================================
+         *
+         * If the Control is already in review/approval workflow,
+         * changing the File Type will return the Control
+         * to the reviewer.
+         */
+        $isEditableStatus = in_array(
+            $control->status_control,
+            [
+                'not_started',
+                'drafting',
+                'return_to_officer'
+            ],
+            true
+        );
+
+        if (
+            $user->isAdmin() &&
+            $oldFileType !== $newFileType &&
+            !$isEditableStatus
+        ) {
             $control->status_control = 'return_to_reviewer';
             $control->save();
-            
+
             $managers = User::where('role', 'reviewer')->get();
+
             $url = route('dashboard');
+
             if ($control->application) {
                 $url = route('dashboard.controls', [
                     'category'       => $control->it_category_id,
@@ -163,13 +242,18 @@ class EvidenceController extends Controller
                     'quarter'        => $control->quarter,
                 ]);
             }
-            $message = "Control {$control->it_control_id} has been returned by Admin (File Type changed) for re-review.";
-            \Illuminate\Support\Facades\Notification::send($managers, new ControlWorkflowNotification($message, $url, $control->id));
-        }
 
-        if ($user->isCreator() && $oldFileType !== $newFileType && in_array($control->status_control, ['ongoing_review', 'return_to_reviewer'], true)) {
-            $control->status_control = 'drafting';
-            $control->save();
+            $message =
+                "Control {$control->it_control_id} has been returned by Admin (File Type changed) for re-review.";
+
+            \Illuminate\Support\Facades\Notification::send(
+                $managers,
+                new ControlWorkflowNotification(
+                    $message,
+                    $url,
+                    $control->id
+                )
+            );
         }
 
         return response()->json([
@@ -187,10 +271,31 @@ class EvidenceController extends Controller
         $this->checkEvidenceAccess($evidence);
 
         $user = auth()->user();
+
         $control = Control::find($evidence->control_id);
-        
-        $creatorEditableStatuses = ['not_started', 'drafting', 'return_to_officer', 'ongoing_review', 'return_to_reviewer'];
-        $canDelete = $user->isAdmin() || ($user->isCreator() && $control && in_array($control->status_control, $creatorEditableStatuses, true));
+
+        $creatorEditableStatuses = [
+            'not_started',
+            'drafting',
+            'return_to_officer',
+            'ongoing_review',
+            'return_to_reviewer'
+        ];
+
+        $canDelete =
+            $user->isAdmin()
+            ||
+            (
+                $user->isCreator()
+                &&
+                $control
+                &&
+                in_array(
+                    $control->status_control,
+                    $creatorEditableStatuses,
+                    true
+                )
+            );
 
         if (!$canDelete) {
             return response()->json([
@@ -208,18 +313,23 @@ class EvidenceController extends Controller
         // Revert control status back to officer so they can re-upload
         if ($control) {
             $remainingCount = $control->evidences()->count();
+
             if ($remainingCount === 0) {
                 $control->status_control = 'not_started';
                 $control->save();
-                
-                $message = 'Evidence deleted. Control status returned to Not Started.';
+
+                $message =
+                    'Evidence deleted. Control status returned to Not Started.';
+
                 $newStatus = 'not_started';
             } else {
                 if ($user->isCreator()) {
                     $control->status_control = 'drafting';
                     $control->save();
-                    
-                    $message = 'Evidence deleted. Control status returned to Drafting.';
+
+                    $message =
+                        'Evidence deleted. Control status returned to Drafting.';
+
                     $newStatus = 'drafting';
                 } else {
                     // Admin
@@ -227,19 +337,43 @@ class EvidenceController extends Controller
                     $control->save();
 
                     $url = route('applications.index');
+
                     if ($control->assigned_to) {
-                        $assignedUser = User::find($control->assigned_to);
+                        $assignedUser = User::find(
+                            $control->assigned_to
+                        );
+
                         if ($assignedUser) {
-                            $msgStr = "Control {$control->it_control_id} has been returned for correction because Admin deleted an evidence file.";
-                            $assignedUser->notify(new ControlWorkflowNotification($msgStr, $url, $control->id));
+                            $msgStr =
+                                "Control {$control->it_control_id} has been returned for correction because Admin deleted an evidence file.";
+
+                            $assignedUser->notify(
+                                new ControlWorkflowNotification(
+                                    $msgStr,
+                                    $url,
+                                    $control->id
+                                )
+                            );
                         }
                     } else {
                         $users = User::where('role', 'creator')->get();
-                        $msgStr = "Control {$control->it_control_id} has been returned for correction because Admin deleted an evidence file.";
-                        \Illuminate\Support\Facades\Notification::send($users, new ControlWorkflowNotification($msgStr, $url, $control->id));
+
+                        $msgStr =
+                            "Control {$control->it_control_id} has been returned for correction because Admin deleted an evidence file.";
+
+                        \Illuminate\Support\Facades\Notification::send(
+                            $users,
+                            new ControlWorkflowNotification(
+                                $msgStr,
+                                $url,
+                                $control->id
+                            )
+                        );
                     }
-                    
-                    $message = 'Evidence deleted. Control status returned to Officer.';
+
+                    $message =
+                        'Evidence deleted. Control status returned to Officer.';
+
                     $newStatus = 'return_to_officer';
                 }
             }
@@ -256,28 +390,61 @@ class EvidenceController extends Controller
     }
 
     /**
-     * Check if the authenticated user has access to the given evidence based on their UPTI.
+     * Check if the authenticated user has access
+     * to the given evidence based on their UPTI.
      */
     private function checkEvidenceAccess(ControlEvidence $evidence)
     {
         $user = auth()->user();
+
         if (!$user->isAdmin()) {
             $evidence->load('control');
-            
+
             // Check UPTI access
-            if (!$user->upti || stripos($evidence->control->upti, $user->upti->name) === false) {
+            if (
+                !$user->upti
+                ||
+                stripos(
+                    $evidence->control->upti,
+                    $user->upti->name
+                ) === false
+            ) {
                 abort(403, 'Unauthorized access to this evidence.');
             }
 
             // Check workflow status visibility
             $status = $evidence->control->status_control;
+
             if ($user->isReviewer()) {
-                if (in_array($status, ['not_started', 'drafting', 'return_to_officer'])) {
-                    abort(403, 'Evidence is not yet available for review.');
+                if (
+                    in_array(
+                        $status,
+                        [
+                            'not_started',
+                            'drafting',
+                            'return_to_officer'
+                        ]
+                    )
+                ) {
+                    abort(
+                        403,
+                        'Evidence is not yet available for review.'
+                    );
                 }
             } elseif ($user->isApprover()) {
-                if (!in_array($status, ['ongoing_approval', 'completed'])) {
-                    abort(403, 'Evidence is not yet available for approval.');
+                if (
+                    !in_array(
+                        $status,
+                        [
+                            'ongoing_approval',
+                            'completed'
+                        ]
+                    )
+                ) {
+                    abort(
+                        403,
+                        'Evidence is not yet available for approval.'
+                    );
                 }
             }
         }

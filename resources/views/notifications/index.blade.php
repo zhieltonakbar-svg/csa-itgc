@@ -1,85 +1,266 @@
 @extends('layouts.app')
 
+@section('title', 'Notifications — CSA - ITGC')
+
 @section('content')
-<div class="container-fluid py-4">
+
+<div class="container-fluid">
+
     <div class="d-flex justify-content-between align-items-center mb-4">
+
         <div>
-            <h4 class="mb-0 text-gray-800" style="font-weight: 700;">Notification History</h4>
-            <p class="text-muted mb-0" style="font-size: 14px;">View and manage all notifications you have received.</p>
+
+            <h4 class="mb-1">
+                Notifications
+            </h4>
+
+            <div class="text-muted small">
+                Your workflow notifications
+            </div>
+
         </div>
-        
-        @if($notifications->count() > 0)
-        <form action="{{ route('notifications.clear') }}" method="POST" onsubmit="return confirm('Are you sure you want to delete ALL notification history? This action cannot be undone.');">
-            @csrf
-            @method('DELETE')
-            <button type="submit" class="btn btn-danger btn-sm" style="font-weight: 600; padding: 8px 16px;">
-                <i class="bi bi-trash3-fill me-1"></i> Clear All History
-            </button>
-        </form>
+
+        @if(auth()->user()->unreadNotifications->count())
+
+            <form
+                method="POST"
+                action="{{ route('notifications.readAll') }}"
+                id="markAllForm"
+            >
+
+                @csrf
+
+                <button
+                    type="submit"
+                    class="btn btn-sm btn-outline-success"
+                >
+
+                    <i class="bi bi-check2-all"></i>
+
+                    Mark All as Read
+
+                </button>
+
+            </form>
+
         @endif
+
     </div>
 
-    @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show mb-4" role="alert" style="border-radius: 8px;">
-            <i class="bi bi-check-circle-fill me-2"></i> {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    @endif
+    <div class="card border-0 shadow-sm">
 
-    <div class="card border-0 shadow-sm" style="border-radius: 12px; overflow: hidden;">
-        @if($notifications->count() > 0)
-            <div class="list-group list-group-flush">
-                @foreach($notifications as $notification)
-                    <div class="list-group-item d-flex justify-content-between align-items-center p-4 hover-bg-light" style="border-left: 4px solid {{ empty($notification->read_at) ? '#3b82f6' : 'transparent' }};">
-                        <div class="d-flex align-items-start">
-                            <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
-                                <i class="bi bi-bell-fill fs-5"></i>
-                            </div>
-                            <div>
-                                <h6 class="mb-1" style="font-weight: 600; color: #1e293b;">
-                                    {{ $notification->data['message'] ?? 'System notification' }}
-                                </h6>
-                                <div class="text-muted" style="font-size: 13px;">
-                                    <i class="bi bi-clock me-1"></i> {{ $notification->created_at->diffForHumans() }} 
-                                    ({{ $notification->created_at->format('d M Y, H:i') }})
-                                </div>
-                                @if(isset($notification->data['url']))
-                                    <a href="{{ $notification->data['url'] }}" class="btn btn-sm btn-outline-primary mt-2" style="font-size: 12px; border-radius: 6px;">
-                                        View Data <i class="bi bi-arrow-right-short"></i>
-                                    </a>
-                                @endif
-                            </div>
+        <div class="list-group list-group-flush">
+
+            @forelse($notifications as $notification)
+
+                <div
+                    class="list-group-item"
+                    style="
+                        background:
+                            {{ $notification->read_at
+                                ? '#ffffff'
+                                : '#f8fafc' }};
+                    "
+                >
+
+                    <div class="d-flex align-items-start gap-3">
+
+                        <div
+                            style="
+                                width:38px;
+                                height:38px;
+                                border-radius:50%;
+                                background:#eaf6ef;
+                                color:#198754;
+                                display:flex;
+                                align-items:center;
+                                justify-content:center;
+                                flex-shrink:0;
+                            "
+                        >
+
+                            <i class="bi bi-bell-fill"></i>
+
                         </div>
-                        
-                        <form action="{{ route('notifications.destroy', $notification->id) }}" method="POST">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn btn-light text-danger btn-sm rounded-circle" title="Delete this notification" style="width: 35px; height: 35px;" onclick="return confirm('Delete this notification?');">
-                                <i class="bi bi-trash"></i>
+
+                        <div class="flex-grow-1">
+
+                            <div
+                                style="
+                                    font-size:14px;
+                                    font-weight:600;
+                                    color:#152238;
+                                "
+                            >
+
+                                {{ $notification->data['message'] ?? 'New notification' }}
+
+                            </div>
+
+                            <div
+                                style="
+                                    font-size:12px;
+                                    color:#64748b;
+                                    margin-top:4px;
+                                "
+                            >
+
+                                {{ $notification->created_at->diffForHumans() }}
+
+                            </div>
+
+                            @if(
+                                !empty(
+                                    $notification->data['url']
+                                )
+                            )
+
+                                <a
+                                    href="{{ $notification->data['url'] }}"
+                                    class="btn btn-sm btn-outline-success mt-2"
+                                >
+
+                                    Open
+
+                                </a>
+
+                            @endif
+
+                        </div>
+
+                        @if(!$notification->read_at)
+
+                            <button
+                                type="button"
+                                class="btn btn-sm btn-light mark-notification-read"
+                                data-id="{{ $notification->id }}"
+                                title="Mark as read"
+                            >
+
+                                <i class="bi bi-check2"></i>
+
                             </button>
-                        </form>
+
+                        @endif
+
                     </div>
-                @endforeach
-            </div>
-            
-            <div class="card-footer bg-white p-3 d-flex justify-content-center border-top">
-                {{ $notifications->links('pagination::bootstrap-5') }}
-            </div>
-        @else
-            <div class="card-body text-center py-5">
-                <div class="text-muted mb-3">
-                    <i class="bi bi-bell-slash text-gray-300" style="font-size: 4rem; color: #cbd5e1;"></i>
+
                 </div>
-                <h5 style="color: #475569; font-weight: 600;">No notification history</h5>
-                <p class="text-muted" style="font-size: 14px;">There are currently no notifications in your inbox.</p>
-            </div>
-        @endif
+
+            @empty
+
+                <div class="p-5 text-center">
+
+                    <i
+                        class="bi bi-bell-slash"
+                        style="
+                            font-size:38px;
+                            color:#94a3b8;
+                        "
+                    ></i>
+
+                    <div
+                        class="mt-3"
+                        style="
+                            font-weight:600;
+                            color:#475569;
+                        "
+                    >
+
+                        No notifications
+
+                    </div>
+
+                    <div
+                        class="small mt-1"
+                        style="
+                            color:#94a3b8;
+                        "
+                    >
+
+                        You do not have any notifications yet.
+
+                    </div>
+
+                </div>
+
+            @endforelse
+
+        </div>
+
     </div>
+
+    <div class="mt-3">
+
+        {{ $notifications->links() }}
+
+    </div>
+
 </div>
 
-<style>
-    .hover-bg-light:hover {
-        background-color: #f8fafc;
-    }
-</style>
 @endsection
+
+@push('scripts')
+
+<script>
+
+document.querySelectorAll(
+    '.mark-notification-read'
+).forEach(function (button) {
+
+    button.addEventListener(
+        'click',
+        async function () {
+
+            const id =
+                this.dataset.id;
+
+            try {
+
+                const response =
+                    await fetch(
+                        `/notifications/${id}/read`,
+                        {
+                            method:'POST',
+                            headers:{
+                                'X-CSRF-TOKEN':
+                                    document
+                                        .querySelector(
+                                            'meta[name="csrf-token"]'
+                                        )
+                                        ?.getAttribute(
+                                            'content'
+                                        ),
+
+                                'Accept':
+                                    'application/json'
+                            }
+                        }
+                    );
+
+                if (
+                    response.ok
+                ) {
+
+                    window.location.reload();
+
+                }
+
+            } catch (
+                error
+            ) {
+
+                console.error(
+                    error
+                );
+
+            }
+
+        }
+    );
+
+});
+
+</script>
+
+@endpush

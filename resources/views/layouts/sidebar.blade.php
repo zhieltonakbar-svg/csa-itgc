@@ -44,24 +44,35 @@
 
         <div class="nav-section">Modules</div>
 
-        {{-- IT RCM → submenu with categories --}}
+        {{-- IT RCM (Admin) / IT Category (Officer, Reviewer, Approver) → submenu with categories --}}
         <div class="nav-item">
             <a href="#" class="nav-link nav-toggle"
                style="color: #ffffff !important;"
                aria-expanded="{{ $isOnCategoryPage || $isOnRcmPage ? 'true' : 'false' }}">
                 <i class="bi bi-shield-lock"></i>
-                <span class="nav-text">{{ $user->isAdmin() ? 'IT RCM' : 'IT Category' }}</span>
+                <span class="nav-text">{{ $user->isAdmin() ? 'IT RCM Management' : 'IT Category' }}</span>
                 <i class="bi bi-chevron-right nav-arrow"></i>
             </a>
             <ul class="nav-submenu {{ $isOnCategoryPage || $isOnRcmPage ? 'show' : '' }}">
                 @foreach($sidebarCategories as $cat)
                     <li>
-                        <a href="{{ route('dashboard.controls', ['category' => $cat->id]) . '?' . http_build_query(request()->only('year', 'quarter', 'upti_id', 'application_id')) }}"
-                           class="nav-link {{ $activeCategoryId == $cat->id ? 'sub-active' : '' }}"
-                           data-category-id="{{ $cat->id }}"
-                           data-category-name="{{ $cat->name }}">
-                            {{ $cat->name }}
-                        </a>
+                        @if($user->isAdmin())
+                            {{-- Admin: full IT RCM management, no period filter, all applications --}}
+                            <a href="{{ route('rcm.controls', ['category' => $cat->id]) }}"
+                               class="nav-link {{ $activeCategoryId == $cat->id ? 'sub-active' : '' }}"
+                               data-category-id="{{ $cat->id }}"
+                               data-category-name="{{ $cat->name }}">
+                                {{ $cat->name }}
+                            </a>
+                        @else
+                            {{-- Officer / Reviewer / Approver: filtered by year, quarter, application (via Dashboard filter) --}}
+                            <a href="{{ route('dashboard.controls', ['category' => $cat->id]) . '?' . http_build_query(request()->only('year', 'quarter', 'upti_id', 'application_id')) }}"
+                               class="nav-link {{ $activeCategoryId == $cat->id ? 'sub-active' : '' }}"
+                               data-category-id="{{ $cat->id }}"
+                               data-category-name="{{ $cat->name }}">
+                                {{ $cat->name }}
+                            </a>
+                        @endif
                     </li>
                 @endforeach
             </ul>

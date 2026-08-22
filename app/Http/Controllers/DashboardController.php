@@ -5,251 +5,802 @@ namespace App\Http\Controllers;
 use App\Models\Application;
 use App\Models\Control;
 use App\Models\ItCategory;
+use App\Models\Upti;
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller
 {
-    /**
-     * Show the dashboard with the application dropdown populated from the DB.
-     */
-    public function index()
+    public function index(Request $request)
     {
         $user = auth()->user();
 
-        if ($user && !$user->isAdmin() && !$user->upti_id) {
-            $uptis = collect();
-            $applications = collect();
-        } else {
-            $uptis = \App\Models\Upti::orderBy('name')->get();
-            $applications = \App\Models\Application::where('is_active', true);
-            if ($user && !$user->isAdmin()) {
-                $applications->where('upti_id', $user->upti_id);
-            }
-            $applications = $applications->with('upti')->orderBy('name')->get();
+        $availableYears = Control::query()
+            ->whereNotNull('year')
+            ->select('year')
+            ->distinct()
+            ->orderByDesc('year')
+            ->pluck('year')
+            ->map(fn ($year) => (int) $year)
+            ->values();
+
+        if ($availableYears->isEmpty()) {
+            $availableYears = collect([
+                now()->year,
+                now()->year - 1,
+                now()->year - 2,
+                now()->year - 3,
+            ]);
         }
 
-        return view('dashboard.index', compact('uptis', 'applications'));
+        $year = (int) $request->input(
+            'year',
+            $availableYears->first()
+        );
+
+        if (!$availableYears->contains($year)) {
+            $year = (int) $availableYears->first();
+        }
+
+        $quarter = strtolower(
+            (string) $request->input(
+                'quarter',
+                'q1'
+            )
+        );
+
+        if (!in_array(
+            $quarter,
+            ['q1', 'q2', 'q3', 'q4'],
+            true
+        )) {
+            $quarter = 'q1';
+        }
+
+        $userUptiName =
+            trim(
+                (string) optional(
+                    $user->upti
+                )->name
+            );
+
+        $applicationsQuery =
+            Application::query()
+                ->where(
+                    'is_active',
+                    true
+                )
+                ->with('upti')
+                ->orderBy('name');
+
+        if (!$user->isAdmin()) {
+            if ($user->upti_id) {
+                $applicationsQuery->where(
+                    function ($query) use (
+                        $user
+                    ) {
+                        $query
+                            ->where(
+                                'upti_id',
+                                $user->upti_id
+                            )
+                            ->orWhereExists(
+                                function ($subQuery) use (
+                                    $user
+                                ) {
+                                    $subQuery
+                                        ->selectRaw('1')
+                                        ->from('controls')
+                                        ->whereColumn(
+                                            'controls.application_id',
+                                            'applications.id'
+                                        )
+                                        ->whereRaw(
+                                            'LOWER(TRIM(controls.upti)) = LOWER(TRIM(?))',
+                                            [
+                                                optional(
+                                                    $user->upti
+                                                )->name
+                                            ]
+                                        );
+                                }
+                            );
+                    }
+                );
+            } else {
+                $applicationsQuery->whereRaw(
+                    '1 = 0'
+                );
+            }
+        }
+
+        $applications =
+            $applicationsQuery->get();
+
+        $applicationId =
+            $request->input(
+                'application_id'
+            );
+
+        if (
+            $applicationId !== null &&
+            $applications->contains(
+                'id',
+                (int) $applicationId
+            )
+        ) {
+            $applicationId =
+                (int) $applicationId;
+        } else {
+            $applicationId = null;
+        }
+
+        $selectedApplication = null;
+
+        if ($applicationId !== null) {
+            $selectedApplication =
+                $applications->firstWhere(
+                    'id',
+                    $applicationId
+                );
+        }
+
+        $categories =
+            ItCategory::query()
+                ->orderBy('name')
+                ->get();
+
+        $uptis =
+            Upti::query()
+                ->orderBy('name')
+                ->get();
+
+        foreach (
+            $applications
+            as $application
+        ) {
+            $dashboardCategories =
+                collect();
+
+            foreach (
+                $categories
+                as $category
+            ) {
+                $controlsQuery =
+                    Control::query()
+                        ->where(
+                            'application_id',
+                            $application->id
+                        )
+                        ->where(
+                            'it_category_id',
+                            $category->id
+                        )
+                        ->where(
+                            'year',
+                            $year
+                        )
+                        ->where(
+                            'quarter',
+                            $quarter
+                        );
+
+                if (
+                    !$user->isAdmin()
+                ) {
+                    if (
+                        $userUptiName !== ''
+                    ) {
+                        $controlsQuery
+                            ->whereRaw(
+                                'LOWER(TRIM(upti)) = LOWER(TRIM(?))',
+                                [
+                                    $userUptiName
+                                ]
+                            );
+                    } else {
+                        $controlsQuery
+                            ->whereRaw(
+                                '1 = 0'
+                            );
+                    }
+                }
+
+                $controls =
+                    $controlsQuery
+                        ->get();
+
+                $total =
+                    $controls->count();
+
+                $completed =
+                    $controls
+                        ->where(
+                            'status_control',
+                            'completed'
+                        )
+                        ->count();
+
+                $ongoing =
+                    $controls
+                        ->whereIn(
+                            'status_control',
+                            [
+                                'drafting',
+                                'ongoing_review',
+                                'ongoing_approval',
+                                'return_to_officer',
+                                'return_to_reviewer',
+                            ]
+                        )
+                        ->count();
+
+                if ($total === 0) {
+                    $status =
+                        'not_complete';
+                } elseif (
+                    $completed === $total
+                ) {
+                    $status =
+                        'complete';
+                } elseif (
+                    $completed > 0 ||
+                    $ongoing > 0
+                ) {
+                    $status =
+                        'partial';
+                } else {
+                    $status =
+                        'not_complete';
+                }
+
+                $dashboardCategory =
+                    clone $category;
+
+                $dashboardCategory->setAttribute(
+                    'dashboard_status',
+                    $status
+                );
+
+                $dashboardCategory->setAttribute(
+                    'completion_status',
+                    $status
+                );
+
+                $dashboardCategory->setAttribute(
+                    'dashboard_count',
+                    $total
+                );
+
+                $dashboardCategory->setAttribute(
+                    'total_controls',
+                    $total
+                );
+
+                $dashboardCategory->setAttribute(
+                    'completed_controls',
+                    $completed
+                );
+
+                $dashboardCategory->setAttribute(
+                    'ongoing_controls',
+                    $ongoing
+                );
+
+                $dashboardCategories->push(
+                    $dashboardCategory
+                );
+            }
+
+            $application->setRelation(
+                'dashboard_categories',
+                $dashboardCategories
+            );
+        }
+
+        return view(
+            'dashboard',
+            compact(
+                'user',
+                'applications',
+                'categories',
+                'uptis',
+                'year',
+                'quarter',
+                'availableYears',
+                'applicationId',
+                'selectedApplication'
+            )
+        );
     }
 
-    /**
-     * JSON endpoint: return IT categories for a given application.
-     *
-     * GET /dashboard/categories?application_id=1
-     *
-     * Response shape:
-     * {
-     *   "application": "SAP S/4HANA",
-     *   "categories": [
-     *     { "id": 1, "name": "Access to Programs & Data", "icon": "bi-shield-lock",
-     *       "description": "...", "completion_status": "partial" },
-     *     ...
-     *   ]
-     * }
-     */
-    public function getCategories(Request $request)
-    {
-        $request->validate([
-            'application_id' => 'required|exists:applications,id',
-            'year'           => 'nullable|string',
-            'quarter'        => 'nullable|string',
-        ]);
+    public function getCategories(
+        Request $request
+    ) {
+        $user =
+            auth()->user();
 
-        $appId   = $request->application_id;
-        $year    = $request->query('year', date('Y'));
-        $quarter = $request->query('quarter', 'q1');
-        
-        $user = auth()->user();
-        
-        if ($user && !$user->isAdmin() && !$user->upti_id) {
-            return response()->json(['application' => '', 'categories' => []]);
-        }
-        
-        $query = Application::with('itCategories')->where('id', $appId);
-        if ($user && !$user->isAdmin()) {
-            $query->where('upti_id', $user->upti_id);
-        }
-        $applications = $query->get();
-        if ($applications->isEmpty()) {
-            return response()->json(['application' => '', 'categories' => []]);
-        }
-        $applicationName = $applications->first()->name;
-        $appIds = $applications->pluck('id');
-        $user = auth()->user();
+        $applicationId =
+            $request->input(
+                'application_id'
+            );
 
-        $uniqueCategories = collect();
-        foreach ($applications as $app) {
-            foreach ($app->itCategories as $cat) {
-                if (!$uniqueCategories->has($cat->id)) {
-                    $uniqueCategories->put($cat->id, $cat);
+        $year =
+            (int) $request->input(
+                'year',
+                now()->year
+            );
+
+        $quarter =
+            strtolower(
+                (string) $request->input(
+                    'quarter',
+                    'q1'
+                )
+            );
+
+        if (!in_array(
+            $quarter,
+            ['q1', 'q2', 'q3', 'q4'],
+            true
+        )) {
+            $quarter = 'q1';
+        }
+
+        if (!$applicationId) {
+            return response()->json([
+                'success' =>
+                    false,
+                'message' =>
+                    'Application is required.',
+                'categories' => [],
+            ], 422);
+        }
+
+        $application =
+            Application::query()
+                ->where(
+                    'is_active',
+                    true
+                )
+                ->with('upti')
+                ->find(
+                    $applicationId
+                );
+
+        if (!$application) {
+            return response()->json([
+                'success' =>
+                    false,
+                'message' =>
+                    'Application not found.',
+                'categories' => [],
+            ], 404);
+        }
+
+        if (!$user->isAdmin()) {
+            $userUptiName =
+                trim(
+                    (string) optional(
+                        $user->upti
+                    )->name
+                );
+
+            $hasAccess =
+                (
+                    $user->upti_id &&
+                    (int) $application->upti_id ===
+                    (int) $user->upti_id
+                ) ||
+                (
+                    $userUptiName !== '' &&
+                    Control::query()
+                        ->where(
+                            'application_id',
+                            $application->id
+                        )
+                        ->whereRaw(
+                            'LOWER(TRIM(upti)) = LOWER(TRIM(?))',
+                            [
+                                $userUptiName
+                            ]
+                        )
+                        ->exists()
+                );
+
+            if (!$hasAccess) {
+                return response()->json([
+                    'success' =>
+                        false,
+                    'message' =>
+                        'You do not have access to this application.',
+                    'categories' => [],
+                ], 403);
+            }
+        }
+
+        $categories =
+            ItCategory::query()
+                ->orderBy('name')
+                ->get();
+
+        $userUptiName =
+            trim(
+                (string) optional(
+                    $user->upti
+                )->name
+            );
+
+        $result =
+            $categories->map(
+                function (
+                    $category
+                ) use (
+                    $applicationId,
+                    $year,
+                    $quarter,
+                    $user,
+                    $userUptiName
+                ) {
+                    $controlsQuery =
+                        Control::query()
+                            ->where(
+                                'application_id',
+                                $applicationId
+                            )
+                            ->where(
+                                'it_category_id',
+                                $category->id
+                            )
+                            ->where(
+                                'year',
+                                $year
+                            )
+                            ->where(
+                                'quarter',
+                                $quarter
+                            );
+
+                    if (
+                        !$user->isAdmin()
+                    ) {
+                        if (
+                            $userUptiName !== ''
+                        ) {
+                            $controlsQuery
+                                ->whereRaw(
+                                    'LOWER(TRIM(upti)) = LOWER(TRIM(?))',
+                                    [
+                                        $userUptiName
+                                    ]
+                                );
+                        } else {
+                            $controlsQuery
+                                ->whereRaw(
+                                    '1 = 0'
+                                );
+                        }
+                    }
+
+                    $controls =
+                        $controlsQuery
+                            ->get();
+
+                    $total =
+                        $controls->count();
+
+                    $completed =
+                        $controls
+                            ->where(
+                                'status_control',
+                                'completed'
+                            )
+                            ->count();
+
+                    $ongoing =
+                        $controls
+                            ->whereIn(
+                                'status_control',
+                                [
+                                    'drafting',
+                                    'ongoing_review',
+                                    'ongoing_approval',
+                                    'return_to_officer',
+                                    'return_to_reviewer',
+                                ]
+                            )
+                            ->count();
+
+                    $status =
+                        $total === 0
+                            ? 'not_complete'
+                            : (
+                                $completed === $total
+                                    ? 'complete'
+                                    : (
+                                        $completed > 0 ||
+                                        $ongoing > 0
+                                            ? 'partial'
+                                            : 'not_complete'
+                                    )
+                            );
+
+                    return [
+                        'id' =>
+                            $category->id,
+                        'name' =>
+                            $category->name,
+                        'icon' =>
+                            $category->icon,
+                        'count' =>
+                            $total,
+                        'total_controls' =>
+                            $total,
+                        'completed_controls' =>
+                            $completed,
+                        'ongoing_controls' =>
+                            $ongoing,
+                        'status' =>
+                            $status,
+                        'completion_status' =>
+                            $status,
+                        'dashboard_status' =>
+                            $status,
+                    ];
                 }
-            }
-        }
-
-        $categories = $uniqueCategories->values()->map(function ($cat) use ($appIds, $year, $quarter, $user) {
-            $query = Control::whereIn('application_id', $appIds)
-                ->where('it_category_id', $cat->id)
-                ->where('year', $year)
-                ->where('quarter', $quarter);
-                
-            if ($user && !$user->isAdmin() && $user->upti) {
-                $query->where(function($q) use ($user) {
-                    $q->where('upti', 'LIKE', '%' . $user->upti->name . '%')
-                      ->orWhere('upti', 'Multi UPTI');
-                });
-            }
-
-            $controls = $query->get();
-
-            $statusInfo = Control::calculateStatus($controls);
-
-            $totalCount = $controls->count();
-            $completedCount = $controls->where('status_control', 'completed')->count();
-            $notCompletedCount = $totalCount - $completedCount;
-
-            return [
-                'id'                  => $cat->id,
-                'name'                => $cat->name,
-                'icon'                => $cat->icon,
-                'description'         => $cat->description,
-                'completion_status'   => $statusInfo['pivot_status'],
-                'completed_count'     => $completedCount,
-                'not_completed_count' => $notCompletedCount,
-                'total_count'         => $totalCount,
-            ];
-        });
+            );
 
         return response()->json([
-            'application' => $applicationName,
-            'categories'  => $categories,
+            'success' =>
+                true,
+            'categories' =>
+                $result->values(),
         ]);
     }
 
-    /**
-     * Show the IT Category detail page (controls table template) for an UPTI/Application.
-     *
-     * GET /it-category/{category}/controls?upti_id=1&application_id=1&year=2026&quarter=q1
-     */
-    /**
-     * Dashboard IT Category: read-only for Admin.
-     * GET /it-category/{category}/controls?application_id=1&year=2026&quarter=q1
-     */
-    public function showControls(ItCategory $category, Request $request)
-    {
-        $year    = $request->query('year', date('Y'));
-        $quarter = $request->query('quarter', 'q1');
-        $appId   = $request->query('application_id');
+    public function showControls(
+        Request $request,
+        ItCategory $category
+    ) {
+        $user =
+            auth()->user();
 
-        if (!$appId) {
-            return redirect()->route('dashboard')->with('error', 'Application is required.');
+        $applicationId =
+            $request->input(
+                'application_id'
+            );
+
+        $year =
+            (int) $request->input(
+                'year',
+                now()->year
+            );
+
+        $quarter =
+            strtolower(
+                (string) $request->input(
+                    'quarter',
+                    'q1'
+                )
+            );
+
+        $source =
+            $request->input(
+                'source',
+                'dashboard'
+            );
+
+        if (!in_array(
+            $quarter,
+            ['q1', 'q2', 'q3', 'q4'],
+            true
+        )) {
+            $quarter = 'q1';
         }
 
-        $application = Application::with('upti')->findOrFail($appId);
-        $upti = $application->upti;
-
-        $user = auth()->user();
-        $appIds = [$appId];
-
-        $completionStatus = 'partial_completed';
-
-        $query = Control::with(['evidences', 'application.upti'])
-            ->whereIn('application_id', $appIds)
-            ->where('it_category_id', $category->id)
-            ->where('year', $year)
-            ->where('quarter', $quarter);
-
-        if ($user && !$user->isAdmin() && $user->upti) {
-            $query->where(function ($q) use ($user) {
-                $q->where('upti', 'LIKE', '%' . $user->upti->name . '%')
-                  ->orWhere('upti', 'Multi UPTI');
-            });
+        if (!$applicationId) {
+            abort(
+                400,
+                'Application is required.'
+            );
         }
 
-        $controls = $query->orderBy('application_id')
-            ->orderBy('it_control_id')
-            ->get();
+        $application =
+            Application::query()
+                ->where(
+                    'is_active',
+                    true
+                )
+                ->with('upti')
+                ->findOrFail(
+                    $applicationId
+                );
 
-        $allUptis = \App\Models\Upti::orderBy('name')->get();
+        if (!$user->isAdmin()) {
+            $userUptiName =
+                trim(
+                    (string) optional(
+                        $user->upti
+                    )->name
+                );
 
-        // Dashboard entry: always view-only for Admin
-        $source = 'dashboard';
+            $hasAccess =
+                (
+                    $user->upti_id &&
+                    (int) $application->upti_id ===
+                    (int) $user->upti_id
+                ) ||
+                (
+                    $userUptiName !== '' &&
+                    Control::query()
+                        ->where(
+                            'application_id',
+                            $application->id
+                        )
+                        ->whereRaw(
+                            'LOWER(TRIM(upti)) = LOWER(TRIM(?))',
+                            [
+                                $userUptiName
+                            ]
+                        )
+                        ->exists()
+                );
 
-        return view('it-category.show', compact(
-            'upti',
-            'application',
-            'category',
-            'year',
-            'quarter',
-            'completionStatus',
-            'controls',
-            'allUptis',
-            'source'
-        ));
-    }
-
-    /**
-     * IT RCM Management: full admin capabilities.
-     * GET /rcm/{category}/controls
-     * Shows ALL controls for this category across all applications & UPTIs.
-     */
-    public function showRcmControls(ItCategory $category, Request $request)
-    {
-        // Only admin can access this route
-        if (!auth()->user()->isAdmin()) {
-            abort(403);
+            if (!$hasAccess) {
+                abort(
+                    403,
+                    'You do not have access to this application.'
+                );
+            }
         }
 
-        $completionStatus = 'partial_completed';
+        $controlsQuery =
+            Control::query()
+                ->with([
+                    'application.upti',
+                    'itCategory',
+                    'evidences',
+                ])
+                ->where(
+                    'application_id',
+                    $application->id
+                )
+                ->where(
+                    'it_category_id',
+                    $category->id
+                )
+                ->where(
+                    'year',
+                    $year
+                )
+                ->where(
+                    'quarter',
+                    $quarter
+                );
 
-        // Load ALL controls for this category — no application/upti/period filter
-        $controls = Control::with(['evidences', 'application.upti'])
-            ->where('it_category_id', $category->id)
-            ->orderBy('year', 'desc')
-            ->orderBy('quarter', 'desc')
-            ->orderBy('application_id')
-            ->orderBy('it_control_id')
-            ->get();
+        if (!$user->isAdmin()) {
+            $userUptiName =
+                trim(
+                    (string) optional(
+                        $user->upti
+                    )->name
+                );
 
-        $allUptis        = \App\Models\Upti::orderBy('name')->get();
-        $allApplications = \App\Models\Application::where('is_active', true)
-            ->with('upti')
-            ->orderBy('name')
-            ->get();
-
-        // Dummy values — not used in IT RCM view (no period filter)
-        $year        = null;
-        $quarter     = null;
-        $application = null;
-        $upti        = null;
-
-        // IT RCM: full capabilities
-        $source = 'rcm';
-
-        return view('it-rcm.show', compact(
-            'upti',
-            'application',
-            'category',
-            'year',
-            'quarter',
-            'completionStatus',
-            'controls',
-            'allUptis',
-            'allApplications',
-            'source'
-        ));
-    }
-
-    /**
-     * IT RCM landing page — shows all IT categories for admin.
-     * GET /rcm
-     */
-    public function rcmIndex()
-    {
-        if (!auth()->user()->isAdmin()) {
-            abort(403);
+            if (
+                $userUptiName !== ''
+            ) {
+                $controlsQuery
+                    ->whereRaw(
+                        'LOWER(TRIM(upti)) = LOWER(TRIM(?))',
+                        [
+                            $userUptiName
+                        ]
+                    );
+            } else {
+                $controlsQuery
+                    ->whereRaw(
+                        '1 = 0'
+                    );
+            }
         }
 
-        $categories = \App\Models\ItCategory::orderBy('name')->get();
+        $controls =
+            $controlsQuery
+                ->orderBy('upti')
+                ->orderByRaw(
+                    "
+                    CASE
+                        WHEN it_control_id REGEXP '^C-IT-[0-9]+$'
+                        THEN CAST(
+                            SUBSTRING_INDEX(
+                                it_control_id,
+                                '-',
+                                -1
+                            ) AS UNSIGNED
+                        )
+                        ELSE 999999
+                    END
+                    "
+                )
+                ->orderBy('id')
+                ->get();
 
-        return view('it-rcm.index', compact('categories'));
+        $allApplicationsQuery =
+            Application::query()
+                ->where(
+                    'is_active',
+                    true
+                )
+                ->with('upti')
+                ->orderBy('name');
+
+        if (!$user->isAdmin()) {
+            $allApplicationsQuery
+                ->where(
+                    function ($query) use (
+                        $user
+                    ) {
+                        $query
+                            ->where(
+                                'upti_id',
+                                $user->upti_id
+                            )
+                            ->orWhereExists(
+                                function (
+                                    $subQuery
+                                ) use (
+                                    $user
+                                ) {
+                                    $subQuery
+                                        ->selectRaw(
+                                            '1'
+                                        )
+                                        ->from(
+                                            'controls'
+                                        )
+                                        ->whereColumn(
+                                            'controls.application_id',
+                                            'applications.id'
+                                        )
+                                        ->whereRaw(
+                                            'LOWER(TRIM(controls.upti)) = LOWER(TRIM(?))',
+                                            [
+                                                optional(
+                                                    $user->upti
+                                                )->name
+                                            ]
+                                        );
+                                }
+                            );
+                    }
+                );
+        }
+
+        $allApplications =
+            $allApplicationsQuery->get();
+
+        $allCategories =
+            ItCategory::query()
+                ->orderBy('name')
+                ->get();
+
+        $allUptis =
+            Upti::query()
+                ->orderBy('name')
+                ->get();
+
+        return view(
+            'it-category.show',
+            compact(
+                'category',
+                'application',
+                'controls',
+                'year',
+                'quarter',
+                'source',
+                'allApplications',
+                'allCategories',
+                'allUptis'
+            )
+        );
     }
 }

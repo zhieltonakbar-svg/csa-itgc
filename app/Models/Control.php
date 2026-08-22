@@ -69,8 +69,7 @@ class Control extends Model
 
     public function getStatusLabelAttribute(): string
     {
-        return self::$statusLabels[$this->status_control]
-            ?? 'Not Started Yet';
+        return self::$statusLabels[$this->status_control] ?? 'Not Started Yet';
     }
 
     public static array $itCategoryStatusLabels = [
@@ -81,20 +80,20 @@ class Control extends Model
 
     public function getItCategoryStatusLabelAttribute(): string
     {
-        return self::$itCategoryStatusLabels[$this->status_it_category]
-            ?? 'Not Completed';
+        return self::$itCategoryStatusLabels[$this->status_it_category] ?? 'Not Completed';
     }
 
-    /**
-     * Status Control tidak boleh diedit langsung oleh Officer/Creator.
-     * Workflow Officer tetap menggunakan transition().
-     */
+    /*
+    |--------------------------------------------------------------------------
+    | WORKFLOW
+    |--------------------------------------------------------------------------
+    */
+
     public static function allowedTransitions(string $role): array
     {
         return match ($role) {
-
-            'creator' => [
-                'not_started'       => 'drafting',
+            'creator', 'officer' => [
+                'not_started'       => 'ongoing_review',
                 'drafting'          => 'ongoing_review',
                 'return_to_officer' => 'ongoing_review',
             ],
@@ -118,39 +117,25 @@ class Control extends Model
         string $toStatus
     ): bool {
         $map = [
-
             'creator' => [
-                'not_started' => [
-                    'drafting',
-                    'ongoing_review',
-                ],
+                'not_started'       => ['ongoing_review'],
+                'drafting'          => ['ongoing_review'],
+                'return_to_officer' => ['ongoing_review'],
+            ],
 
-                'drafting' => [
-                    'ongoing_review',
-                ],
-
-                'return_to_officer' => [
-                    'ongoing_review',
-                ],
+            'officer' => [
+                'not_started'       => ['ongoing_review'],
+                'drafting'          => ['ongoing_review'],
+                'return_to_officer' => ['ongoing_review'],
             ],
 
             'reviewer' => [
-                'ongoing_review' => [
-                    'ongoing_approval',
-                    'return_to_officer',
-                ],
-
-                'return_to_reviewer' => [
-                    'ongoing_approval',
-                    'return_to_officer',
-                ],
+                'ongoing_review'     => ['ongoing_approval', 'return_to_officer'],
+                'return_to_reviewer' => ['ongoing_approval', 'return_to_officer'],
             ],
 
             'approver' => [
-                'ongoing_approval' => [
-                    'completed',
-                    'return_to_officer',
-                ],
+                'ongoing_approval' => ['completed', 'return_to_officer'],
             ],
         ];
 
@@ -161,13 +146,6 @@ class Control extends Model
         );
     }
 
-    /**
-     * Officer/Creator tidak mendapatkan aksi untuk
-     * mengubah Status Control secara langsung.
-     *
-     * Perubahan status Officer hanya melalui workflow
-     * Send to Manager / Resubmit.
-     */
     public function availableActions(User $user): array
     {
         $role   = $user->role;
@@ -175,29 +153,14 @@ class Control extends Model
         $actions = [];
 
         switch ($role) {
-
             case 'creator':
+            case 'officer':
 
                 if (
                     $this->assigned_to !== null &&
                     $this->assigned_to !== $user->id
                 ) {
                     return [];
-                }
-
-                if (
-                    in_array(
-                        $status,
-                        ['not_started', 'drafting'],
-                        true
-                    )
-                ) {
-                    $actions[] = [
-                        'action' => 'start',
-                        'label'  => 'Send to Manager',
-                        'to'     => 'ongoing_review',
-                        'class'  => 'btn-workflow-start',
-                    ];
                 }
 
                 if ($status === 'return_to_officer') {
@@ -214,11 +177,8 @@ class Control extends Model
             case 'reviewer':
 
                 if (
-                    in_array(
-                        $status,
-                        ['ongoing_review', 'return_to_reviewer'],
-                        true
-                    )
+                    $status === 'ongoing_review' ||
+                    $status === 'return_to_reviewer'
                 ) {
                     $actions[] = [
                         'action' => 'approve',
@@ -265,47 +225,6 @@ class Control extends Model
         return $actions;
     }
 
-    /**
-     * Hanya role berikut yang boleh mengubah
-     * Status Control secara langsung.
-     */
-    public function canChangeStatus(User $user): bool
-    {
-        return in_array(
-            $user->role,
-            ['reviewer', 'approver'],
-            true
-        );
-    }
-
-    /**
-     * Hanya Admin yang boleh mengubah data Control.
-     */
-    public function canEditControl(User $user): bool
-    {
-        return $user->isAdmin();
-    }
-
-    /**
-     * Officer/Creator hanya boleh upload evidence.
-     */
-    public function canUploadEvidence(User $user): bool
-    {
-        return in_array(
-            $user->role,
-            ['creator', 'officer'],
-            true
-        );
-    }
-
-    /**
-     * Hanya Admin yang boleh menghapus Control.
-     */
-    public function canDeleteControl(User $user): bool
-    {
-        return $user->isAdmin();
-    }
-
     public static function calculateStatus($controls): array
     {
         if ($controls->isEmpty()) {
@@ -318,10 +237,7 @@ class Control extends Model
         $totalCount = $controls->count();
 
         $completedCount = $controls
-            ->filter(
-                fn ($c) =>
-                    $c->status_control === 'completed'
-            )
+            ->filter(fn ($c) => $c->status_control === 'completed')
             ->count();
 
         if ($completedCount === $totalCount) {

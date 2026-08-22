@@ -5,845 +5,1161 @@
 @push('styles')
 <style>
 /* ============================================================
+   CSA - ITGC
    IT CATEGORY DETAIL PAGE
-   Table columns: Control ID | Control Description | Status Control
-   Summary:       Application | Year | Quarter
+   GREEN THEME
    ============================================================ */
 
-/* ── Page Header ─────────────────────────────────────────── */
 .itc-page-header {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 16px;
-    margin-bottom: 1.5rem;
-    flex-wrap: wrap;
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:16px;
+    margin-bottom:1.5rem;
+    flex-wrap:wrap;
 }
+
 .itc-header-left {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    min-width: 0;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    min-width:0;
 }
 
-/* Breadcrumb */
 .itc-breadcrumb {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    font-size: 12.5px;
-    flex-wrap: wrap;
-    color: var(--text-secondary);
+    display:flex;
+    align-items:center;
+    gap:5px;
+    font-size:12.5px;
+    flex-wrap:wrap;
+    color:#64748b;
 }
+
 .itc-breadcrumb a {
-    color: var(--text-secondary);
-    text-decoration: none;
-    transition: color 0.18s;
+    color:#64748b;
+    text-decoration:none;
+    transition:.18s;
 }
-.itc-breadcrumb a:hover { color: var(--primary); }
-.itc-breadcrumb .bc-sep { color: var(--text-muted); font-size: 9px; }
+
+.itc-breadcrumb a:hover {
+    color:#198754;
+}
+
+.itc-breadcrumb .bc-sep {
+    color:#94a3b8;
+    font-size:9px;
+}
+
 .itc-breadcrumb .bc-cur {
-    color: var(--text-primary);
-    font-weight: 600;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 220px;
+    color:#152238;
+    font-weight:600;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    max-width:220px;
 }
 
-/* Page title */
 .itc-page-title {
-    font-size: 20px;
-    font-weight: 800;
-    color: var(--text-primary);
-    letter-spacing: -0.3px;
-    margin: 0;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    line-height: 1.25;
+    font-size:20px;
+    font-weight:800;
+    color:#152238;
+    letter-spacing:-.3px;
+    margin:0;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    line-height:1.25;
 }
+
 .itc-title-icon {
-    width: 38px;
-    height: 38px;
-    background: var(--primary-gradient);
-    border-radius: 9px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    box-shadow: 0 2px 10px rgba(25,135,84,.3);
+    width:38px;
+    height:38px;
+    background:linear-gradient(135deg,#198754,#157347);
+    border-radius:9px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-shrink:0;
+    box-shadow:0 3px 12px rgba(25,135,84,.25);
 }
-.itc-title-icon i { font-size: 18px; color: #fff; }
 
-/* Back button */
+.itc-title-icon i {
+    font-size:18px;
+    color:#fff;
+}
+
 .btn-back-itc {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--text-secondary);
-    text-decoration: none;
-    padding: 8px 16px;
-    border-radius: var(--radius-sm);
-    border: 1.5px solid var(--border-color);
-    background: var(--bg-white);
-    transition: var(--transition);
-    white-space: nowrap;
-    flex-shrink: 0;
-    align-self: flex-start;
-}
-.btn-back-itc:hover {
-    border-color: var(--primary);
-    color: var(--primary);
-    background: var(--primary-light);
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    font-size:13px;
+    font-weight:500;
+    color:#64748b;
+    text-decoration:none;
+    padding:8px 16px;
+    border-radius:8px;
+    border:1.5px solid #dbe3e8;
+    background:#fff;
+    transition:.18s;
+    white-space:nowrap;
+    flex-shrink:0;
+    align-self:flex-start;
 }
 
-/* ── Summary Card — Application | Year | Quarter ─────────── */
+.btn-back-itc:hover {
+    border-color:#198754;
+    color:#198754;
+    background:#eaf6ef;
+}
+
+/* ============================================================
+   SUMMARY
+   ============================================================ */
+
 .itc-summary-card {
-    background: var(--bg-white);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-card);
-    margin-bottom: 1.25rem;
-    overflow: hidden;
+    background:#fff;
+    border:1px solid #dbe3e8;
+    border-radius:12px;
+    box-shadow:0 8px 25px rgba(25,135,84,.06);
+    margin-bottom:1.25rem;
+    overflow:hidden;
 }
+
 .itc-summary-header {
-    padding: 10px 20px;
-    background: var(--bg-body);
-    border-bottom: 1px solid var(--border-color);
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    font-size: 11.5px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.6px;
-    color: var(--text-secondary);
+    padding:10px 20px;
+    background:#f8fafb;
+    border-bottom:1px solid #dbe3e8;
+    display:flex;
+    align-items:center;
+    gap:7px;
+    font-size:11.5px;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:.6px;
+    color:#64748b;
 }
-.itc-summary-header i { color: var(--primary); font-size: 14px; }
+
+.itc-summary-header i {
+    color:#198754;
+    font-size:14px;
+}
 
 .itc-summary-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
 }
+
 .itc-sum-cell {
-    padding: 18px 24px;
-    border-right: 1px solid var(--border-light);
+    padding:18px 24px;
+    border-right:1px solid #edf1f3;
 }
-.itc-sum-cell:last-child { border-right: none; }
+
+.itc-sum-cell:last-child {
+    border-right:none;
+}
+
 .itc-sum-label {
-    font-size: 10.5px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.65px;
-    color: var(--text-muted);
-    margin-bottom: 8px;
-    display: block;
+    font-size:10.5px;
+    font-weight:600;
+    text-transform:uppercase;
+    letter-spacing:.65px;
+    color:#94a3b8;
+    margin-bottom:8px;
+    display:block;
 }
+
 .itc-sum-value {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--text-primary);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    line-height: 1.3;
+    font-size:14px;
+    font-weight:600;
+    color:#152238;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    line-height:1.3;
 }
-.itc-sum-value i { font-size: 16px; color: var(--primary); flex-shrink: 0; }
 
-/* ── Section label ───────────────────────────────────────── */
+.itc-sum-value i {
+    font-size:16px;
+    color:#198754;
+    flex-shrink:0;
+}
+
+/* ============================================================
+   SECTION
+   ============================================================ */
+
 .itc-section-label {
-    display: flex;
-    align-items: center;
-    gap: 9px;
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.7px;
-    color: var(--text-muted);
-    margin-bottom: 10px;
+    display:flex;
+    align-items:center;
+    gap:9px;
+    font-size:11px;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:.7px;
+    color:#94a3b8;
+    margin-bottom:10px;
 }
+
 .itc-section-label::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--border-color);
+    content:'';
+    flex:1;
+    height:1px;
+    background:#dbe3e8;
 }
-.itc-section-label i { color: var(--primary); font-size: 13px; }
 
-/* ── Toolbar ─────────────────────────────────────────────── */
+.itc-section-label i {
+    color:#198754;
+    font-size:13px;
+}
+
+/* ============================================================
+   TOOLBAR
+   ============================================================ */
+
 .itc-toolbar {
-    background: var(--bg-white);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-md) var(--radius-md) 0 0;
-    border-bottom: 1px solid var(--border-light);
-    padding: 12px 18px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    flex-wrap: wrap;
+    background:#fff;
+    border:1px solid #dbe3e8;
+    border-radius:12px 12px 0 0;
+    border-bottom:1px solid #edf1f3;
+    padding:12px 18px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    flex-wrap:wrap;
 }
+
 .itc-toolbar-left {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-    flex: 1;
-    min-width: 0;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    flex-wrap:wrap;
+    flex:1;
+    min-width:0;
 }
+
 .itc-toolbar-right {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-shrink: 0;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    flex-shrink:0;
 }
 
-/* Search input */
 .itc-search-wrap {
-    position: relative;
-    flex: 1;
-    min-width: 180px;
-    max-width: 280px;
+    position:relative;
+    flex:1;
+    min-width:180px;
+    max-width:280px;
 }
+
 .itc-search-wrap i {
-    position: absolute;
-    left: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--text-muted);
-    font-size: 13px;
-    pointer-events: none;
+    position:absolute;
+    left:10px;
+    top:50%;
+    transform:translateY(-50%);
+    color:#94a3b8;
+    font-size:13px;
+    pointer-events:none;
 }
+
 .itc-search-input {
-    width: 100%;
-    padding: 7px 12px 7px 32px;
-    border: 1.5px solid var(--border-color);
-    border-radius: var(--radius-sm);
-    font-size: 13px;
-    background: var(--bg-body);
-    font-family: inherit;
-    color: var(--text-primary);
-    transition: var(--transition);
-    outline: none;
+    width:100%;
+    padding:7px 12px 7px 32px;
+    border:1.5px solid #dbe3e8;
+    border-radius:8px;
+    font-size:13px;
+    background:#f8fafb;
+    font-family:inherit;
+    color:#152238;
+    transition:.18s;
+    outline:none;
 }
+
 .itc-search-input:focus {
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(25,135,84,.09);
-    background: #fff;
+    border-color:#198754;
+    box-shadow:0 0 0 3px rgba(25,135,84,.09);
+    background:#fff;
 }
-.itc-search-input::placeholder { color: var(--text-muted); }
 
-/* Toolbar buttons */
+.itc-search-input::placeholder {
+    color:#94a3b8;
+}
+
 .itc-tb-btn {
-    padding: 7px 13px;
-    border-radius: var(--radius-sm);
-    border: 1.5px solid var(--border-color);
-    background: var(--bg-white);
-    color: var(--text-primary);
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    transition: var(--transition);
-    font-family: inherit;
-    white-space: nowrap;
-    text-decoration: none;
+    padding:7px 13px;
+    border-radius:8px;
+    border:1.5px solid #dbe3e8;
+    background:#fff;
+    color:#152238;
+    font-size:13px;
+    font-weight:500;
+    cursor:pointer;
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    transition:.18s;
+    font-family:inherit;
+    white-space:nowrap;
+    text-decoration:none;
 }
-.itc-tb-btn:hover {
-    border-color: var(--primary);
-    color: var(--primary);
-    background: var(--primary-light);
-}
+
+.itc-tb-btn:hover,
 .itc-tb-btn.active {
-    border-color: var(--primary);
-    color: var(--primary);
-    background: var(--primary-light);
+    border-color:#198754;
+    color:#198754;
+    background:#eaf6ef;
 }
-.itc-tb-btn i { font-size: 14px; }
 
-/* Total controls pill */
+.itc-tb-btn i {
+    font-size:14px;
+}
+
 .itc-total-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 14px;
-    border-radius: 20px;
-    background: var(--primary-light);
-    font-size: 12.5px;
-    font-weight: 600;
-    color: var(--text-secondary);
-    white-space: nowrap;
-    border: 1px solid rgba(25,135,84,.15);
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    padding:6px 14px;
+    border-radius:20px;
+    background:#eaf6ef;
+    font-size:12.5px;
+    font-weight:600;
+    color:#64748b;
+    white-space:nowrap;
+    border:1px solid rgba(25,135,84,.15);
 }
-.itc-total-pill strong { color: var(--primary); font-weight: 800; }
-.itc-total-pill i { color: var(--primary); font-size: 13px; }
 
-/* Add Data — green CTA */
+.itc-total-pill strong {
+    color:#198754;
+    font-weight:800;
+}
+
+.itc-total-pill i {
+    color:#198754;
+    font-size:13px;
+}
+
 .itc-btn-add {
-    padding: 7px 16px;
-    border-radius: var(--radius-sm);
-    border: none;
-    background: var(--primary-gradient);
-    color: #fff;
-    font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    transition: var(--transition);
-    font-family: inherit;
-    white-space: nowrap;
-    box-shadow: 0 2px 8px rgba(25,135,84,.25);
+    padding:7px 16px;
+    border-radius:8px;
+    border:none;
+    background:linear-gradient(135deg,#198754,#157347);
+    color:#fff;
+    font-size:13px;
+    font-weight:700;
+    cursor:pointer;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    transition:.18s;
+    font-family:inherit;
+    white-space:nowrap;
+    box-shadow:0 2px 8px rgba(25,135,84,.22);
 }
+
 .itc-btn-add:hover {
-    background: var(--primary-gradient-hover);
-    box-shadow: 0 4px 16px rgba(25,135,84,.3);
-    transform: translateY(-1px);
+    background:linear-gradient(135deg,#157347,#146c43);
+    box-shadow:0 4px 16px rgba(25,135,84,.3);
+    transform:translateY(-1px);
 }
-.itc-btn-add:active { transform: translateY(0); box-shadow: none; }
-.itc-btn-add i { font-size: 15px; }
 
-/* Delete All Data */
 .itc-btn-delete-all {
-    padding: 7px 16px;
-    border-radius: var(--radius-sm);
-    border: none;
-    background: linear-gradient(135deg, #ef4444, #b91c1c);
-    color: #fff;
-    font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    transition: var(--transition);
-    font-family: inherit;
-    text-transform: lowercase;
-    box-shadow: 0 2px 8px rgba(220,38,38,.25);
+    padding:7px 16px;
+    border-radius:8px;
+    border:none;
+    background:linear-gradient(135deg,#dc3545,#bb2d3b);
+    color:#fff;
+    font-size:13px;
+    font-weight:700;
+    cursor:pointer;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    transition:.18s;
+    font-family:inherit;
+    white-space:nowrap;
+    box-shadow:0 2px 8px rgba(220,53,69,.2);
 }
+
 .itc-btn-delete-all:hover {
-    background: linear-gradient(135deg, #dc2626, #991b1b);
-    box-shadow: 0 4px 16px rgba(220,38,38,.35);
-    transform: translateY(-1px);
+    background:linear-gradient(135deg,#c82333,#a71d2a);
+    box-shadow:0 4px 16px rgba(220,53,69,.3);
+    transform:translateY(-1px);
 }
-.itc-btn-delete-all:active { transform: translateY(0); box-shadow: none; }
-.itc-btn-delete-all i { font-size: 14px; }
 
-/* ── Data Table — 3 columns ──────────────────────────────── */
+/* ============================================================
+   TABLE
+   ============================================================ */
+
 .itc-table-wrap {
-    background: var(--bg-white);
-    border: 1px solid var(--border-color);
-    border-top: none;
-    border-radius: 0 0 var(--radius-md) var(--radius-md);
-    overflow: hidden;
+    background:#fff;
+    border:1px solid #dbe3e8;
+    border-top:none;
+    border-radius:0 0 12px 12px;
+    overflow:hidden;
 }
+
 .itc-table-scroll {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
 }
+
 .itc-table {
-    width: 100%;
-    border-collapse: collapse;
-    min-width: 560px;
+    width:100%;
+    border-collapse:collapse;
+    min-width:850px;
 }
 
-/* Thead */
 .itc-table thead th {
-    padding: 11px 16px;
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.55px;
-    color: var(--text-secondary);
-    background: #F8FAFB;
-    border-bottom: 2px solid var(--border-color);
-    white-space: nowrap;
-    vertical-align: middle;
-}
-.itc-table thead th:first-child { padding-left: 20px; }
-.itc-table thead th:last-child  { padding-right: 20px; }
-.itc-table thead th.th-center   { text-align: center; }
-.itc-table thead th.sortable    { cursor: pointer; user-select: none; }
-.itc-table thead th.sortable:hover {
-    color: var(--primary);
-    background: var(--primary-light);
+    padding:11px 16px;
+    font-size:11px;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:.55px;
+    color:#64748b;
+    background:#f8fafb;
+    border-bottom:2px solid #dbe3e8;
+    white-space:nowrap;
+    vertical-align:middle;
 }
 
-/* Tbody */
+.itc-table thead th:first-child {
+    padding-left:20px;
+}
+
+.itc-table thead th:last-child {
+    padding-right:20px;
+}
+
+.itc-table thead th.th-center {
+    text-align:center;
+}
+
 .itc-table tbody td {
-    padding: 12px 16px;
-    font-size: 13.5px;
-    border-bottom: 1px solid var(--border-light);
-    vertical-align: middle;
-    color: var(--text-primary);
-    line-height: 1.5;
-}
-.itc-table tbody td:first-child { padding-left: 20px; }
-.itc-table tbody td:last-child  { padding-right: 20px; }
-.itc-table tbody td.td-center   { text-align: center; }
-.itc-table tbody tr             { transition: background 0.14s; }
-.itc-table tbody tr:hover       { background: #f5fbf7; }
-.itc-table tbody tr:last-child td { border-bottom: none; }
-
-/* Column widths */
-.col-ctrlid  { width: 130px; white-space: nowrap; }
-.col-desc    { /* takes remaining space */ }
-.col-status  { width: 170px; text-align: center; }
-.col-actions { width: 120px; text-align: center; white-space: nowrap; }
-
-/* ── Row action buttons ──────────────────────────────────── */
-.row-act-group {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-}
-.row-act-btn {
-    width: 30px;
-    height: 30px;
-    border-radius: 6px;
-    border: 1.5px solid;
-    background: transparent;
-    cursor: pointer;
-    font-size: 13px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    transition: var(--transition);
-    font-family: inherit;
-    flex-shrink: 0;
-}
-/* View — blue/teal outline */
-.row-act-view {
-    color: #0891b2;
-    border-color: rgba(8,145,178,.3);
-    background: rgba(8,145,178,.06);
-}
-.row-act-view:hover {
-    background: #0891b2;
-    border-color: #0891b2;
-    color: #fff;
-    box-shadow: 0 2px 8px rgba(8,145,178,.25);
-}
-/* Edit — green outline */
-.row-act-edit {
-    color: var(--primary);
-    border-color: rgba(25,135,84,.35);
-    background: var(--primary-light);
-}
-.row-act-edit:hover {
-    background: var(--primary);
-    border-color: var(--primary);
-    color: #fff;
-    box-shadow: 0 2px 8px rgba(25,135,84,.25);
-}
-/* Delete — red outline */
-.row-act-delete {
-    color: #dc2626;
-    border-color: rgba(220,38,38,.3);
-    background: rgba(220,38,38,.06);
-}
-.row-act-delete:hover {
-    background: #dc2626;
-    border-color: #dc2626;
-    color: #fff;
-    box-shadow: 0 2px 8px rgba(220,38,38,.25);
+    padding:12px 16px;
+    font-size:13.5px;
+    border-bottom:1px solid #edf1f3;
+    vertical-align:middle;
+    color:#152238;
+    line-height:1.5;
 }
 
-/* Control ID pill */
+.itc-table tbody td:first-child {
+    padding-left:20px;
+}
+
+.itc-table tbody td:last-child {
+    padding-right:20px;
+}
+
+.itc-table tbody td.td-center {
+    text-align:center;
+}
+
+.itc-table tbody tr {
+    transition:background .14s;
+}
+
+.itc-table tbody tr:hover {
+    background:#f5fbf7;
+}
+
+.itc-table tbody tr:last-child td {
+    border-bottom:none;
+}
+
+.col-ctrlid {
+    width:130px;
+    white-space:nowrap;
+}
+
+.col-status {
+    width:170px;
+    text-align:center;
+}
+
+.col-actions {
+    width:120px;
+    text-align:center;
+    white-space:nowrap;
+}
+
+/* ============================================================
+   CONTROL ID
+   ============================================================ */
+
 .ctrl-id-pill {
-    display: inline-block;
-    padding: 3px 11px;
-    background: var(--primary-light);
-    color: var(--primary);
-    border-radius: 5px;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.3px;
-    white-space: nowrap;
-    border: 1px solid rgba(25,135,84,.18);
+    display:inline-block;
+    padding:4px 11px;
+    background:#eaf6ef;
+    color:#198754;
+    border-radius:6px;
+    font-size:12px;
+    font-weight:700;
+    letter-spacing:.3px;
+    white-space:nowrap;
+    border:1px solid rgba(25,135,84,.18);
 }
 
-/* ── Status Control badges ───────────────────────────────── */
-/*
-   Excel values → display labels:
-   not_started      → Not Started Yet   (gray)
-   ongoing_review   → On Going Review   (amber)
-   ongoing_approval → On Going Approval (blue)
-   completed        → Completed         (green)
-*/
-.sc-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 11.5px;
-    font-weight: 700;
-    white-space: nowrap;
+/* ============================================================
+   STATUS
+   ============================================================ */
+
+.status-badge {
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:5px;
+    padding:5px 12px;
+    border-radius:20px;
+    font-size:11.5px;
+    font-weight:700;
+    white-space:nowrap;
 }
-.sc-badge::before {
-    content: '';
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    flex-shrink: 0;
+
+.status-badge::before {
+    content:'';
+    width:6px;
+    height:6px;
+    border-radius:50%;
+    flex-shrink:0;
 }
+
 .sc-not-started {
-    background: rgba(107,114,128,.08);
-    color: #4b5563;
-    border: 1px solid rgba(107,114,128,.2);
+    background:rgba(107,114,128,.08);
+    color:#4b5563;
+    border:1px solid rgba(107,114,128,.2);
 }
-.sc-not-started::before { background: #9ca3af; }
+
+.sc-not-started::before {
+    background:#9ca3af;
+}
+
 .sc-ongoing-review {
-    background: rgba(217,119,6,.1);
-    color: #b45309;
-    border: 1px solid rgba(217,119,6,.22);
+    background:rgba(217,119,6,.10);
+    color:#b45309;
+    border:1px solid rgba(217,119,6,.22);
 }
-.sc-ongoing-review::before { background: #d97706; }
+
+.sc-ongoing-review::before {
+    background:#d97706;
+}
+
 .sc-ongoing-approval {
-    background: rgba(59,130,246,.1);
-    color: #1d4ed8;
-    border: 1px solid rgba(59,130,246,.18);
+    background:rgba(59,130,246,.10);
+    color:#1d4ed8;
+    border:1px solid rgba(59,130,246,.18);
 }
-.sc-ongoing-approval::before { background: #3b82f6; }
+
+.sc-ongoing-approval::before {
+    background:#3b82f6;
+}
+
 .sc-completed {
-    background: rgba(25,135,84,.1);
-    color: #15803d;
-    border: 1px solid rgba(25,135,84,.18);
+    background:rgba(25,135,84,.10);
+    color:#15803d;
+    border:1px solid rgba(25,135,84,.18);
 }
-.sc-completed::before { background: #198754; }
 
-/* ── Empty State ─────────────────────────────────────────── */
+.sc-completed::before {
+    background:#198754;
+}
+
+/* ============================================================
+   ACTION BUTTONS
+   ============================================================ */
+
+.row-act-group {
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+}
+
+.row-act-btn {
+    width:32px;
+    height:32px;
+    border-radius:7px;
+    border:1.5px solid;
+    background:transparent;
+    cursor:pointer;
+    font-size:13px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    transition:.18s;
+    font-family:inherit;
+    flex-shrink:0;
+}
+
+.row-act-view {
+    color:#0891b2;
+    border-color:rgba(8,145,178,.3);
+    background:rgba(8,145,178,.06);
+}
+
+.row-act-view:hover {
+    background:#0891b2;
+    border-color:#0891b2;
+    color:#fff;
+}
+
+.row-act-edit {
+    color:#198754;
+    border-color:rgba(25,135,84,.35);
+    background:#eaf6ef;
+}
+
+.row-act-edit:hover {
+    background:#198754;
+    border-color:#198754;
+    color:#fff;
+}
+
+.row-act-delete {
+    color:#dc3545;
+    border-color:rgba(220,53,69,.3);
+    background:rgba(220,53,69,.06);
+}
+
+.row-act-delete:hover {
+    background:#dc3545;
+    border-color:#dc3545;
+    color:#fff;
+}
+
+.row-act-pdf {
+    color:#e11d48;
+    border-color:rgba(225,29,72,.3);
+    background:rgba(225,29,72,.06);
+    text-decoration:none;
+}
+
+.row-act-pdf:hover {
+    background:#e11d48;
+    border-color:#e11d48;
+    color:#fff;
+}
+
+/* ============================================================
+   EVIDENCE
+   ============================================================ */
+
+.evidence-pill {
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    background:#f8fafc;
+    border:1px solid #dbe3e8;
+    padding:3px 8px;
+    border-radius:5px;
+    font-size:11px;
+    color:#334155;
+    text-decoration:none;
+}
+
+.evidence-pill:hover {
+    border-color:#b8c8d0;
+    background:#fff;
+}
+
+.ctrl-notes-container {
+    margin-top:8px;
+    border-top:1px dashed #e2e8f0;
+    padding-top:6px;
+    font-size:11px;
+}
+
+/* ============================================================
+   EMPTY STATE
+   ============================================================ */
+
 .itc-empty-state {
-    padding: 80px 24px 72px;
-    text-align: center;
-    background: var(--bg-white);
-    border: 1px solid var(--border-color);
-    border-top: none;
-    border-radius: 0 0 var(--radius-md) var(--radius-md);
+    padding:80px 24px 72px;
+    text-align:center;
+    background:#fff;
+    border:1px solid #dbe3e8;
+    border-top:none;
+    border-radius:0 0 12px 12px;
 }
+
 .itc-empty-icon-wrap {
-    width: 96px;
-    height: 96px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #EAF6EF 0%, #d1e7dd 100%);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 22px;
-    position: relative;
-    box-shadow: 0 4px 20px rgba(25,135,84,.12);
+    width:96px;
+    height:96px;
+    border-radius:50%;
+    background:linear-gradient(135deg,#eaf6ef 0%,#d1e7dd 100%);
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    margin-bottom:22px;
+    position:relative;
+    box-shadow:0 4px 20px rgba(25,135,84,.12);
 }
+
+.itc-empty-icon-wrap i {
+    font-size:38px;
+    color:#198754;
+}
+
 .itc-empty-icon-wrap::before {
-    content: '';
-    position: absolute;
-    inset: -8px;
-    border-radius: 50%;
-    border: 2px dashed rgba(25,135,84,.2);
-    animation: orbit-spin 28s linear infinite;
+    content:'';
+    position:absolute;
+    inset:-8px;
+    border-radius:50%;
+    border:2px dashed rgba(25,135,84,.2);
 }
-@keyframes orbit-spin {
-    from { transform: rotate(0deg); }
-    to   { transform: rotate(360deg); }
-}
-.itc-empty-icon-wrap i { font-size: 38px; color: var(--primary); opacity: .85; }
+
 .itc-empty-state h5 {
-    font-size: 16px;
-    font-weight: 800;
-    color: var(--text-primary);
-    margin: 0 0 10px;
+    font-size:16px;
+    font-weight:800;
+    color:#152238;
+    margin:0 0 10px;
 }
+
 .itc-empty-state p {
-    font-size: 13.5px;
-    color: var(--text-secondary);
-    max-width: 420px;
-    display: inline-block;
-    line-height: 1.7;
-    margin: 0 0 22px;
+    font-size:13.5px;
+    color:#64748b;
+    max-width:420px;
+    display:inline-block;
+    line-height:1.7;
+    margin:0 0 22px;
 }
+
 .itc-empty-tag {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 18px;
-    border-radius: 20px;
-    background: var(--primary-light);
-    color: var(--primary);
-    font-size: 12.5px;
-    font-weight: 700;
-    border: 1px solid rgba(25,135,84,.15);
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    padding:6px 18px;
+    border-radius:20px;
+    background:#eaf6ef;
+    color:#198754;
+    font-size:12.5px;
+    font-weight:700;
+    border:1px solid rgba(25,135,84,.15);
 }
 
-/* ── Pagination footer ───────────────────────────────────── */
+/* ============================================================
+   FOOTER
+   ============================================================ */
+
 .itc-footer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 11px 20px;
-    background: var(--bg-white);
-    border: 1px solid var(--border-color);
-    border-top: 1px solid var(--border-light);
-    border-radius: 0 0 var(--radius-md) var(--radius-md);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:11px 20px;
+    background:#fff;
+    border:1px solid #dbe3e8;
+    border-top:1px solid #edf1f3;
+    border-radius:0 0 12px 12px;
 }
-.itc-footer-info { font-size: 12.5px; color: var(--text-secondary); }
-.itc-footer-pag  { display: flex; align-items: center; gap: 4px; }
-.pag-btn {
-    padding: 5px 10px;
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-sm);
-    background: var(--bg-white);
-    color: var(--text-primary);
-    font-size: 12.5px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: var(--transition);
-    font-family: inherit;
-    display: inline-flex;
-    align-items: center;
-    gap: 3px;
-}
-.pag-btn:hover:not([disabled]):not(.pag-active) {
-    border-color: var(--primary);
-    color: var(--primary);
-    background: var(--primary-light);
-}
-.pag-active  { background: var(--primary); border-color: var(--primary); color: #fff; font-weight: 700; }
-.pag-btn[disabled] { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
 
-/* ── Add Control Modal ───────────────────────────────────── */
-.itc-modal-backdrop {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(10,16,30,.52);
-    z-index: 2000;
-    align-items: center;
-    justify-content: center;
-    backdrop-filter: blur(2px);
-    -webkit-backdrop-filter: blur(2px);
-    padding: 16px;
+.itc-footer-info {
+    font-size:12.5px;
+    color:#64748b;
 }
-.itc-modal-backdrop.open { display: flex; }
+
+.itc-footer-pag {
+    display:flex;
+    align-items:center;
+    gap:4px;
+}
+
+.pag-btn {
+    padding:5px 10px;
+    border:1px solid #dbe3e8;
+    border-radius:8px;
+    background:#fff;
+    color:#152238;
+    font-size:12.5px;
+    font-weight:500;
+    cursor:pointer;
+    transition:.18s;
+    font-family:inherit;
+    display:inline-flex;
+    align-items:center;
+    gap:3px;
+}
+
+.pag-btn:hover:not([disabled]):not(.pag-active) {
+    border-color:#198754;
+    color:#198754;
+    background:#eaf6ef;
+}
+
+.pag-active {
+    background:#198754;
+    border-color:#198754;
+    color:#fff;
+    font-weight:700;
+}
+
+.pag-btn[disabled] {
+    opacity:.4;
+    cursor:not-allowed;
+    pointer-events:none;
+}
+
+/* ============================================================
+   MODAL
+   ============================================================ */
+
+.itc-modal-backdrop {
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(10,16,30,.52);
+    z-index:2000;
+    align-items:center;
+    justify-content:center;
+    backdrop-filter:blur(2px);
+    padding:16px;
+}
+
+.itc-modal-backdrop.open {
+    display:flex;
+}
 
 .itc-modal {
-    background: var(--bg-white);
-    border-radius: var(--radius-lg);
-    box-shadow: 0 24px 64px rgba(0,0,0,.18);
-    width: 100%;
-    max-width: 520px;
-    max-height: 90vh;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    animation: modal-enter .22s cubic-bezier(.4,0,.2,1) both;
-}
-@keyframes modal-enter {
-    from { opacity: 0; transform: scale(.96) translateY(12px); }
-    to   { opacity: 1; transform: scale(1)  translateY(0); }
+    background:#fff;
+    border-radius:14px;
+    box-shadow:0 24px 64px rgba(0,0,0,.18);
+    width:100%;
+    max-width:520px;
+    max-height:90vh;
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
 }
 
-/* Modal header */
 .itc-modal-head {
-    padding: 18px 22px;
-    border-bottom: 1px solid var(--border-color);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    background: var(--bg-body);
+    padding:18px 22px;
+    border-bottom:1px solid #dbe3e8;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    background:#f8fafb;
 }
+
 .itc-modal-head-title {
-    font-size: 15px;
-    font-weight: 700;
-    color: var(--text-primary);
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin: 0;
+    font-size:15px;
+    font-weight:700;
+    color:#152238;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin:0;
 }
+
 .modal-title-icon {
-    width: 34px;
-    height: 34px;
-    background: var(--primary-gradient);
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    box-shadow: 0 2px 8px rgba(25,135,84,.22);
+    width:34px;
+    height:34px;
+    background:linear-gradient(135deg,#198754,#157347);
+    border-radius:8px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-shrink:0;
+    box-shadow:0 2px 8px rgba(25,135,84,.22);
 }
-.modal-title-icon i { font-size: 15px; color: #fff; }
+
+.modal-title-icon i {
+    font-size:15px;
+    color:#fff;
+}
+
 .itc-modal-close-btn {
-    width: 32px; height: 32px;
-    border: 1.5px solid var(--border-color);
-    background: var(--bg-white);
-    border-radius: 7px;
-    color: var(--text-muted);
-    font-size: 16px;
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer; transition: var(--transition);
+    width:32px;
+    height:32px;
+    border:1.5px solid #dbe3e8;
+    background:#fff;
+    border-radius:7px;
+    color:#94a3b8;
+    font-size:16px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    transition:.18s;
 }
+
 .itc-modal-close-btn:hover {
-    border-color: var(--primary);
-    color: var(--primary);
-    background: var(--primary-light);
+    border-color:#198754;
+    color:#198754;
+    background:#eaf6ef;
 }
 
-/* Modal body */
 .itc-modal-body {
-    padding: 22px 24px 8px;
-    overflow-y: auto;
-    flex: 1;
+    padding:22px 24px 8px;
+    overflow-y:auto;
+    flex:1;
 }
-.modal-ui-notice {
-    display: flex;
-    align-items: center;
-    gap: 9px;
-    padding: 10px 14px;
-    background: #FFF7ED;
-    border: 1px solid rgba(217,119,6,.2);
-    border-radius: var(--radius-sm);
-    margin-bottom: 18px;
-    font-size: 12.5px;
-    color: #92400e;
-    line-height: 1.5;
-}
-.modal-ui-notice i { font-size: 15px; color: #d97706; flex-shrink: 0; }
 
-/* Form fields */
 .modal-form-group {
-    margin-bottom: 16px;
+    margin-bottom:16px;
 }
-.modal-form-group:last-child { margin-bottom: 0; }
+
 .modal-label {
-    display: block;
-    font-size: 12.5px;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: 6px;
+    display:block;
+    font-size:12.5px;
+    font-weight:600;
+    color:#152238;
+    margin-bottom:6px;
 }
+
 .modal-label span.required {
-    color: #dc2626;
-    margin-left: 2px;
+    color:#dc3545;
+    margin-left:2px;
 }
+
 .modal-input,
 .modal-select,
 .modal-textarea {
-    width: 100%;
-    padding: 8px 12px;
-    border: 1.5px solid var(--border-color);
-    border-radius: var(--radius-sm);
-    font-size: 13px;
-    font-family: inherit;
-    color: var(--text-primary);
-    background: var(--bg-body);
-    transition: var(--transition);
-    outline: none;
-    box-sizing: border-box;
+    width:100%;
+    padding:8px 12px;
+    border:1.5px solid #dbe3e8;
+    border-radius:8px;
+    font-size:13px;
+    font-family:inherit;
+    color:#152238;
+    background:#f8fafb;
+    transition:.18s;
+    outline:none;
+    box-sizing:border-box;
 }
+
 .modal-input:focus,
 .modal-select:focus,
 .modal-textarea:focus {
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(25,135,84,.09);
-    background: #fff;
+    border-color:#198754;
+    box-shadow:0 0 0 3px rgba(25,135,84,.09);
+    background:#fff;
 }
-.modal-input::placeholder,
-.modal-textarea::placeholder { color: var(--text-muted); }
+
 .modal-select {
-    appearance: none;
-    -webkit-appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239ca3af' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 12px center;
-    padding-right: 32px;
-    cursor: pointer;
+    cursor:pointer;
 }
-.modal-textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
 
-/* Two-column row */
+.modal-textarea {
+    resize:vertical;
+    min-height:80px;
+    line-height:1.5;
+}
+
 .modal-form-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 14px;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:14px;
 }
 
-/* Modal footer */
 .itc-modal-foot {
-    padding: 16px 24px;
-    border-top: 1px solid var(--border-color);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-    margin-top: 18px;
+    padding:16px 24px;
+    border-top:1px solid #dbe3e8;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    background:#fff;
 }
-.modal-foot-note {
-    font-size: 11.5px;
-    color: var(--text-muted);
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
-.modal-foot-note i { color: var(--primary); font-size: 13px; }
-.modal-foot-actions {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-.modal-btn-cancel {
-    padding: 8px 18px;
-    border-radius: var(--radius-sm);
-    border: 1.5px solid var(--border-color);
-    background: var(--bg-white);
-    color: var(--text-primary);
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    font-family: inherit;
-    transition: var(--transition);
-}
-.modal-btn-cancel:hover {
-    border-color: var(--primary);
-    color: var(--primary);
-    background: var(--primary-light);
-}
-.modal-btn-save {
-    padding: 8px 20px;
-    border-radius: var(--radius-sm);
-    border: none;
-    background: var(--primary-gradient);
-    color: #fff;
-    font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
-    font-family: inherit;
-    transition: var(--transition);
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    box-shadow: 0 2px 8px rgba(25,135,84,.2);
-}
-.modal-btn-save i { font-size: 14px; }
 
-/* ── Responsive ──────────────────────────────────────────── */
-@media (max-width: 768px) {
-    .itc-summary-grid { grid-template-columns: 1fr; }
-    .itc-sum-cell { border-right: none; border-bottom: 1px solid var(--border-light); }
-    .itc-sum-cell:last-child { border-bottom: none; }
-    .itc-toolbar { flex-direction: column; align-items: stretch; }
-    .itc-toolbar-left, .itc-toolbar-right { width: 100%; flex-wrap: wrap; }
-    .itc-search-wrap { max-width: 100%; }
-    .itc-page-header { flex-direction: column; }
-    .modal-form-row { grid-template-columns: 1fr; }
-    .itc-modal-foot { flex-direction: column; align-items: stretch; }
-    .modal-foot-actions { justify-content: flex-end; }
+.modal-foot-note {
+    font-size:11.5px;
+    color:#94a3b8;
+    display:flex;
+    align-items:center;
+    gap:5px;
+}
+
+.modal-foot-note i {
+    color:#198754;
+    font-size:13px;
+}
+
+.modal-foot-actions {
+    display:flex;
+    align-items:center;
+    gap:8px;
+}
+
+.modal-btn-cancel {
+    padding:8px 18px;
+    border-radius:8px;
+    border:1.5px solid #dbe3e8;
+    background:#fff;
+    color:#152238;
+    font-size:13px;
+    font-weight:500;
+    cursor:pointer;
+    font-family:inherit;
+    transition:.18s;
+}
+
+.modal-btn-cancel:hover {
+    border-color:#198754;
+    color:#198754;
+    background:#eaf6ef;
+}
+
+.modal-btn-save {
+    padding:8px 20px;
+    border-radius:8px;
+    border:none;
+    background:linear-gradient(135deg,#198754,#157347);
+    color:#fff;
+    font-size:13px;
+    font-weight:700;
+    cursor:pointer;
+    font-family:inherit;
+    transition:.18s;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    box-shadow:0 2px 8px rgba(25,135,84,.20);
+}
+
+.modal-btn-save:hover {
+    background:linear-gradient(135deg,#157347,#146c43);
+}
+
+/* ============================================================
+   MAPPING
+   ============================================================ */
+
+.mc-list-box {
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    max-height:160px;
+    overflow-y:auto;
+    border:1px solid #dbe3e8;
+    border-radius:8px;
+    padding:10px;
+    background:#f8fafb;
+}
+
+.mc-item {
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:13px;
+    cursor:pointer;
+    font-weight:400;
+    padding:7px 8px;
+    border:1px solid transparent;
+    border-radius:7px;
+    background:#fff;
+}
+
+.mc-item:hover {
+    border-color:#bbf7d0;
+    background:#f0fdf4;
+}
+
+.mc-item input {
+    width:15px;
+    height:15px;
+    cursor:pointer;
+    flex-shrink:0;
+}
+
+.mc-item-text {
+    flex:1;
+    min-width:0;
+}
+
+.mc-item-badge {
+    background:#eaf6ef;
+    color:#198754;
+    border:1px solid #bbf7d0;
+    border-radius:4px;
+    padding:2px 6px;
+    font-size:10px;
+    font-weight:700;
+    white-space:nowrap;
+}
+
+.mc-control-id-box {
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    border:1px solid #dbe3e8;
+    border-radius:8px;
+    padding:10px;
+    background:#f8fafb;
+}
+
+.mc-control-id-row {
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    padding:8px 10px;
+    background:#fff;
+    border:1px solid #e2e8f0;
+    border-radius:7px;
+}
+
+.mc-control-id-upti {
+    font-size:12.5px;
+    font-weight:600;
+    color:#334155;
+}
+
+.mc-control-id-value {
+    display:inline-flex;
+    align-items:center;
+    padding:4px 10px;
+    border-radius:5px;
+    background:#eaf6ef;
+    color:#198754;
+    border:1px solid #bbf7d0;
+    font-size:12px;
+    font-weight:700;
+}
+
+@media (max-width:768px) {
+    .itc-summary-grid {
+        grid-template-columns:1fr;
+    }
+
+    .itc-sum-cell {
+        border-right:none;
+        border-bottom:1px solid #edf1f3;
+    }
+
+    .itc-sum-cell:last-child {
+        border-bottom:none;
+    }
+
+    .itc-toolbar {
+        flex-direction:column;
+        align-items:stretch;
+    }
+
+    .itc-toolbar-left,
+    .itc-toolbar-right {
+        width:100%;
+        flex-wrap:wrap;
+    }
+
+    .itc-search-wrap {
+        max-width:100%;
+    }
+
+    .itc-page-header {
+        flex-direction:column;
+    }
+
+    .modal-form-row {
+        grid-template-columns:1fr;
+    }
+
+    .itc-modal-foot {
+        flex-direction:column;
+        align-items:stretch;
+    }
+
+    .modal-foot-actions {
+        justify-content:flex-end;
+    }
 }
 </style>
 @endpush
@@ -851,1835 +1167,4547 @@
 @section('content')
 
 @php
-    /* Quarter labels */
     $quarterLabels = [
         'q1' => 'Q1',
         'q2' => 'Q2',
         'q3' => 'Q3',
         'q4' => 'Q4',
     ];
-    $quarterLabel = $quarterLabels[$quarter] ?? strtoupper($quarter);
 
-    /*
-     * Status Control — DB enum keys → display labels & badge classes
-     * not_started      → "Not Started Yet"   (gray)
-     * ongoing_review   → "On Going Review"   (amber)
-     * ongoing_approval → "On Going Approval" (blue)
-     * completed        → "Completed"         (green)
-     */
+    $quarterLabel =
+        $quarterLabels[$quarter]
+        ?? strtoupper($quarter);
+
     $scBadgeMap = [
-        'not_started'      => ['label' => 'Not Started Yet',   'cls' => 'sc-not-started'],
-        'ongoing_review'   => ['label' => 'On Going Review',   'cls' => 'sc-ongoing-review'],
-        'ongoing_approval' => ['label' => 'On Going Approval', 'cls' => 'sc-ongoing-approval'],
-        'completed'        => ['label' => 'Completed',          'cls' => 'sc-completed'],
-        'complete'         => ['label' => 'Completed',          'cls' => 'sc-completed'],
+        'not_started' => [
+            'label' => 'Not Started Yet',
+            'cls' => 'sc-not-started',
+        ],
+
+        'drafting' => [
+            'label' => 'Drafting',
+            'cls' => 'sc-not-started',
+        ],
+
+        'ongoing_review' => [
+            'label' => 'On Going Review',
+            'cls' => 'sc-ongoing-review',
+        ],
+
+        'ongoing_approval' => [
+            'label' => 'On Going Approval',
+            'cls' => 'sc-ongoing-approval',
+        ],
+
+        'return_to_officer' => [
+            'label' => 'Return to Officer',
+            'cls' => 'sc-ongoing-review',
+        ],
+
+        'return_to_reviewer' => [
+            'label' => 'Return to Reviewer',
+            'cls' => 'sc-ongoing-review',
+        ],
+
+        'completed' => [
+            'label' => 'Completed',
+            'cls' => 'sc-completed',
+        ],
+
+        'complete' => [
+            'label' => 'Completed',
+            'cls' => 'sc-completed',
+        ],
     ];
 
-    // $controls is injected by DashboardController@showCategory
-    // (filtered by application + it_category + year + quarter)
-    $totalControls = $controls->count();
+    $totalControls =
+        $controls->count();
 
-    // All applications for the modal dropdown
-    $allApplications = \App\Models\Application::where('is_active', true)->orderBy('name')->get();
-    $allCategories   = \App\Models\ItCategory::orderBy('name')->get();
+    $allUptis =
+        \App\Models\Upti::query()
+            ->orderBy('name')
+            ->get();
+
+    $authUser =
+        auth()->user();
+
+    $authRole =
+        $authUser->role ?? '';
+
+    $isAdmin =
+        $authUser->isAdmin();
+
+    $isOfficer =
+        in_array(
+            $authRole,
+            ['creator', 'officer'],
+            true
+        );
+
+    $isReviewer =
+        $authRole === 'reviewer';
+
+    $isApprover =
+        $authRole === 'approver';
 @endphp
 
-{{-- ══════════════════════════════════════════════════════
-     PAGE HEADER
-     ══════════════════════════════════════════════════════ --}}
 <div class="itc-page-header">
 
     <div class="itc-header-left">
-        <nav class="itc-breadcrumb" aria-label="Breadcrumb">
+
+        <nav
+            class="itc-breadcrumb"
+            aria-label="Breadcrumb"
+        >
+
             <a href="{{ route('dashboard') }}">
-                <i class="bi bi-house-fill" style="font-size:10px;"></i>&nbsp;Dashboard
+
+                <i
+                    class="bi bi-house-fill"
+                    style="font-size:10px;"
+                ></i>
+
+                &nbsp;Dashboard
+
             </a>
-            <span class="bc-sep"><i class="bi bi-chevron-right"></i></span>
-            <a href="{{ route('dashboard') }}">{{ $application->name }}</a>
-            <span class="bc-sep"><i class="bi bi-chevron-right"></i></span>
-            <span class="bc-cur">{{ $category->name }}</span>
+
+            <span class="bc-sep">
+
+                <i class="bi bi-chevron-right"></i>
+
+            </span>
+
+            <a href="{{ route('dashboard') }}">
+
+                {{ $application->name }}
+
+            </a>
+
+            <span class="bc-sep">
+
+                <i class="bi bi-chevron-right"></i>
+
+            </span>
+
+            <span class="bc-cur">
+
+                {{ $category->name }}
+
+            </span>
+
         </nav>
 
         <h1 class="itc-page-title">
+
             <span class="itc-title-icon">
+
                 <i class="bi {{ $category->icon }}"></i>
+
             </span>
+
             {{ $category->name }}
+
         </h1>
+
     </div>
 
-    <a href="{{ route('dashboard') }}" class="btn-back-itc">
-        <i class="bi bi-arrow-left"></i> Back to Dashboard
+    <a
+        href="{{ route('dashboard') }}"
+        class="btn-back-itc"
+    >
+
+        <i class="bi bi-arrow-left"></i>
+
+        Back to Dashboard
+
     </a>
+
 </div>
 
-{{-- ══════════════════════════════════════════════════════
-     SUMMARY CARD — Application | Year | Quarter ONLY
-     ══════════════════════════════════════════════════════ --}}
 <div class="itc-summary-card">
+
     <div class="itc-summary-header">
+
         <i class="bi bi-info-circle-fill"></i>
+
         Assessment Overview
+
     </div>
+
     <div class="itc-summary-grid">
 
         <div class="itc-sum-cell">
-            <span class="itc-sum-label">Application</span>
+
+            <span class="itc-sum-label">
+                Application
+            </span>
+
             <div class="itc-sum-value">
+
                 <i class="bi bi-window-stack"></i>
+
                 {{ $application->name }}
+
             </div>
+
         </div>
 
         <div class="itc-sum-cell">
-            <span class="itc-sum-label">Year</span>
+
+            <span class="itc-sum-label">
+                Year
+            </span>
+
             <div class="itc-sum-value">
+
                 <i class="bi bi-calendar3"></i>
+
                 {{ $year }}
+
             </div>
+
         </div>
 
         <div class="itc-sum-cell">
-            <span class="itc-sum-label">Quarter</span>
+
+            <span class="itc-sum-label">
+                Quarter
+            </span>
+
             <div class="itc-sum-value">
+
                 <i class="bi bi-calendar-range"></i>
+
                 {{ $quarterLabel }}
+
             </div>
+
         </div>
 
     </div>
+
 </div>
 
-{{-- ══════════════════════════════════════════════════════
-     CONTROLS TABLE
-     ══════════════════════════════════════════════════════ --}}
 <div class="itc-section-label">
+
     <i class="bi bi-table"></i>
+
     Assessment Controls
+
 </div>
 
-{{-- ── Toolbar ─────────────────────────────────────────────────────────── --}}
-<div class="itc-toolbar" role="toolbar" aria-label="Controls toolbar">
+<div
+    class="itc-toolbar"
+    role="toolbar"
+    aria-label="Controls toolbar"
+>
 
     <div class="itc-toolbar-left">
 
-        {{-- Search Controls --}}
         <div class="itc-search-wrap">
+
             <i class="bi bi-search"></i>
-            <input type="text"
-                   class="itc-search-input"
-                   id="itc-search"
-                   placeholder="Search controls..."
-                   autocomplete="off"
-                   aria-label="Search controls">
+
+            <input
+                type="text"
+                class="itc-search-input"
+                id="itc-search"
+                placeholder="Search controls..."
+                autocomplete="off"
+                aria-label="Search controls"
+            >
+
         </div>
 
-        {{-- Filter --}}
-        <button type="button" class="itc-tb-btn" id="itc-filter-btn" title="Filter">
-            <i class="bi bi-funnel"></i> Filter
+        <button
+            type="button"
+            class="itc-tb-btn"
+            id="itc-filter-btn"
+            title="Filter"
+        >
+
+            <i class="bi bi-funnel"></i>
+
+            Filter
+
         </button>
 
-        {{-- Refresh --}}
-        <button type="button" class="itc-tb-btn" onclick="location.reload()" title="Refresh">
-            <i class="bi bi-arrow-clockwise"></i> Refresh
+        <button
+            type="button"
+            class="itc-tb-btn"
+            onclick="location.reload()"
+            title="Refresh"
+        >
+
+            <i class="bi bi-arrow-clockwise"></i>
+
+            Refresh
+
         </button>
 
     </div>
 
     <div class="itc-toolbar-right">
 
-        {{-- Total Controls indicator --}}
-        <span class="itc-total-pill" aria-live="polite">
+        <span
+            class="itc-total-pill"
+            aria-live="polite"
+        >
+
             <i class="bi bi-list-check"></i>
-            Total Controls: <strong id="itc-total">{{ $totalControls }}</strong>
+
+            Total Controls:
+
+            <strong id="itc-total">
+                {{ $totalControls }}
+            </strong>
+
         </span>
 
-        {{-- Delete All Controls --}}
-        @if ($controls->isNotEmpty())
-        <button type="button"
+        @if($isAdmin && $controls->isNotEmpty())
+
+            <button
+                type="button"
                 class="itc-btn-delete-all"
                 id="itc-delete-all-btn"
-                onclick="document.getElementById('deleteAllControlModal').classList.add('open')">
-            <i class="bi bi-trash-fill"></i> delete all
-        </button>
+            >
+
+                <i class="bi bi-trash-fill"></i>
+
+                Delete All
+
+            </button>
+
         @endif
 
-        {{-- Add Data → opens "Add Control" modal form --}}
-        <button type="button"
+        @if($isAdmin)
+
+            <button
+                type="button"
                 class="itc-btn-add"
                 id="itc-add-btn"
                 aria-haspopup="dialog"
-                aria-controls="addControlModal">
-            <i class="bi bi-plus-lg"></i> Add Data
-        </button>
+                aria-controls="addControlModal"
+            >
+
+                <i class="bi bi-plus-lg"></i>
+
+                Add Data
+
+            </button>
+
+        @endif
 
     </div>
+
 </div>
 
-{{-- ── Table / Empty State ─────────────────────────────────────────────── --}}
-@if ($controls->isEmpty())
+@if($controls->isEmpty())
 
-    {{-- Column headers always visible --}}
-    <div style="overflow-x:auto; background:var(--bg-white);
-                border:1px solid var(--border-color); border-top:none;">
-        <table class="itc-table" aria-label="Assessment controls table">
+    <div
+        style="
+            overflow-x:auto;
+            background:#fff;
+            border:1px solid #dbe3e8;
+            border-top:none;
+        "
+    >
+
+        <table
+            class="itc-table"
+            aria-label="Assessment controls table"
+        >
+
             <thead>
+
                 <tr>
-                    <th class="col-ctrlid sortable">Control ID</th>
-                    <th class="col-desc">Control Description</th>
-                    <th class="col-status th-center">Status Control</th>
-                    <th class="col-actions">Actions</th>
+
+                    <th class="col-ctrlid">
+                        Control ID
+                    </th>
+
+                    <th>
+                        Control Description
+                    </th>
+
+                    <th class="col-status th-center">
+                        Status Control
+                    </th>
+
+                    <th class="col-actions">
+                        Actions
+                    </th>
+
                 </tr>
+
             </thead>
+
             <tbody id="itc-tbody"></tbody>
+
         </table>
+
     </div>
 
-    {{-- Professional empty state --}}
-    <div class="itc-empty-state" id="itc-empty-state">
-        <div class="itc-empty-icon-wrap" aria-hidden="true">
+    <div
+        class="itc-empty-state"
+        id="itc-empty-state"
+    >
+
+        <div class="itc-empty-icon-wrap">
+
             <i class="bi bi-clipboard2-data"></i>
+
         </div>
-        <h5>No Assessment Data Available</h5>
+
+        <h5>
+            No Assessment Data Available
+        </h5>
+
         <p>
+
             No control records have been added yet for
-            <strong>{{ $application->name }}</strong> — <strong>{{ $category->name }}</strong>.<br>
-            Use <strong>Add Data</strong> to manually enter a control record,
-            or wait for the Excel import feature to become available.
+
+            <strong>
+                {{ $application->name }}
+            </strong>
+
+            —
+
+            <strong>
+                {{ $category->name }}
+            </strong>.
+
         </p>
+
         <span class="itc-empty-tag">
+
             <i class="bi bi-clock-history"></i>
-            Excel Import — Coming Soon
+
+            No Control Data
+
         </span>
+
     </div>
 
 @else
 
-    {{-- Populated table --}}
     <div class="itc-table-wrap">
+
         <div class="itc-table-scroll">
-            <table class="itc-table" id="itc-table" aria-label="Assessment controls table">
+
+            <table
+                class="itc-table"
+                id="itc-table"
+                aria-label="Assessment controls table"
+            >
+
                 <thead>
+
                     <tr>
-                        <th class="col-ctrlid sortable">Control ID</th>
-                        <th class="col-desc">Control Description</th>
-                        <th class="col-frekuensi">Frequency Description</th>
-                        <th class="col-upti">UPTI</th>
-                        <th class="col-keyctrl">Key Control</th>
-                        <th class="col-status th-center">Status Control</th>
-                        <th class="col-actions">Actions</th>
+
+                        <th class="col-ctrlid">
+                            Control ID
+                        </th>
+
+                        <th>
+                            Control Description
+                        </th>
+
+                        <th>
+                            Frequency Description
+                        </th>
+
+                        <th>
+                            UPTI
+                        </th>
+
+                        <th>
+                            Key Control
+                        </th>
+
+                        <th class="col-status th-center">
+                            Status Control
+                        </th>
+
+                        <th class="col-actions">
+                            Actions
+                        </th>
+
                     </tr>
+
                 </thead>
+
                 <tbody id="itc-tbody">
-                    @php $prevUpti = null; @endphp
-                    @foreach ($controls as $ctrl)
+
                     @php
-                        // Add dashed line separator when UPTI changes
-                        if ($prevUpti !== null && $prevUpti !== $ctrl->upti) {
-                            echo '<tr aria-hidden="true" style="border-top: 1px dashed #cbd5e1;"><td colspan="8" style="padding:0; height:8px;"></td></tr>';
-                        }
-                        $prevUpti = $ctrl->upti;
-
-                        $scKey  = $ctrl->status_control ?? 'not_started';
-                        $scInfo = $scBadgeMap[$scKey] ?? $scBadgeMap['not_started'];
-                        
-                        $fileType = $ctrl->file_type ?? '—';
+                        $prevUpti = null;
                     @endphp
-                    <tr
-                        data-id="{{ $ctrl->id ?? '' }}"
-                        data-ctrl-id="{{ $ctrl->it_control_id ?? '' }}"
-                        data-ctrl-desc="{{ addslashes($ctrl->control_description ?? '') }}"
-                        data-ctrl-frek="{{ $ctrl->keterangan_frekuensi ?? '' }}"
-                        data-ctrl-upti="{{ $ctrl->upti ?? '' }}"
-                        data-ctrl-keyctrl="{{ $ctrl->key_control ?? '' }}"
-                        data-ctrl-file-type="{{ $ctrl->file_type ?? '' }}"
-                        data-ctrl-status="{{ $ctrl->status_control ?? 'not_started' }}"
-                        data-cat-status="{{ $ctrl->status_it_category ?? 'not_completed' }}"
-                        data-app-id="{{ $ctrl->application_id }}"
-                        data-cat-id="{{ $ctrl->it_category_id }}"
-                        data-evidences="{{ isset($ctrl->evidences) ? htmlspecialchars(json_encode($ctrl->evidences), ENT_QUOTES, 'UTF-8') : '[]' }}"
-                    >
-                        <td class="col-ctrlid">
-                            <span class="ctrl-id-pill">{{ $ctrl->it_control_id ?? '—' }}</span>
-                        </td>
-                        <td class="col-desc">
-                            <div>{{ $ctrl->control_description ?? '—' }}</div>
-                            @if(isset($ctrl->evidences) && $ctrl->evidences->count() > 0)
-                                <div class="evidence-pill-list" style="display:flex; flex-wrap:wrap; gap:6px; margin-top:6px;">
-                                    @foreach($ctrl->evidences as $ev)
-                                        @if($ev->file_type === 'Berita Acara') @continue @endif
-                                        @php
-                                            $ext = strtolower(pathinfo($ev->original_name, PATHINFO_EXTENSION));
-                                            $icon = 'bi-paperclip';
-                                            $iconColor = 'var(--primary, #059669)';
-                                            
-                                            if ($ext === 'pdf') {
-                                                $icon = 'bi-file-earmark-pdf-fill';
-                                                $iconColor = '#e11d48'; // red
-                                            } elseif (in_array($ext, ['doc', 'docx'])) {
-                                                $icon = 'bi-file-earmark-word-fill';
-                                                $iconColor = '#2563eb'; // blue
-                                            } elseif (in_array($ext, ['xls', 'xlsx', 'csv'])) {
-                                                $icon = 'bi-file-earmark-excel-fill';
-                                                $iconColor = '#16a34a'; // green
-                                            }
-                                        @endphp
-                                        <a href="{{ route('evidence.show', $ev->id) }}" target="_blank" class="evidence-pill" style="display:inline-flex; align-items:center; gap:5px; background:#f8fafc; border:1px solid #e2e8f0; padding:2px 8px; border-radius:4px; font-size:11px; color:#334155; text-decoration:none;">
-                                            <i class="bi {{ $icon }}" style="color:{{ $iconColor }};"></i>
-                                            <span style="font-weight:500;" title="{{ $ev->original_name }}">{{ Str::limit($ev->original_name, 26) }}</span>
-                                            @if(!empty($ev->file_type))
-                                                <span style="background:#e0e7ff; color:#3730a3; font-size:10px; font-weight:700; padding:1px 5px; border-radius:3px; border:1px solid #c7d2fe; white-space:nowrap; margin-left:2px;">{{ $ev->file_type }}</span>
-                                            @endif
-                                        </a>
-                                    @endforeach
-                                </div>
-                            @endif
-                            
-                            @if($ctrl->reviewer_notes || $ctrl->approver_notes)
-                                <div class="ctrl-notes-container" style="margin-top:8px; border-top:1px dashed #e2e8f0; padding-top:6px; font-size:11px;">
-                                    @if($ctrl->reviewer_notes)
-                                        <div style="background:#fef3c7; color:#92400e; padding:4px 8px; border-radius:4px; margin-bottom:4px; border-left:3px solid #f59e0b;">
-                                            <strong>Manager Notes:</strong> 
-                                            <span style="font-style:italic;">"{{ $ctrl->reviewer_notes }}"</span>
-                                        </div>
-                                    @endif
-                                    @if($ctrl->approver_notes)
-                                        <div style="background:#e0e7ff; color:#3730a3; padding:4px 8px; border-radius:4px; border-left:3px solid #6366f1;">
-                                            <strong>Senior Manager Notes:</strong> 
-                                            <span style="font-style:italic;">"{{ $ctrl->approver_notes }}"</span>
-                                        </div>
-                                    @endif
-                                </div>
-                            @endif
-                        </td>
-                        <td class="col-frekuensi">
-                            {{ $ctrl->keterangan_frekuensi ?? '—' }}
-                        </td>
-                        <td class="col-upti">
-                            {{ $ctrl->upti ?? '—' }}
-                        </td>
-                        <td class="col-keyctrl">
-                            {{ $ctrl->key_control === null ? '—' : ($ctrl->key_control ? 'Yes' : 'No') }}
-                        </td>
-                        <td class="col-status td-center">
-                            @if(auth()->user()->isAdmin())
-                                <span class="status-badge {{ $scInfo['cls'] }}">
-                                    {{ $scInfo['label'] }}
-                                </span>
-                            @else
-                                <select class="status-quick-select" data-id="{{ $ctrl->id }}" style="padding: 4px 8px; font-size: 11.5px; font-weight: 600; border-radius: 6px; border: 1px solid #e2e8f0; background-color: #f8fafc; color: #475569; cursor: pointer; outline: none; width: 100%; text-align: center;">
-                                    <option value="not_started" {{ $scKey === 'not_started' ? 'selected' : '' }}>Not Started Yet</option>
-                                    <option value="ongoing_review" {{ $scKey === 'ongoing_review' ? 'selected' : '' }}>On Going Review</option>
-                                    <option value="ongoing_approval" {{ $scKey === 'ongoing_approval' ? 'selected' : '' }}>On Going Approval</option>
-                                    <option value="completed" {{ $scKey === 'completed' ? 'selected' : '' }}>Completed</option>
-                                </select>
-                            @endif
-                        </td>
-                        <td class="col-actions">
-                            <div class="row-act-group">
-                                {{-- 1. Edit Control / Upload Evidence --}}
-                                <button type="button"
-                                        class="row-act-btn row-act-edit btn-edit-ctrl"
-                                        title="{{ auth()->user()->isAdmin() ? 'Edit Control' : 'Upload Evidence' }}"
-                                        aria-label="Action Control {{ $ctrl->it_control_id }}">
-                                    @if(auth()->user()->isAdmin())
-                                        <i class="bi bi-pencil-fill"></i>
-                                    @else
-                                        <i class="bi bi-upload"></i>
-                                    @endif
-                                </button>
 
-                                {{-- 2. Download Berita Acara --}}
-                                @if($ctrl->status_control === 'completed')
-                                <a href="{{ route('controls.beritaAcara', $ctrl->id) }}"
-                                   class="row-act-btn row-act-pdf"
-                                   title="Download Berita Acara"
-                                   target="_blank">
-                                    <i class="bi bi-file-earmark-pdf-fill" style="color: #e11d48;"></i>
-                                </a>
+                    @foreach($controls as $ctrl)
+
+                        @php
+                            if (
+                                $prevUpti !== null &&
+                                $prevUpti !== $ctrl->upti
+                            ) {
+                                echo '<tr aria-hidden="true">
+                                    <td
+                                        colspan="7"
+                                        style="
+                                            padding:0;
+                                            height:8px;
+                                            border-top:1px dashed #cbd5e1;
+                                        "
+                                    ></td>
+                                </tr>';
+                            }
+
+                            $prevUpti =
+                                $ctrl->upti;
+
+                            $scKey =
+                                $ctrl->status_control
+                                ?? 'not_started';
+
+                            $scInfo =
+                                $scBadgeMap[$scKey]
+                                ?? $scBadgeMap['not_started'];
+                        @endphp
+
+                        <tr
+                            data-id="{{ $ctrl->id }}"
+                            data-ctrl-id="{{ $ctrl->it_control_id ?? '' }}"
+                            data-ctrl-desc="{{ addslashes($ctrl->control_description ?? '') }}"
+                            data-ctrl-frek="{{ $ctrl->keterangan_frekuensi ?? '' }}"
+                            data-ctrl-upti="{{ $ctrl->upti ?? '' }}"
+                            data-ctrl-keyctrl="{{ $ctrl->key_control ?? '' }}"
+                            data-ctrl-file-type="{{ $ctrl->file_type ?? '' }}"
+                            data-ctrl-status="{{ $ctrl->status_control ?? 'not_started' }}"
+                            data-app-id="{{ $ctrl->application_id }}"
+                            data-cat-id="{{ $ctrl->it_category_id }}"
+                        >
+
+                            <td class="col-ctrlid">
+
+                                <span class="ctrl-id-pill">
+
+                                    {{ $ctrl->it_control_id ?? '—' }}
+
+                                </span>
+
+                            </td>
+
+                            <td class="col-desc">
+
+                                <div>
+
+                                    {{ $ctrl->control_description ?? '—' }}
+
+                                </div>
+
+                                @if(
+                                    isset($ctrl->evidences) &&
+                                    $ctrl->evidences->count() > 0
+                                )
+
+                                    <div
+                                        style="
+                                            display:flex;
+                                            flex-wrap:wrap;
+                                            gap:6px;
+                                            margin-top:6px;
+                                        "
+                                    >
+
+                                        @foreach(
+                                            $ctrl->evidences
+                                            as $ev
+                                        )
+
+                                            @if(
+                                                $ev->file_type ===
+                                                'Berita Acara'
+                                            )
+
+                                                @continue
+
+                                            @endif
+
+                                            @php
+                                                $ext =
+                                                    strtolower(
+                                                        pathinfo(
+                                                            $ev->original_name,
+                                                            PATHINFO_EXTENSION
+                                                        )
+                                                    );
+
+                                                $icon =
+                                                    'bi-paperclip';
+
+                                                $iconColor =
+                                                    '#198754';
+
+                                                if(
+                                                    $ext ===
+                                                    'pdf'
+                                                ) {
+
+                                                    $icon =
+                                                        'bi-file-earmark-pdf-fill';
+
+                                                    $iconColor =
+                                                        '#e11d48';
+
+                                                } elseif(
+                                                    in_array(
+                                                        $ext,
+                                                        ['doc','docx'],
+                                                        true
+                                                    )
+                                                ) {
+
+                                                    $icon =
+                                                        'bi-file-earmark-word-fill';
+
+                                                    $iconColor =
+                                                        '#2563eb';
+
+                                                } elseif(
+                                                    in_array(
+                                                        $ext,
+                                                        ['xls','xlsx','csv'],
+                                                        true
+                                                    )
+                                                ) {
+
+                                                    $icon =
+                                                        'bi-file-earmark-excel-fill';
+
+                                                    $iconColor =
+                                                        '#16a34a';
+
+                                                }
+                                            @endphp
+
+                                            <a
+                                                href="{{ route('evidence.show', $ev->id) }}"
+                                                target="_blank"
+                                                class="evidence-pill"
+                                            >
+
+                                                <i
+                                                    class="bi {{ $icon }}"
+                                                    style="color:{{ $iconColor }};"
+                                                ></i>
+
+                                                <span
+                                                    title="{{ $ev->original_name }}"
+                                                >
+
+                                                    {{
+                                                        Str::limit(
+                                                            $ev->original_name,
+                                                            26
+                                                        )
+                                                    }}
+
+                                                </span>
+
+                                                @if(
+                                                    !empty(
+                                                        $ev->file_type
+                                                    )
+                                                )
+
+                                                    <span
+                                                        style="
+                                                            background:#e0e7ff;
+                                                            color:#3730a3;
+                                                            font-size:10px;
+                                                            font-weight:700;
+                                                            padding:1px 5px;
+                                                            border-radius:3px;
+                                                            border:1px solid #c7d2fe;
+                                                            white-space:nowrap;
+                                                        "
+                                                    >
+
+                                                        {{ $ev->file_type }}
+
+                                                    </span>
+
+                                                @endif
+
+                                            </a>
+
+                                        @endforeach
+
+                                    </div>
+
                                 @endif
 
-                                {{-- 3. Delete Control --}}
-                                <button type="button"
-                                        class="row-act-btn row-act-delete btn-delete-ctrl"
-                                        title="Delete Control"
-                                        data-ctrl-id="{{ $ctrl->it_control_id }}"
-                                        aria-label="Delete {{ $ctrl->it_control_id }}">
-                                    <i class="bi bi-trash3-fill"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
+                                @if(
+                                    $ctrl->reviewer_notes ||
+                                    $ctrl->approver_notes
+                                )
+
+                                    <div class="ctrl-notes-container">
+
+                                        @if(
+                                            $ctrl->reviewer_notes
+                                        )
+
+                                            <div
+                                                style="
+                                                    background:#fef3c7;
+                                                    color:#92400e;
+                                                    padding:4px 8px;
+                                                    border-radius:4px;
+                                                    margin-bottom:4px;
+                                                    border-left:3px solid #f59e0b;
+                                                "
+                                            >
+
+                                                <strong>
+                                                    Manager Notes:
+                                                </strong>
+
+                                                <span
+                                                    style="font-style:italic;"
+                                                >
+
+                                                    "{{ $ctrl->reviewer_notes }}"
+
+                                                </span>
+
+                                            </div>
+
+                                        @endif
+
+                                        @if(
+                                            $ctrl->approver_notes
+                                        )
+
+                                            <div
+                                                style="
+                                                    background:#e0e7ff;
+                                                    color:#3730a3;
+                                                    padding:4px 8px;
+                                                    border-radius:4px;
+                                                    border-left:3px solid #6366f1;
+                                                "
+                                            >
+
+                                                <strong>
+                                                    Senior Manager Notes:
+                                                </strong>
+
+                                                <span
+                                                    style="font-style:italic;"
+                                                >
+
+                                                    "{{ $ctrl->approver_notes }}"
+
+                                                </span>
+
+                                            </div>
+
+                                        @endif
+
+                                    </div>
+
+                                @endif
+
+                            </td>
+
+                            <td class="col-frekuensi">
+
+                                {{ $ctrl->keterangan_frekuensi ?? '—' }}
+
+                            </td>
+
+                            <td class="col-upti">
+
+                                {{ $ctrl->upti ?? '—' }}
+
+                            </td>
+
+                            <td class="col-keyctrl">
+
+                                {{
+                                    $ctrl->key_control === null
+                                    ? '—'
+                                    : (
+                                        in_array(
+                                            strtoupper(
+                                                (string)
+                                                $ctrl->key_control
+                                            ),
+                                            [
+                                                'YES',
+                                                '1',
+                                                'TRUE',
+                                            ],
+                                            true
+                                        )
+                                        ? 'Yes'
+                                        : 'No'
+                                    )
+                                }}
+
+                            </td>
+
+                            <td class="col-status td-center">
+
+                                <span
+                                    class="status-badge {{ $scInfo['cls'] }}"
+                                >
+
+                                    {{ $scInfo['label'] }}
+
+                                </span>
+
+                            </td>
+
+                            <td class="col-actions">
+
+                                <div class="row-act-group">
+
+                                    @if($isAdmin)
+
+                                        <button
+                                            type="button"
+                                            class="row-act-btn row-act-edit btn-edit-ctrl"
+                                            title="Edit Control"
+                                            aria-label="Edit {{ $ctrl->it_control_id }}"
+                                        >
+
+                                            <i class="bi bi-pencil-fill"></i>
+
+                                        </button>
+
+                                    @elseif($isOfficer)
+
+                                        <button
+                                            type="button"
+                                            class="row-act-btn row-act-edit btn-edit-ctrl"
+                                            title="Upload Evidence"
+                                            aria-label="Upload Evidence {{ $ctrl->it_control_id }}"
+                                        >
+
+                                            <i class="bi bi-cloud-arrow-up-fill"></i>
+
+                                        </button>
+
+                                    @else
+
+                                        <button
+                                            type="button"
+                                            class="row-act-btn row-act-view btn-edit-ctrl"
+                                            title="View Control"
+                                            aria-label="View {{ $ctrl->it_control_id }}"
+                                        >
+
+                                            <i class="bi bi-eye-fill"></i>
+
+                                        </button>
+
+                                    @endif
+
+                                    @if(
+                                        $ctrl->status_control ===
+                                        'completed'
+                                    )
+
+                                        <a
+                                            href="{{ route('controls.beritaAcara', $ctrl->id) }}"
+                                            class="row-act-btn row-act-pdf"
+                                            title="Download Berita Acara"
+                                            target="_blank"
+                                        >
+
+                                            <i class="bi bi-file-earmark-pdf-fill"></i>
+
+                                        </a>
+
+                                    @endif
+
+                                    @if($isAdmin)
+
+                                        <button
+                                            type="button"
+                                            class="row-act-btn row-act-delete btn-delete-ctrl"
+                                            title="Delete Control"
+                                            data-ctrl-id="{{ $ctrl->it_control_id }}"
+                                        >
+
+                                            <i class="bi bi-trash3-fill"></i>
+
+                                        </button>
+
+                                    @endif
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
                     @endforeach
+
                 </tbody>
+
             </table>
+
         </div>
+
     </div>
 
-    {{-- Pagination footer --}}
     <div class="itc-footer">
+
         <div class="itc-footer-info">
-            Showing <strong id="showing-count">{{ $controls->count() }}</strong>
-            of <strong>{{ $controls->count() }}</strong> controls
+
+            Showing
+
+            <strong id="showing-count">
+                {{ $controls->count() }}
+            </strong>
+
+            of
+
+            <strong>
+                {{ $controls->count() }}
+            </strong>
+
+            controls
+
         </div>
+
         <div class="itc-footer-pag">
-            <button class="pag-btn" disabled><i class="bi bi-chevron-left"></i> Prev</button>
-            <button class="pag-btn pag-active" aria-current="page">1</button>
-            <button class="pag-btn" disabled>Next <i class="bi bi-chevron-right"></i></button>
+
+            <button
+                class="pag-btn"
+                disabled
+            >
+
+                <i class="bi bi-chevron-left"></i>
+
+                Prev
+
+            </button>
+
+            <button
+                class="pag-btn pag-active"
+                aria-current="page"
+            >
+                1
+            </button>
+
+            <button
+                class="pag-btn"
+                disabled
+            >
+
+                Next
+
+                <i class="bi bi-chevron-right"></i>
+
+            </button>
+
         </div>
+
     </div>
 
 @endif
 
-{{-- ══════════════════════════════════════════════════════
+
+{{-- ============================================================
      ADD CONTROL MODAL
-     ══════════════════════════════════════════════════════ --}}
-<div class="itc-modal-backdrop"
-     id="addControlModal"
-     role="dialog"
-     aria-modal="true"
-     aria-labelledby="addControlTitle">
+     ============================================================ --}}
+
+@if($isAdmin)
+
+<div
+    class="itc-modal-backdrop"
+    id="addControlModal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="addControlTitle"
+>
 
     <div class="itc-modal">
 
         <div class="itc-modal-head">
-            <h2 class="itc-modal-head-title" id="addControlTitle">
+
+            <h2
+                class="itc-modal-head-title"
+                id="addControlTitle"
+            >
+
                 <span class="modal-title-icon">
+
                     <i class="bi bi-plus-circle-fill"></i>
+
                 </span>
+
                 Add Control Record
+
             </h2>
-            <button class="itc-modal-close-btn" id="addControlClose" type="button" aria-label="Close">
+
+            <button
+                class="itc-modal-close-btn"
+                id="addControlClose"
+                type="button"
+            >
+
                 <i class="bi bi-x-lg"></i>
+
             </button>
+
         </div>
 
         <div class="itc-modal-body">
 
-            <form id="addControlForm" autocomplete="off">
+            <form
+                id="addControlForm"
+                autocomplete="off"
+            >
+
                 @csrf
-                <input type="hidden" name="year" value="{{ $year }}">
-                <input type="hidden" name="quarter" value="{{ $quarter }}">
 
-                <input type="hidden" id="mc-application" name="application_id" value="{{ $application->id }}">
-                <input type="hidden" id="mc-category" name="it_category_id" value="{{ $category->id }}">
+                <input
+                    type="hidden"
+                    name="year"
+                    value="{{ $year }}"
+                >
 
-                <div class="modal-form-group">
-                    <label class="modal-label">Control ID</label>
-                    <div id="mc-generated-control-ids"
-                         style="display:flex; flex-direction:column; gap:8px;
-                                border:1px solid var(--border-color,#d1d5db);
-                                border-radius:8px; padding:10px;
-                                background:var(--bg-body,#f9fafb);">
-                        <div style="font-size:12.5px; color:#6b7280;">
-                            <i class="bi bi-info-circle me-1"></i>
-                            Select one or more UPTI to generate Control ID automatically.
-                        </div>
-                    </div>
-                    <div style="font-size:11.5px; color:#6b7280; margin-top:6px; line-height:1.5;">
-                        Each selected UPTI receives its own Control ID sequence. The sequence is independent of Year and Quarter.
-                    </div>
-                </div>
+                <input
+                    type="hidden"
+                    name="quarter"
+                    value="{{ $quarter }}"
+                >
+
+                <input
+                    type="hidden"
+                    name="it_category_id"
+                    value="{{ $category->id }}"
+                >
 
                 <div class="modal-form-group">
+
                     <label class="modal-label">
-                        UPTI <span class="required">*</span>
-                        <span style="font-size:11px; font-weight:400; color:#6b7280;">(pilih satu atau lebih)</span>
+
+                        UPTI
+
+                        <span class="required">
+                            *
+                        </span>
+
                     </label>
-                    <div id="mc-uptis-list" style="display:flex; flex-direction:column; gap:6px; max-height:160px; overflow-y:auto;
-                                                  border:1px solid var(--border-color,#d1d5db); border-radius:8px; padding:10px;
-                                                  background:var(--input-bg,#f9fafb);">
+
+                    <div
+                        id="mc-uptis-list"
+                        class="mc-list-box"
+                    >
+
                         @foreach($allUptis as $u)
-                        <label style="display:flex; align-items:center; gap:8px; font-size:13px; cursor:pointer; font-weight:400;">
-                            <input type="checkbox" name="uptis[]" value="{{ $u->name }}"
-                                   style="width:15px; height:15px; cursor:pointer;"
-                                   {{ ($application && $application->upti && $application->upti->name == $u->name) ? 'checked' : '' }}>
-                            <span>{{ $u->name }}</span>
-                        </label>
+
+                            <label class="mc-item">
+
+                                <input
+                                    type="checkbox"
+                                    name="uptis[]"
+                                    value="{{ $u->name }}"
+                                >
+
+                                <span class="mc-item-text">
+                                    {{ $u->name }}
+                                </span>
+
+                            </label>
+
                         @endforeach
+
                     </div>
+
+                    <div
+                        style="
+                            font-size:11.5px;
+                            color:#64748b;
+                            margin-top:6px;
+                        "
+                    >
+
+                        Select one or more UPTIs.
+
+                    </div>
+
                 </div>
 
                 <div class="modal-form-group">
-                    <label class="modal-label" for="mc-description">
-                        Control Description <span class="required">*</span>
+
+                    <label class="modal-label">
+
+                        Application
+
+                        <span class="required">
+                            *
+                        </span>
+
                     </label>
-                    <textarea class="modal-textarea"
-                              id="mc-description"
-                              name="control_description"
-                              placeholder="Describe the IT control objective and activity..."
-                              rows="4"
-                              required></textarea>
-                </div>
 
-                <div class="modal-form-row">
-                    <div class="modal-form-group">
-                        <label class="modal-label" for="mc-frekuensi">Keterangan Frekuensi</label>
-                        <select class="modal-input" id="mc-frekuensi" name="keterangan_frekuensi">
-                            <option value="">-- Pilih --</option>
-                            <option value="Per Project">Per Project</option>
-                            <option value="Quarterly">Quarterly</option>
-                            <option value="Twice a year">Twice a year</option>
-                            <option value="Yearly">Yearly</option>
-                        </select>
+                    <div
+                        id="mc-applications-list"
+                        class="mc-list-box"
+                    >
+
+                        <div
+                            style="
+                                font-size:12.5px;
+                                color:#64748b;
+                            "
+                        >
+
+                            Select UPTI to display applications.
+
+                        </div>
+
                     </div>
+
                 </div>
 
                 <div class="modal-form-group">
-                    <label class="modal-label" for="mc-key-control">Key Control</label>
-                    <select class="modal-input" id="mc-key-control" name="key_control">
-                        <option value="">-- Select --</option>
-                        <option value="YES">YES</option>
-                        <option value="NO">NO</option>
-                    </select>
+
+                    <label class="modal-label">
+
+                        Control ID
+
+                    </label>
+
+                    <div
+                        id="mc-generated-control-ids"
+                        class="mc-control-id-box"
+                    >
+
+                        <div
+                            style="
+                                font-size:12.5px;
+                                color:#64748b;
+                            "
+                        >
+
+                            Select UPTI to generate Control ID automatically.
+
+                        </div>
+
+                    </div>
+
                 </div>
 
+                <div class="modal-form-group">
 
+                    <label
+                        class="modal-label"
+                        for="mc-description"
+                    >
 
+                        Control Description
+
+                        <span class="required">
+                            *
+                        </span>
+
+                    </label>
+
+                    <textarea
+                        class="modal-textarea"
+                        id="mc-description"
+                        name="control_description"
+                        rows="4"
+                        required
+                    ></textarea>
+
+                </div>
+
+                <div class="modal-form-group">
+
+                    <label
+                        class="modal-label"
+                        for="mc-frekuensi"
+                    >
+
+                        Keterangan Frekuensi
+
+                    </label>
+
+                    <select
+                        class="modal-input"
+                        id="mc-frekuensi"
+                        name="keterangan_frekuensi"
+                    >
+
+                        <option value="">
+                            -- Pilih --
+                        </option>
+
+                        <option value="Per Project">
+                            Per Project
+                        </option>
+
+                        <option value="Quarterly">
+                            Quarterly
+                        </option>
+
+                        <option value="Twice a year">
+                            Twice a year
+                        </option>
+
+                        <option value="Yearly">
+                            Yearly
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <div class="modal-form-group">
+
+                    <label
+                        class="modal-label"
+                        for="mc-key-control"
+                    >
+
+                        Key Control
+
+                    </label>
+
+                    <select
+                        class="modal-input"
+                        id="mc-key-control"
+                        name="key_control"
+                    >
+
+                        <option value="">
+                            -- Select --
+                        </option>
+
+                        <option value="YES">
+                            YES
+                        </option>
+
+                        <option value="NO">
+                            NO
+                        </option>
+
+                    </select>
+
+                </div>
 
             </form>
+
         </div>
 
         <div class="itc-modal-foot">
-            <span class="modal-foot-note" id="mc-save-msg">
+
+            <span
+                class="modal-foot-note"
+                id="mc-save-msg"
+            >
+
                 <i class="bi bi-info-circle"></i>
+
                 Ready to save
+
             </span>
+
             <div class="modal-foot-actions">
-                <button type="button" class="modal-btn-cancel" id="addControlCancel">
+
+                <button
+                    type="button"
+                    class="modal-btn-cancel"
+                    id="addControlCancel"
+                >
                     Cancel
                 </button>
-                <button type="button" class="modal-btn-save" id="btn-save-add-control">
-                    <i class="bi bi-floppy-fill"></i> Save Control
+
+                <button
+                    type="button"
+                    class="modal-btn-save"
+                    id="btn-save-add-control"
+                >
+
+                    <i class="bi bi-floppy-fill"></i>
+
+                    Save Control
+
                 </button>
+
             </div>
+
         </div>
 
     </div>
+
 </div>
 
-{{-- ══════════════════════════════════════════════════════
-     EDIT CONTROL RECORD MODAL
-     ══════════════════════════════════════════════════════ --}}
-<div class="itc-modal-backdrop"
-     id="editControlModal"
-     role="dialog"
-     aria-modal="true"
-     aria-labelledby="editControlTitle">
+@endif
+
+
+{{-- ============================================================
+     EDIT / UPLOAD / VIEW MODAL
+     ============================================================ --}}
+
+<div
+    class="itc-modal-backdrop"
+    id="editControlModal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="editControlTitle"
+>
 
     <div class="itc-modal">
 
         <div class="itc-modal-head">
-            <h2 class="itc-modal-head-title" id="editControlTitle">
-                <span class="modal-title-icon" style="background:linear-gradient(135deg,#2563eb,#1d4ed8);">
-                    @if(auth()->user()->isAdmin())
+
+            <h2
+                class="itc-modal-head-title"
+                id="editControlTitle"
+            >
+
+                <span class="modal-title-icon">
+
+                    @if($isAdmin)
                         <i class="bi bi-pencil-fill"></i>
+                    @elseif($isOfficer)
+                        <i class="bi bi-cloud-arrow-up-fill"></i>
                     @else
-                        <i class="bi bi-upload"></i>
+                        <i class="bi bi-eye-fill"></i>
                     @endif
+
                 </span>
-                {{ auth()->user()->isAdmin() ? 'Edit Control' : 'Upload Evidence' }}
+
+                @if($isAdmin)
+                    Edit Control
+                @elseif($isOfficer)
+                    Upload Evidence
+                @else
+                    View Control
+                @endif
+
             </h2>
-            <button class="itc-modal-close-btn" id="editControlClose" type="button" aria-label="Close">
+
+            <button
+                class="itc-modal-close-btn"
+                id="editControlClose"
+                type="button"
+            >
+
                 <i class="bi bi-x-lg"></i>
+
             </button>
+
         </div>
 
         <div class="itc-modal-body">
 
-            <form id="editControlForm" autocomplete="off" enctype="multipart/form-data">
+            <form
+                id="editControlForm"
+                autocomplete="off"
+                enctype="multipart/form-data"
+            >
+
                 @csrf
-                <input type="hidden" id="ec-id" name="id">
 
-                <input type="hidden" id="ec-application" name="application_id" value="{{ $application->id }}">
-                <input type="hidden" id="ec-category" name="it_category_id" value="{{ $category->id }}">
-                <input type="hidden" id="ec-status-control" name="status_control">
+                <input
+                    type="hidden"
+                    id="ec-id"
+                    name="id"
+                >
 
-                <div class="modal-form-row">
-                    <div class="modal-form-group">
-                        <label class="modal-label" for="ec-ctrl-id">Control ID</label>
-                        <input type="text" class="modal-input" id="ec-ctrl-id"
-                               name="it_control_id" placeholder="e.g. C-IT-01" required>
-                    </div>
+                <input
+                    type="hidden"
+                    id="ec-application"
+                    name="application_id"
+                    value="{{ $application->id }}"
+                >
+
+                <input
+                    type="hidden"
+                    id="ec-category"
+                    name="it_category_id"
+                    value="{{ $category->id }}"
+                >
+
+                <input
+                    type="hidden"
+                    id="ec-status-control"
+                    name="status_control"
+                >
+
+                <div class="modal-form-group">
+
+                    <label
+                        class="modal-label"
+                        for="ec-ctrl-id"
+                    >
+                        Control ID
+                    </label>
+
+                    <input
+                        type="text"
+                        class="modal-input"
+                        id="ec-ctrl-id"
+                        name="it_control_id"
+                        readonly
+                    >
+
                 </div>
 
                 <div class="modal-form-group">
-                    <label class="modal-label" for="ec-description">Control Description</label>
-                    <textarea class="modal-textarea" id="ec-description"
-                              name="control_description" rows="4"
-                              placeholder="Control description..."></textarea>
-                </div>
 
-                <div class="modal-form-row">
-                    <div class="modal-form-group">
-                        <label class="modal-label" for="ec-frekuensi">Keterangan Frekuensi</label>
-                        <select class="modal-input" id="ec-frekuensi" name="keterangan_frekuensi">
-                            <option value="">-- Pilih --</option>
-                            <option value="Per Project">Per Project</option>
-                            <option value="Quarterly">Quarterly</option>
-                            <option value="Twice a year">Twice a year</option>
-                            <option value="Yearly">Yearly</option>
-                        </select>
-                    </div>
-                    <div class="modal-form-group">
-                        <label class="modal-label" for="ec-upti">UPTI</label>
-                        <select class="modal-input" id="ec-upti" name="upti">
-                            <option value="">-- Pilih --</option>
-                            @foreach($allUptis as $u)
-                                <option value="{{ $u->name }}">{{ $u->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
+                    <label
+                        class="modal-label"
+                        for="ec-description"
+                    >
+                        Control Description
+                    </label>
+
+                    <textarea
+                        class="modal-textarea"
+                        id="ec-description"
+                        name="control_description"
+                        rows="4"
+                        {{ !$isAdmin ? 'readonly' : '' }}
+                    ></textarea>
+
                 </div>
 
                 <div class="modal-form-group">
-                    <label class="modal-label" for="ec-key-control">Key Control</label>
-                    <select class="modal-input" id="ec-key-control" name="key_control">
-                        <option value="">-- Select --</option>
-                        <option value="1">YES</option>
-                        <option value="0">NO</option>
+
+                    <label
+                        class="modal-label"
+                        for="ec-frekuensi"
+                    >
+                        Keterangan Frekuensi
+                    </label>
+
+                    <select
+                        class="modal-input"
+                        id="ec-frekuensi"
+                        name="keterangan_frekuensi"
+                        {{ !$isAdmin ? 'disabled' : '' }}
+                    >
+
+                        <option value="">
+                            -- Pilih --
+                        </option>
+
+                        <option value="Per Project">
+                            Per Project
+                        </option>
+
+                        <option value="Quarterly">
+                            Quarterly
+                        </option>
+
+                        <option value="Twice a year">
+                            Twice a year
+                        </option>
+
+                        <option value="Yearly">
+                            Yearly
+                        </option>
+
                     </select>
+
                 </div>
 
-                @if(!auth()->user()->isAdmin())
-                {{-- Upload / Replace Evidence - per-file type selection --}}
-                <div class="modal-form-group" id="ec-upload-section" style="background-color: #f0fdf4; border: 2px dashed #34d399; padding: 15px; border-radius: 8px; margin-top: 10px; margin-bottom: 20px;">
-                    <label class="modal-label" for="ec-evidences" style="color: #065f46; font-size: 14px; font-weight: 700; margin-bottom: 8px;"><i class="bi bi-cloud-arrow-up-fill me-1"></i> Upload Evidence (PDF, Word, Excel)</label>
-                    <div style="font-size:12px; color:#047857; margin-bottom:10px;">Select files, then specify the <strong>File Type</strong> for each file you upload.</div>
-                    <input type="file" class="modal-input" id="ec-evidences" name="evidences[]" multiple accept=".pdf,.doc,.docx,.xls,.xlsx" style="padding: 10px; background: #fff; border: 1px solid #6ee7b7; cursor: pointer;">
-                    <div style="font-size:11px; color:#059669; margin-top:6px;"><i class="bi bi-info-circle"></i> Max 10MB per file. You can upload multiple files at once.</div>
-                    <div id="ec-selected-files-list" style="margin-top:12px; display:flex; flex-direction:column; gap:8px;"></div>
+                <div class="modal-form-group">
+
+                    <label
+                        class="modal-label"
+                        for="ec-upti"
+                    >
+                        UPTI
+                    </label>
+
+                    <select
+                        class="modal-input"
+                        id="ec-upti"
+                        name="upti"
+                        {{ !$isAdmin ? 'disabled' : '' }}
+                    >
+
+                        <option value="">
+                            -- Pilih --
+                        </option>
+
+                        @foreach($allUptis as $u)
+
+                            <option
+                                value="{{ $u->name }}"
+                            >
+
+                                {{ $u->name }}
+
+                            </option>
+
+                        @endforeach
+
+                    </select>
+
                 </div>
+
+                <div class="modal-form-group">
+
+                    <label
+                        class="modal-label"
+                        for="ec-key-control"
+                    >
+                        Key Control
+                    </label>
+
+                    <select
+                        class="modal-input"
+                        id="ec-key-control"
+                        name="key_control"
+                        {{ !$isAdmin ? 'disabled' : '' }}
+                    >
+
+                        <option value="">
+                            -- Select --
+                        </option>
+
+                        <option value="1">
+                            YES
+                        </option>
+
+                        <option value="0">
+                            NO
+                        </option>
+
+                    </select>
+
+                </div>
+
+                @if($isOfficer)
+
+                    <div
+                        class="modal-form-group"
+                        id="ec-upload-section"
+                        style="
+                            background:#f0fdf4;
+                            border:2px dashed #34d399;
+                            padding:15px;
+                            border-radius:8px;
+                            margin-top:10px;
+                            margin-bottom:20px;
+                        "
+                    >
+
+                        <label
+                            class="modal-label"
+                            for="ec-evidences"
+                            style="
+                                color:#065f46;
+                                font-size:14px;
+                                font-weight:700;
+                                margin-bottom:8px;
+                            "
+                        >
+
+                            <i
+                                class="bi bi-cloud-arrow-up-fill me-1"
+                            ></i>
+
+                            Upload Evidence
+
+                        </label>
+
+                        <div
+                            style="
+                                font-size:12px;
+                                color:#047857;
+                                margin-bottom:10px;
+                            "
+                        >
+
+                            Select files, then specify the
+                            <strong>File Type</strong>
+                            for each file.
+
+                        </div>
+
+                        <input
+                            type="file"
+                            class="modal-input"
+                            id="ec-evidences"
+                            name="evidences[]"
+                            multiple
+                            accept=".pdf,.doc,.docx,.xls,.xlsx"
+                            style="
+                                padding:10px;
+                                background:#fff;
+                                border:1px solid #6ee7b7;
+                            "
+                        >
+
+                        <div
+                            style="
+                                font-size:11px;
+                                color:#059669;
+                                margin-top:6px;
+                            "
+                        >
+
+                            <i class="bi bi-info-circle"></i>
+
+                            Max 10MB per file.
+
+                        </div>
+
+                        <div
+                            id="ec-selected-files-list"
+                            style="
+                                margin-top:12px;
+                                display:flex;
+                                flex-direction:column;
+                                gap:8px;
+                            "
+                        ></div>
+
+                    </div>
+
                 @endif
 
-                {{-- Currently Attached Evidence List --}}
                 <div class="modal-form-group">
-                    <label class="modal-label" style="font-weight:600;">Currently Attached Evidence Files &amp; File Types</label>
-                    <ul id="ec-existing-files" style="list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:8px;">
-                        <!-- JS populated from MySQL -->
-                    </ul>
+
+                    <label
+                        class="modal-label"
+                        style="font-weight:600;"
+                    >
+
+                        Currently Attached Evidence Files &amp; File Types
+
+                    </label>
+
+                    <ul
+                        id="ec-existing-files"
+                        style="
+                            list-style:none;
+                            padding:0;
+                            margin:0;
+                            display:flex;
+                            flex-direction:column;
+                            gap:8px;
+                        "
+                    ></ul>
+
                 </div>
 
             </form>
+
         </div>
 
         <div class="itc-modal-foot">
-            <span class="modal-foot-note" id="ec-save-msg">
+
+            <span
+                class="modal-foot-note"
+                id="ec-save-msg"
+            >
+
                 <i class="bi bi-info-circle"></i>
-                Ready to save
+
+                Ready
+
             </span>
+
             <div class="modal-foot-actions">
-                <button type="button" class="modal-btn-cancel" id="editControlCancel">Cancel</button>
-                <button type="button" class="modal-btn-save" id="btn-save-control"
-                        style="background:linear-gradient(135deg,#2563eb,#1d4ed8);
-                               box-shadow:0 2px 8px rgba(37,99,235,.25);">
-                    <i class="bi bi-floppy-fill"></i> Save Changes
+
+                <button
+                    type="button"
+                    class="modal-btn-cancel"
+                    id="editControlCancel"
+                >
+                    Close
                 </button>
-            </div>
-        </div>
 
-    </div>
-</div>
+                @if($isAdmin)
 
-    </div>
-</div>
-
-{{-- ══════════════════════════════════════════════════════
-     DELETE ALL CONTROLS MODAL
-     ══════════════════════════════════════════════════════ --}}
-<div class="itc-modal-backdrop"
-     id="deleteAllControlModal"
-     role="dialog"
-     aria-modal="true"
-     aria-labelledby="deleteAllControlTitle">
-
-    <div class="itc-modal" style="max-width:420px;">
-
-        <div class="itc-modal-head">
-            <h2 class="itc-modal-head-title" id="deleteAllControlTitle">
-                <span class="modal-title-icon" style="background:linear-gradient(135deg,#dc2626,#b91c1c);">
-                    <i class="bi bi-trash3-fill"></i>
-                </span>
-                Delete All Controls
-            </h2>
-            <button class="itc-modal-close-btn" id="deleteAllControlClose" type="button" aria-label="Close" onclick="document.getElementById('deleteAllControlModal').classList.remove('open')">
-                <i class="bi bi-x-lg"></i>
-            </button>
-        </div>
-
-        <div class="itc-modal-body" style="padding-top:20px; padding-bottom:30px; text-align:center;">
-            <i class="bi bi-exclamation-triangle-fill" style="font-size:36px; color:#dc2626; margin-bottom:12px; display:block;"></i>
-            <h3 style="font-size:16px; font-weight:700; color:var(--text-primary); margin-bottom:10px;">Are you absolutely sure?</h3>
-            <p style="font-size:13.5px; color:var(--text-secondary); margin:0;">
-                This will permanently delete <strong>ALL</strong> controls shown on this page for this category. This action cannot be undone.
-            </p>
-            <input type="hidden" id="delete-all-app-id" value="{{ $application->id }}">
-            <input type="hidden" id="delete-all-cat-id" value="{{ $category->id }}">
-            <input type="hidden" id="delete-all-year" value="{{ $year }}">
-            <input type="hidden" id="delete-all-quarter" value="{{ $quarter }}">
-        </div>
-
-        <div class="itc-modal-foot">
-            <div class="modal-foot-actions" style="width:100%; justify-content:center;">
-                <button type="button" class="modal-btn-cancel" id="deleteAllControlCancel" onclick="document.getElementById('deleteAllControlModal').classList.remove('open')">Cancel</button>
-                <button type="button" class="modal-btn-save" id="btn-confirm-delete-all"
-                        style="background:linear-gradient(135deg,#dc2626,#b91c1c);
-                               box-shadow:0 2px 8px rgba(220,38,38,.25);">
-                    <i class="bi bi-trash3-fill"></i> Yes, Delete All
-                </button>
-            </div>
-        </div>
-
-    </div>
-</div>
-
-{{-- ══════════════════════════════════════════════════════
-     DELETE CONFIRMATION MODAL (UI placeholder — confirm disabled)
-     ══════════════════════════════════════════════════════ --}}
-<div class="itc-modal-backdrop"
-     id="deleteControlModal"
-     role="dialog"
-     aria-modal="true"
-     aria-labelledby="deleteControlTitle">
-
-    <div class="itc-modal" style="max-width:420px;">
-
-        <div class="itc-modal-head">
-            <h2 class="itc-modal-head-title" id="deleteControlTitle">
-                <span class="modal-title-icon" style="background:linear-gradient(135deg,#dc2626,#b91c1c);">
-                    <i class="bi bi-trash3-fill"></i>
-                </span>
-                Delete Control
-            </h2>
-            <button class="itc-modal-close-btn" id="deleteControlClose" type="button" aria-label="Close">
-                <i class="bi bi-x-lg"></i>
-            </button>
-        </div>
-
-        <div class="itc-modal-body" style="padding:24px;">
-
-            {{-- Confirm illustration --}}
-            <div style="text-align:center; margin-bottom:20px;">
-                <div style="width:64px;height:64px;border-radius:50%;
-                            background:rgba(220,38,38,.08);border:2px solid rgba(220,38,38,.2);
-                            display:inline-flex;align-items:center;justify-content:center;
-                            margin-bottom:14px;">
-                    <i class="bi bi-exclamation-triangle-fill" style="font-size:26px;color:#dc2626;"></i>
-                </div>
-                <h6 style="font-size:15px;font-weight:700;color:var(--text-primary);margin:0 0 8px;">
-                    Delete this control?
-                </h6>
-                <p style="font-size:13px;color:var(--text-secondary);margin:0 0 10px;line-height:1.6;">
-                    You are about to delete control
-                    <strong id="delete-ctrl-id-label" style="color:#dc2626;">—</strong>.<br>
-                    This action cannot be undone.
-                </p>
-                <input type="hidden" id="delete-ctrl-db-id">
-            </div>
-
-        </div>
-
-        <div class="itc-modal-foot">
-            <span class="modal-foot-note">
-                <i class="bi bi-info-circle"></i>
-                Confirm is disabled — UI placeholder
-            </span>
-            <div class="modal-foot-actions">
-                <button type="button" class="modal-btn-cancel" id="deleteControlCancel">Cancel</button>
-                <button type="button"
+                    <button
+                        type="button"
                         class="modal-btn-save"
-                        id="btn-confirm-delete"
-                        style="background:linear-gradient(135deg,#dc2626,#b91c1c);box-shadow:0 2px 8px rgba(220,38,38,.25);">
-                    <i class="bi bi-trash3-fill"></i> Confirm Delete
-                </button>
-            </div>
-    </div>
-</div>
+                        id="btn-save-control"
+                    >
 
-{{-- ══════════════════════════════════════════════════════
-     VIEW EVIDENCE DOCUMENT MODAL
-     ══════════════════════════════════════════════════════ --}}
-<div class="modal fade" id="viewEvidenceModal" tabindex="-1"
-     aria-labelledby="viewEvidenceTitle" aria-hidden="true"
-     data-bs-backdrop="static">
-    <div class="modal-dialog modal-xl modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg"
-             style="height:90vh; display:flex; flex-direction:column;">
+                        <i class="bi bi-floppy-fill"></i>
 
-            {{-- Header --}}
-            <div class="modal-header bg-dark text-white border-0 py-3" style="flex-shrink:0;">
-                <h5 class="modal-title d-flex align-items-center mb-0"
-                    id="viewEvidenceTitle" style="font-size:16px;">
-                    <span class="d-flex align-items-center justify-content-center bg-white bg-opacity-10 rounded p-1 me-3">
-                        <i class="bi bi-file-earmark-pdf-fill fs-5"></i>
-                    </span>
-                    <span id="ve-modal-title-text" class="fw-semibold">Document Preview</span>
-                </h5>
-                <button type="button" class="btn-close btn-close-white"
-                        data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
+                        Save Changes
 
-            {{-- Body: flex grows to fill height --}}
-            <div style="flex:1; display:flex; flex-direction:column; overflow:hidden; background:#e9ecef; position:relative;">
+                    </button>
 
-                {{-- Tab strip for multiple files (hidden when single) --}}
-                <div id="ve-files-list-container"
-                     style="display:none; padding:10px 16px; border-bottom:1px solid #dee2e6;
-                            background:#fff; flex-shrink:0;">
-                    <div style="font-size:11px; font-weight:700; text-transform:uppercase;
-                                letter-spacing:.6px; color:#6c757d; margin-bottom:8px;">
-                        Select Evidence File
-                    </div>
-                    <ul id="ve-files-ul"
-                        style="list-style:none; padding:0; margin:0;
-                               display:flex; flex-wrap:wrap; gap:8px;"></ul>
-                </div>
+                @elseif($isOfficer)
 
-                {{-- Spinner (shown while fetching evidence list) --}}
-                <div id="ve-loading-container"
-                     style="display:flex; flex:1; align-items:center; justify-content:center;
-                            flex-direction:column; gap:14px;">
-                    <div id="ve-spinner"
-                         style="width:44px; height:44px;
-                                border:4px solid #dee2e6;
-                                border-top-color:#198754;
-                                border-radius:50%;
-                                animation:ve-spin .75s linear infinite;"></div>
-                    <p style="margin:0; color:#6c757d; font-weight:600; font-size:14px;">
-                        Loading document&hellip;
-                    </p>
-                </div>
+                    <button
+                        type="button"
+                        class="modal-btn-save"
+                        id="btn-save-control"
+                    >
 
-                {{-- Error banner (shown when no evidence / load fail) --}}
-                <div id="ve-error-container"
-                     style="display:none; flex:1; align-items:center; justify-content:center;
-                            flex-direction:column; gap:16px; padding:32px;">
-                    <div style="width:64px; height:64px; border-radius:50%;
-                                background:rgba(220,38,38,.08); border:2px solid rgba(220,38,38,.2);
-                                display:flex; align-items:center; justify-content:center;">
-                        <i class="bi bi-exclamation-triangle-fill"
-                           style="font-size:26px; color:#dc2626;"></i>
-                    </div>
-                    <p id="ve-error-msg"
-                       style="margin:0; color:#6c757d; font-size:14px; text-align:center;
-                              max-width:360px; line-height:1.6;">Could not load the document.</p>
-                    <a id="ve-download-fallback" href="#"
-                       class="btn btn-success btn-sm d-inline-flex align-items-center gap-2">
-                        <i class="bi bi-download"></i> Download Original
-                    </a>
-                </div>
+                        <i class="bi bi-cloud-arrow-up-fill"></i>
 
-                {{-- iFrame PDF Viewer (shown when preview is ready) --}}
-                <iframe id="ve-pdf-iframe"
-                        src="about:blank"
-                        style="display:none; flex:1; width:100%; border:none;"
-                        title="Document Preview"></iframe>
+                        Upload & Save
+
+                    </button>
+
+                @endif
 
             </div>
 
-            {{-- Footer --}}
-            <div class="modal-footer bg-white border-top py-2" style="flex-shrink:0;">
-                <span class="text-secondary me-auto small d-flex align-items-center gap-2">
-                    <i class="bi bi-shield-lock-fill text-success"></i> Read-only preview
-                </span>
-                <a id="ve-download-btn" href="#" download
-                   class="btn btn-success d-inline-flex align-items-center gap-2 fw-semibold px-3">
-                    <i class="bi bi-download"></i> Download
-                </a>
-                <button type="button"
-                        class="btn btn-light border px-4 fw-semibold text-secondary"
-                        data-bs-dismiss="modal">Close</button>
-            </div>
         </div>
+
     </div>
+
 </div>
-<style>
-@keyframes ve-spin { to { transform: rotate(360deg); } }
-</style>
+
+
+{{-- ============================================================
+     DELETE ALL
+     ============================================================ --}}
+
+@if($isAdmin)
+
+<div
+    class="itc-modal-backdrop"
+    id="deleteAllControlModal"
+    role="dialog"
+    aria-modal="true"
+>
+
+    <div
+        class="itc-modal"
+        style="max-width:420px;"
+    >
+
+        <div class="itc-modal-head">
+
+            <h2 class="itc-modal-head-title">
+
+                <span
+                    class="modal-title-icon"
+                    style="
+                        background:linear-gradient(135deg,#dc3545,#bb2d3b);
+                    "
+                >
+
+                    <i class="bi bi-trash3-fill"></i>
+
+                </span>
+
+                Delete All Controls
+
+            </h2>
+
+            <button
+                class="itc-modal-close-btn"
+                id="deleteAllControlClose"
+                type="button"
+            >
+
+                <i class="bi bi-x-lg"></i>
+
+            </button>
+
+        </div>
+
+        <div
+            class="itc-modal-body"
+            style="
+                padding-top:20px;
+                padding-bottom:30px;
+                text-align:center;
+            "
+        >
+
+            <i
+                class="bi bi-exclamation-triangle-fill"
+                style="
+                    font-size:36px;
+                    color:#dc3545;
+                    margin-bottom:12px;
+                    display:block;
+                "
+            ></i>
+
+            <h3
+                style="
+                    font-size:16px;
+                    font-weight:700;
+                    color:#152238;
+                    margin-bottom:10px;
+                "
+            >
+
+                Are you absolutely sure?
+
+            </h3>
+
+            <p
+                style="
+                    font-size:13.5px;
+                    color:#64748b;
+                    margin:0;
+                "
+            >
+
+                This will permanently delete
+
+                <strong>
+                    ALL
+                </strong>
+
+                controls shown on this page.
+
+            </p>
+
+            <input
+                type="hidden"
+                id="delete-all-app-id"
+                value="{{ $application->id }}"
+            >
+
+            <input
+                type="hidden"
+                id="delete-all-cat-id"
+                value="{{ $category->id }}"
+            >
+
+            <input
+                type="hidden"
+                id="delete-all-year"
+                value="{{ $year }}"
+            >
+
+            <input
+                type="hidden"
+                id="delete-all-quarter"
+                value="{{ $quarter }}"
+            >
+
+        </div>
+
+        <div class="itc-modal-foot">
+
+            <div
+                class="modal-foot-actions"
+                style="
+                    width:100%;
+                    justify-content:center;
+                "
+            >
+
+                <button
+                    type="button"
+                    class="modal-btn-cancel"
+                    id="deleteAllControlCancel"
+                >
+                    Cancel
+                </button>
+
+                <button
+                    type="button"
+                    class="modal-btn-save"
+                    id="btn-confirm-delete-all"
+                    style="
+                        background:linear-gradient(135deg,#dc3545,#bb2d3b);
+                    "
+                >
+
+                    <i class="bi bi-trash3-fill"></i>
+
+                    Yes, Delete All
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+{{-- ============================================================
+     DELETE CONTROL
+     ============================================================ --}}
+
+<div
+    class="itc-modal-backdrop"
+    id="deleteControlModal"
+    role="dialog"
+    aria-modal="true"
+>
+
+    <div
+        class="itc-modal"
+        style="max-width:420px;"
+    >
+
+        <div class="itc-modal-head">
+
+            <h2 class="itc-modal-head-title">
+
+                <span
+                    class="modal-title-icon"
+                    style="
+                        background:linear-gradient(135deg,#dc3545,#bb2d3b);
+                    "
+                >
+
+                    <i class="bi bi-trash3-fill"></i>
+
+                </span>
+
+                Delete Control
+
+            </h2>
+
+            <button
+                class="itc-modal-close-btn"
+                id="deleteControlClose"
+                type="button"
+            >
+
+                <i class="bi bi-x-lg"></i>
+
+            </button>
+
+        </div>
+
+        <div
+            class="itc-modal-body"
+            style="padding:24px;"
+        >
+
+            <div style="text-align:center;">
+
+                <div
+                    style="
+                        width:64px;
+                        height:64px;
+                        border-radius:50%;
+                        background:rgba(220,53,69,.08);
+                        border:2px solid rgba(220,53,69,.2);
+                        display:inline-flex;
+                        align-items:center;
+                        justify-content:center;
+                        margin-bottom:14px;
+                    "
+                >
+
+                    <i
+                        class="bi bi-exclamation-triangle-fill"
+                        style="
+                            font-size:26px;
+                            color:#dc3545;
+                        "
+                    ></i>
+
+                </div>
+
+                <h6
+                    style="
+                        font-size:15px;
+                        font-weight:700;
+                        color:#152238;
+                        margin:0 0 8px;
+                    "
+                >
+
+                    Delete this control?
+
+                </h6>
+
+                <p
+                    style="
+                        font-size:13px;
+                        color:#64748b;
+                        margin:0;
+                        line-height:1.6;
+                    "
+                >
+
+                    You are about to delete control
+
+                    <strong
+                        id="delete-ctrl-id-label"
+                        style="color:#dc3545;"
+                    >
+                        —
+                    </strong>.
+
+                </p>
+
+                <input
+                    type="hidden"
+                    id="delete-ctrl-db-id"
+                >
+
+            </div>
+
+        </div>
+
+        <div class="itc-modal-foot">
+
+            <span class="modal-foot-note">
+
+                <i class="bi bi-info-circle"></i>
+
+                This action cannot be undone.
+
+            </span>
+
+            <div class="modal-foot-actions">
+
+                <button
+                    type="button"
+                    class="modal-btn-cancel"
+                    id="deleteControlCancel"
+                >
+                    Cancel
+                </button>
+
+                <button
+                    type="button"
+                    class="modal-btn-save"
+                    id="btn-confirm-delete"
+                    style="
+                        background:linear-gradient(135deg,#dc3545,#bb2d3b);
+                    "
+                >
+
+                    <i class="bi bi-trash3-fill"></i>
+
+                    Confirm Delete
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+@endif
 
 @endsection
 
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
 (function () {
+
     'use strict';
 
-    /* ── Live search filter ──────────────────────────────── */
-    const searchEl    = document.getElementById('itc-search');
-    const tbody       = document.getElementById('itc-tbody');
-    const totalEl     = document.getElementById('itc-total');
-    const showingEl   = document.getElementById('showing-count');
+    const csrfToken =
+        document
+            .querySelector(
+                'meta[name="csrf-token"]'
+            )
+            ?.getAttribute('content')
+            || '';
 
-    if (searchEl && tbody) {
-        searchEl.addEventListener('input', function () {
-            const term = this.value.trim().toLowerCase();
-            const rows = tbody.querySelectorAll('tr');
-            let count = 0;
+    const isAdmin =
+        @json($isAdmin);
 
-            rows.forEach(function (row) {
-                const text = row.textContent.toLowerCase();
-                const show = text.includes(term);
-                row.style.display = show ? '' : 'none';
-                if (show) count++;
-            });
+    const isOfficer =
+        @json($isOfficer);
 
-            if (totalEl)   totalEl.textContent   = count;
-            if (showingEl) showingEl.textContent  = count;
-        });
-    }
+    const addModal =
+        document.getElementById(
+            'addControlModal'
+        );
 
-    /* ── Filter button toggle (visual placeholder) ───────── */
-    const filterBtn = document.getElementById('itc-filter-btn');
-    if (filterBtn) {
-        filterBtn.addEventListener('click', function () {
-            this.classList.toggle('active');
-        });
-    }
+    const addBtn =
+        document.getElementById(
+            'itc-add-btn'
+        );
 
-    /* ─────────────────────────────────────────────────────
-       Generic modal helpers
-    ───────────────────────────────────────────────────── */
-    function openModal(el) {
-        if (!el) return;
-        document.querySelectorAll('.itc-modal-backdrop.open').forEach(function (m) {
-            if (m !== el) m.classList.remove('open');
-        });
-        el.classList.add('open');
-        document.body.style.overflow = 'hidden';
-        setTimeout(function () {
-            const first = el.querySelector('select:not([disabled]), input:not([disabled]), textarea:not([disabled]), button:not([disabled])');
-            if (first) first.focus();
-        }, 80);
-    }
+    const addForm =
+        document.getElementById(
+            'addControlForm'
+        );
 
-    function closeModal(el) {
-        if (!el) return;
-        el.classList.remove('open');
-        document.body.style.overflow = '';
-    }
+    const addSaveBtn =
+        document.getElementById(
+            'btn-save-add-control'
+        );
 
-    function wireClose(backdropId, closeBtnId, cancelBtnId) {
-        var backdrop  = document.getElementById(backdropId);
-        var closeBtn  = document.getElementById(closeBtnId);
-        var cancelBtn = document.getElementById(cancelBtnId);
-        if (closeBtn)  closeBtn.addEventListener('click',  function () { closeModal(backdrop); });
-        if (cancelBtn) cancelBtn.addEventListener('click', function () { closeModal(backdrop); });
-        if (backdrop)  backdrop.addEventListener('click',  function (e) { if (e.target === backdrop) closeModal(backdrop); });
-    }
+    const addSaveMsg =
+        document.getElementById(
+            'mc-save-msg'
+        );
 
-    /* ── Add Control Modal ───────────────────────────────── */
-    var addModal = document.getElementById('addControlModal');
-    var addBtn   = document.getElementById('itc-add-btn');
-    if (addBtn) addBtn.addEventListener('click', function () { openModal(addModal); });
-    wireClose('addControlModal', 'addControlClose', 'addControlCancel');
+    const uptiList =
+        document.getElementById(
+            'mc-uptis-list'
+        );
 
-    /* ── Automatic Control ID Preview + Add Control ───────── */
-    var generatedIdsBox = document.getElementById('mc-generated-control-ids');
-    var uptiList = document.getElementById('mc-uptis-list');
-    var btnSaveAddControl = document.getElementById('btn-save-add-control');
-    var addControlForm = document.getElementById('addControlForm');
+    const applicationList =
+        document.getElementById(
+            'mc-applications-list'
+        );
+
+    const generatedIdsBox =
+        document.getElementById(
+            'mc-generated-control-ids'
+        );
+
+    const searchEl =
+        document.getElementById(
+            'itc-search'
+        );
+
+    const tbody =
+        document.getElementById(
+            'itc-tbody'
+        );
+
+    const totalEl =
+        document.getElementById(
+            'itc-total'
+        );
+
+    const showingEl =
+        document.getElementById(
+            'showing-count'
+        );
 
     function escapeHtml(value) {
+
         return String(value)
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#039;');
+            .replace(
+                /&/g,
+                '&amp;'
+            )
+            .replace(
+                /</g,
+                '&lt;'
+            )
+            .replace(
+                />/g,
+                '&gt;'
+            )
+            .replace(
+                /"/g,
+                '&quot;'
+            )
+            .replace(
+                /'/g,
+                '&#039;'
+            );
+
     }
 
-    async function refreshGeneratedControlIds() {
-        if (!generatedIdsBox || !uptiList) return;
+    function openModal(
+        element
+    ) {
 
-        var selectedUptis = Array.from(
-            uptiList.querySelectorAll('input[name="uptis[]"]:checked')
-        ).map(function (input) { return input.value; });
-
-        if (selectedUptis.length === 0) {
-            generatedIdsBox.innerHTML = `
-                <div style="font-size:12.5px; color:#6b7280;">
-                    <i class="bi bi-info-circle me-1"></i>
-                    Select one or more UPTI to generate Control ID automatically.
-                </div>
-            `;
+        if (!element) {
             return;
         }
 
-        generatedIdsBox.innerHTML = `
-            <div style="font-size:12.5px; color:#6b7280; display:flex; align-items:center; gap:7px;">
-                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                Generating Control IDs...
-            </div>
-        `;
+        document
+            .querySelectorAll(
+                '.itc-modal-backdrop.open'
+            )
+            .forEach(function (modal) {
 
-        var params = new URLSearchParams();
-        selectedUptis.forEach(function (upti) {
-            params.append('uptis[]', upti);
-        });
+                modal.classList.remove(
+                    'open'
+                );
 
-        try {
-            var response = await fetch(
-                `{{ route('controls.nextIds') }}?${params.toString()}`,
-                {
-                    method: 'GET',
-                    headers: {
-                        'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
+            });
+
+        element.classList.add(
+            'open'
+        );
+
+        document.body.style.overflow =
+            'hidden';
+
+    }
+
+    function closeModal(
+        element
+    ) {
+
+        if (!element) {
+            return;
+        }
+
+        element.classList.remove(
+            'open'
+        );
+
+        document.body.style.overflow =
+            '';
+
+    }
+
+    function wireClose(
+        backdropId,
+        closeBtnId,
+        cancelBtnId
+    ) {
+
+        const backdrop =
+            document.getElementById(
+                backdropId
+            );
+
+        const closeBtn =
+            document.getElementById(
+                closeBtnId
+            );
+
+        const cancelBtn =
+            document.getElementById(
+                cancelBtnId
+            );
+
+        if (closeBtn) {
+
+            closeBtn.addEventListener(
+                'click',
+                function () {
+
+                    closeModal(
+                        backdrop
+                    );
+
                 }
             );
 
-            var data = await parseJsonResponse(response);
+        }
 
-            if (!data.success || !data.control_ids) {
-                throw new Error(data.message || 'Failed to generate Control IDs.');
+        if (cancelBtn) {
+
+            cancelBtn.addEventListener(
+                'click',
+                function () {
+
+                    closeModal(
+                        backdrop
+                    );
+
+                }
+            );
+
+        }
+
+        if (backdrop) {
+
+            backdrop.addEventListener(
+                'click',
+                function (event) {
+
+                    if (
+                        event.target ===
+                        backdrop
+                    ) {
+
+                        closeModal(
+                            backdrop
+                        );
+
+                    }
+
+                }
+            );
+
+        }
+
+    }
+
+    async function parseJsonResponse(
+        response
+    ) {
+
+        const contentType =
+            response.headers.get(
+                'content-type'
+            )
+            || '';
+
+        if (
+            !contentType.includes(
+                'application/json'
+            )
+        ) {
+
+            const text =
+                await response.text();
+
+            throw new Error(
+                text
+                || 'Server returned a non-JSON response.'
+            );
+
+        }
+
+        const data =
+            await response.json();
+
+        if (!response.ok) {
+
+            let message =
+                data.message
+                || 'Error processing request.';
+
+            if (data.errors) {
+
+                const errors =
+                    Object
+                        .values(
+                            data.errors
+                        )
+                        .flat();
+
+                if (errors.length) {
+
+                    message =
+                        errors.join(' ');
+
+                }
+
             }
 
-            generatedIdsBox.innerHTML = Object.entries(data.control_ids).map(function (entry) {
-                var upti = entry[0];
-                var controlId = entry[1];
+            throw new Error(
+                message
+            );
 
-                return `
-                    <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; padding:8px 10px; background:#fff; border:1px solid #e2e8f0; border-radius:7px;">
-                        <span style="font-size:12.5px; font-weight:600; color:#334155;">${escapeHtml(upti)}</span>
-                        <span style="display:inline-flex; align-items:center; padding:4px 10px; border-radius:5px; background:#ecfdf5; color:#15803d; border:1px solid #bbf7d0; font-size:12px; font-weight:700;">${escapeHtml(controlId)}</span>
+        }
+
+        return data;
+
+    }
+
+    function showNotification(
+        message,
+        type = 'success'
+    ) {
+
+        if (
+            window.Swal
+        ) {
+
+            Swal.fire({
+                icon:
+                    type === 'danger'
+                        ? 'error'
+                        : type,
+                text:
+                    message,
+                timer:
+                    2200,
+                showConfirmButton:
+                    false
+            });
+
+            return;
+
+        }
+
+        alert(
+            message
+        );
+
+    }
+
+
+    /* ============================================================
+       SEARCH
+       ============================================================ */
+
+    if (
+        searchEl &&
+        tbody
+    ) {
+
+        searchEl.addEventListener(
+            'input',
+            function () {
+
+                const term =
+                    this.value
+                        .trim()
+                        .toLowerCase();
+
+                const rows =
+                    tbody.querySelectorAll(
+                        'tr[data-id]'
+                    );
+
+                let count =
+                    0;
+
+                rows.forEach(
+                    function (row) {
+
+                        const text =
+                            row.textContent
+                                .toLowerCase();
+
+                        const visible =
+                            text.includes(
+                                term
+                            );
+
+                        row.style.display =
+                            visible
+                                ? ''
+                                : 'none';
+
+                        if (visible) {
+                            count++;
+                        }
+
+                    }
+                );
+
+                if (totalEl) {
+                    totalEl.textContent =
+                        count;
+                }
+
+                if (showingEl) {
+                    showingEl.textContent =
+                        count;
+                }
+
+            }
+        );
+
+    }
+
+
+    /* ============================================================
+       FILTER
+       ============================================================ */
+
+    const filterBtn =
+        document.getElementById(
+            'itc-filter-btn'
+        );
+
+    if (filterBtn) {
+
+        filterBtn.addEventListener(
+            'click',
+            function () {
+
+                this.classList.toggle(
+                    'active'
+                );
+
+            }
+        );
+
+    }
+
+
+    /* ============================================================
+       ADD CONTROL
+       ============================================================ */
+
+    if (
+        isAdmin &&
+        addModal &&
+        addBtn &&
+        addForm
+    ) {
+
+        wireClose(
+            'addControlModal',
+            'addControlClose',
+            'addControlCancel'
+        );
+
+        async function refreshApplications() {
+
+            if (
+                !uptiList ||
+                !applicationList
+            ) {
+                return;
+            }
+
+            const selectedUptis =
+                Array.from(
+                    uptiList.querySelectorAll(
+                        'input[name="uptis[]"]:checked'
+                    )
+                ).map(
+                    function (input) {
+                        return input.value;
+                    }
+                );
+
+            applicationList.innerHTML =
+                '';
+
+            if (
+                generatedIdsBox
+            ) {
+
+                generatedIdsBox.innerHTML = `
+                    <div
+                        style="
+                            font-size:12.5px;
+                            color:#64748b;
+                        "
+                    >
+                        Select UPTI to generate Control ID automatically.
                     </div>
                 `;
-            }).join('');
 
-        } catch (error) {
-            generatedIdsBox.innerHTML = `
-                <div style="color:#dc2626; font-size:12.5px; font-weight:600;">
-                    <i class="bi bi-exclamation-triangle me-1"></i>
-                    ${escapeHtml(error.message)}
+            }
+
+            if (
+                !selectedUptis.length
+            ) {
+
+                applicationList.innerHTML = `
+                    <div
+                        style="
+                            font-size:12.5px;
+                            color:#64748b;
+                        "
+                    >
+                        Select UPTI first.
+                    </div>
+                `;
+
+                return;
+
+            }
+
+            applicationList.innerHTML = `
+                <div
+                    style="
+                        font-size:12.5px;
+                        color:#64748b;
+                    "
+                >
+
+                    <span
+                        class="spinner-border spinner-border-sm"
+                        role="status"
+                    ></span>
+
+                    Loading applications...
+
                 </div>
             `;
-        }
-    }
 
-    if (uptiList) {
-        uptiList.addEventListener('change', function (event) {
-            if (event.target && event.target.matches('input[name="uptis[]"]')) {
-                refreshGeneratedControlIds();
-            }
-        });
-    }
+            const params =
+                new URLSearchParams();
 
-    if (addBtn) {
-        addBtn.addEventListener('click', function () {
-            if (addControlForm) addControlForm.reset();
+            selectedUptis.forEach(
+                function (upti) {
 
-            /* Restore Dashboard context. */
-            var applicationField = document.getElementById('mc-application');
-            var categoryField = document.getElementById('mc-category');
+                    params.append(
+                        'uptis[]',
+                        upti
+                    );
 
-            if (applicationField) applicationField.value = '{{ $application->id }}';
-            if (categoryField) categoryField.value = '{{ $category->id }}';
-
-            /* Restore the Application's mapped UPTI as the default selection. */
-            var defaultUpti = @json($application?->upti?->name);
-
-            if (uptiList) {
-                uptiList.querySelectorAll('input[name="uptis[]"]').forEach(function (checkbox) {
-                    checkbox.checked = defaultUpti && checkbox.value === defaultUpti;
-                });
-            }
-
-            refreshGeneratedControlIds();
-        });
-    }
-
-    if (btnSaveAddControl && addControlForm) {
-        btnSaveAddControl.addEventListener('click', async function () {
-            if (!addControlForm.checkValidity()) {
-                addControlForm.reportValidity();
-                return;
-            }
-
-            var selectedUptis = Array.from(
-                document.querySelectorAll('#mc-uptis-list input[name="uptis[]"]:checked')
+                }
             );
 
-            if (selectedUptis.length === 0) {
-                showNotification('Please select at least one UPTI.', 'danger');
-                return;
-            }
-
-            var msg = document.getElementById('mc-save-msg');
-            if (msg) msg.innerHTML = '<i class="bi bi-hourglass-split"></i> Saving...';
-            btnSaveAddControl.disabled = true;
-
             try {
-                var formData = new FormData(addControlForm);
 
-                /* Never send a manually-entered Control ID. The server generates it. */
-                formData.delete('it_control_id');
-                formData.delete('it_control_sequence');
+                const response =
+                    await fetch(
+                        `{{ route('controls.applicationsByUptis') }}?${params.toString()}`,
+                        {
+                            method:
+                                'GET',
 
-                var response = await fetch('{{ route("controls.store") }}', {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': csrfToken,
-                        'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    },
-                    body: formData
-                });
+                            headers:{
+                                'Accept':
+                                    'application/json',
 
-                var data = await parseJsonResponse(response);
+                                'X-Requested-With':
+                                    'XMLHttpRequest'
+                            }
+                        }
+                    );
 
-                if (!data.success) {
-                    throw new Error(data.message || 'Failed to create control.');
+                const data =
+                    await parseJsonResponse(
+                        response
+                    );
+
+                if (
+                    !data.success
+                ) {
+
+                    throw new Error(
+                        data.message
+                        || 'Failed to load applications.'
+                    );
+
                 }
 
-                showNotification(data.message, 'success');
-                closeModal(addModal);
+                const applications =
+                    data.applications
+                    || [];
 
-                setTimeout(function () {
-                    window.location.reload();
-                }, 400);
+                if (
+                    !applications.length
+                ) {
+
+                    applicationList.innerHTML = `
+                        <div
+                            style="
+                                font-size:12.5px;
+                                color:#dc3545;
+                            "
+                        >
+                            No application is mapped to the selected UPTI.
+                        </div>
+                    `;
+
+                    return;
+
+                }
+
+                applicationList.innerHTML =
+                    applications
+                        .map(
+                            function (app) {
+
+                                return `
+                                    <label class="mc-item">
+
+                                        <input
+                                            type="radio"
+                                            name="application_id"
+                                            value="${escapeHtml(app.id)}"
+                                        >
+
+                                        <span class="mc-item-text">
+
+                                            ${escapeHtml(app.name)}
+
+                                        </span>
+
+                                        <span class="mc-item-badge">
+
+                                            ${escapeHtml(
+                                                app.upti_name
+                                                || ''
+                                            )}
+
+                                        </span>
+
+                                    </label>
+                                `;
+
+                            }
+                        )
+                        .join('');
+
+                await refreshControlIds();
 
             } catch (error) {
-                showNotification(error.message || 'An error occurred while saving.', 'danger');
-            } finally {
-                btnSaveAddControl.disabled = false;
-                if (msg) msg.innerHTML = '<i class="bi bi-info-circle"></i> Ready to save';
-            }
-        });
-    }
 
-    /* ── Edit Control Modal ──────────────────────────────── */
-    var editModal = document.getElementById('editControlModal');
-    wireClose('editControlModal', 'editControlClose', 'editControlCancel');
+                applicationList.innerHTML = `
+                    <div
+                        style="
+                            color:#dc3545;
+                            font-size:12.5px;
+                        "
+                    >
 
-    document.addEventListener('click', function (e) {
-        var btn = e.target.closest('.btn-edit-ctrl');
-        if (!btn) return;
+                        ${escapeHtml(
+                            error.message
+                        )}
 
-        var row      = btn.closest('tr');
-        if (!row) return;
-        var id       = row.dataset.id       || '';
-        var ctrlId   = row.dataset.ctrlId   || '';
-        var ctrlDesc = row.dataset.ctrlDesc  || '';
-        var ctrlFrek = row.dataset.ctrlFrek  || '';
-        var ctrlUpti = row.dataset.ctrlUpti  || '';
-        var ctrlKeyCtrl = row.dataset.ctrlKeyctrl || '';
-        var ctrlSt   = row.dataset.ctrlStatus || 'not_started';
-        var catSt    = row.dataset.catStatus  || 'not_completed';
-        var appId    = row.dataset.appId     || '';
-        var catId    = row.dataset.catId     || '';
-
-        var ecDbId   = document.getElementById('ec-id');
-        var ecApp    = document.getElementById('ec-application');
-        var ecCat    = document.getElementById('ec-category');
-        var ecId     = document.getElementById('ec-ctrl-id');
-        var ecDesc   = document.getElementById('ec-description');
-        var ecFrek   = document.getElementById('ec-frekuensi');
-        var ecUpti   = document.getElementById('ec-upti');
-        var ecKeyCtrl = document.getElementById('ec-key-control');
-        var ecSt     = document.getElementById('ec-status-control');
-
-        var ctrlFileType = row.dataset.ctrlFileType || '';
-        
-        if (ecDbId)   ecDbId.value   = id;
-        if (ecApp)    ecApp.value    = appId;
-        if (ecCat)    ecCat.value    = catId;
-        if (ecId)     ecId.value     = ctrlId;
-        if (ecDesc)   ecDesc.value   = ctrlDesc.replace(/\\/g, '');
-        if (ecFrek)   ecFrek.value   = ctrlFrek;
-        if (ecUpti)   ecUpti.value   = ctrlUpti;
-        if (ecKeyCtrl) ecKeyCtrl.value = ctrlKeyCtrl;
-        if (ecSt)     ecSt.value     = ctrlSt;
-
-        var ecFileType = document.getElementById('ec-file-type');
-        if (ecFileType) ecFileType.value = ctrlFileType;
-
-        var ecFiles  = document.getElementById('ec-existing-files');
-        var ecEvInput = document.getElementById('ec-evidences');
-        if (ecEvInput) ecEvInput.value = '';
-
-        if (ecFiles && id) {
-            ecFiles.innerHTML = '<li style="font-size:12px; color:#9ca3af; font-style:italic;"><i class="bi bi-hourglass-split"></i> Loading files...</li>';
-            loadAndRenderEvidences(id, function(evidences) {
-                ecFiles.innerHTML = '';
-                if (evidences.length === 0) {
-                    ecFiles.innerHTML = '<li style="font-size:12px; color:#9ca3af; font-style:italic;">No evidence files currently attached.</li>';
-                } else {
-                    evidences.forEach(function(ev) {
-                        var li = document.createElement('li');
-                        li.style.cssText = 'background:#f8fafc; padding:10px 12px; border-radius:6px; border:1px solid #e2e8f0; display:flex; flex-direction:column; gap:8px;';
-                        
-                        var ftOptions = [
-                            { value: '',                               label: '-- File Type --' },
-                            { value: 'Population Data',                label: 'Population Data' },
-                            { value: 'Information provided by Entity', label: 'Information provided by Entity' },
-                            { value: 'Supporting Document',            label: 'Supporting Document' },
-                            { value: 'Others',                         label: 'Others' },
-                        ];
-                        var optHtml = ftOptions.map(function(o) {
-                            var sel = (o.value === (ev.file_type || '')) ? ' selected' : '';
-                            return '<option value="' + o.value + '"' + sel + '>' + o.label + '</option>';
-                        }).join('');
-
-                        var ftHtml = `<select name="existing_file_types[${ev.id}]" class="existing-file-type-select" data-original="${ev.file_type || ''}"
-                                style="font-size:11.5px; padding:3px 7px; border:1px solid #d1d5db; border-radius:5px; background:#fff; color:#111827; cursor:pointer; min-width:160px; max-width:200px;"
-                                title="Edit file type for this file">${optHtml}</select>`;
-
-                        var ftVal = (ev.file_type || '').replace(/"/g, '&quot;');
-                        li.innerHTML = `
-                            <div style="display:flex; align-items:center; justify-content:space-between;">
-                                <div style="display:flex; align-items:center; gap:8px; font-size:12.5px; overflow:hidden;">
-                                    <i class="bi bi-file-earmark-text text-primary" style="font-size:16px;"></i>
-                                    <span style="font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:240px;" title="${ev.original_name}">${ev.original_name}</span>
-                                </div>
-                                <div style="display:flex; align-items:center; gap:6px;">
-                                    ${ftHtml}
-                                    <button type="button" class="btn-delete-ev btn-sm" data-id="${ev.id}" style="color:#dc2626; background:#fef2f2; border:none; padding:4px 8px; border-radius:4px; cursor:pointer; font-size:11.5px;"><i class="bi bi-trash3-fill"></i> Delete</button>
-                                </div>
-                            </div>
-                        `;
-                        ecFiles.appendChild(li);
-                    });
-                }
-            });
-        }
-
-
-        openModal(editModal);
-    });
-
-    // Custom Notification helper
-    function showNotification(message, type = 'success') {
-        const alertHtml = `
-            <div class="alert alert-${type} alert-dismissible fade show" role="alert" style="margin-top: 15px;">
-                <i class="bi bi-${type === 'success' ? 'check' : 'exclamation'}-circle me-2"></i>${message}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        `;
-        const container = document.querySelector('.page-content');
-        if (container) {
-            container.insertAdjacentHTML('afterbegin', alertHtml);
-            setTimeout(() => {
-                const alerts = container.querySelectorAll('.alert');
-                if (alerts.length > 0) {
-                    const lastAlert = alerts[0];
-                    if (window.bootstrap && bootstrap.Alert) {
-                        bootstrap.Alert.getOrCreateInstance(lastAlert).close();
-                    }
-                }
-            }, 5000);
-        } else {
-            alert(message);
-        }
-    }
-
-    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-
-    async function parseJsonResponse(res) {
-        const contentType = res.headers.get('content-type') || '';
-        let data = {};
-        if (contentType.includes('application/json')) {
-            data = await res.json();
-        } else {
-            const text = await res.text();
-            throw new Error('Server returned non-JSON response (' + res.status + '). Please try again.');
-        }
-
-        if (!res.ok) {
-            let msg = data.message || 'Error processing request.';
-            if (data.errors) {
-                const errs = Object.values(data.errors).flat();
-                if (errs.length > 0) msg = errs.join(' ');
-            }
-            throw new Error(msg);
-        }
-        return data;
-    }
-
-    // Helper: Load evidence records directly from MySQL database by Control ID
-    function loadAndRenderEvidences(controlId, callback) {
-        fetch('/controls/' + controlId + '/evidence', {
-            headers: {
-                'Accept': 'application/json',
-                'X-CSRF-TOKEN': csrfToken
-            }
-        })
-        .then(parseJsonResponse)
-        .then(data => {
-            callback(data.evidences || []);
-        })
-        .catch(err => {
-            callback([]);
-        });
-    }
-
-    // Add Control logic
-    var btnSaveAddControl = document.getElementById('btn-save-add-control');
-    if (btnSaveAddControl) {
-        btnSaveAddControl.addEventListener('click', function() {
-            var form = document.getElementById('addControlForm');
-
-            // Format control ID from sequence and validate
-            var seq = form.querySelector('input[name="it_control_sequence"]').value;
-            var num = parseInt(seq, 10);
-
-            if (!num || num < 1) {
-                showNotification('Please enter a valid number for the Control ID.', 'danger');
-                return;
-            }
-
-            // Extract used numbers from existing table rows
-            var usedNums = [];
-            document.querySelectorAll('tr[data-ctrl-id]').forEach(function(row) {
-                var cid = row.getAttribute('data-ctrl-id');
-                if (cid && cid.startsWith('C-IT-')) {
-                    var n = parseInt(cid.replace('C-IT-', ''), 10);
-                    if (!isNaN(n)) usedNums.push(n);
-                }
-            });
-
-            var maxNum = usedNums.length > 0 ? Math.max(...usedNums) : 0;
-
-            if (usedNums.includes(num)) {
-                showNotification('Control ID is already in use!', 'danger');
-                return;
-            } else if (num > maxNum + 1) {
-                var nextExpected = maxNum + 1;
-                showNotification('Control ID is out of sequence! (Next expected: ' + nextExpected + ')', 'danger');
-                return;
-            }
-
-            if (!form.checkValidity()) {
-                form.reportValidity();
-                return;
-            }
-            
-            var msg = document.getElementById('mc-save-msg');
-            if (msg) msg.innerHTML = '<i class="bi bi-hourglass-split"></i> Saving...';
-            btnSaveAddControl.disabled = true;
-
-            var formData = new FormData(form);
-
-            var paddedSeq = num.toString().padStart(2, '0');
-            formData.append('it_control_id', 'C-IT-' + paddedSeq);
-
-            fetch('{{ route("controls.store") }}', {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': csrfToken,
-                    'Accept': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                body: formData
-            })
-            .then(parseJsonResponse)
-            .then(data => {
-                if (data.success) {
-                    showNotification(data.message, 'success');
-                    closeModal(document.getElementById('addControlModal'));
-                    // Reload to reflect changes immediately from the database
-                    location.reload();
-                } else {
-                    showNotification(data.message || 'Error occurred', 'danger');
-                }
-            })
-            .catch(err => {
-                showNotification(err.message || 'An error occurred while saving.', 'danger');
-            })
-            .finally(() => {
-                if (msg) msg.innerHTML = '<i class="bi bi-info-circle"></i> Ready to save';
-                btnSaveAddControl.disabled = false;
-            });
-        });
-    }
-
-    // Delete Evidence logic
-    document.addEventListener('click', function (e) {
-        var btn = e.target.closest('.btn-delete-ev');
-        if (!btn) return;
-        if (!confirm('Delete this file permanently?')) return;
-        
-        var evId = btn.dataset.id;
-        btn.disabled = true;
-
-        fetch('/evidence/' + evId, {
-            method: 'DELETE',
-            headers: {
-                'X-CSRF-TOKEN': csrfToken,
-                'Accept': 'application/json'
-            }
-        })
-        .then(parseJsonResponse)
-        .then(data => {
-             if (data.success) {
-                 showNotification('Evidence deleted', 'success');
-                 location.reload();
-             }
-        })
-        .catch(err => { 
-            showNotification(err.message || 'Error deleting evidence', 'danger');
-            btn.disabled = false;
-        });
-    });
-
-    // Save Control logic (Edit)
-    var btnSaveControl = document.getElementById('btn-save-control');
-    if (btnSaveControl) {
-        btnSaveControl.addEventListener('click', function() {
-            var form = document.getElementById('editControlForm');
-
-            // Manual validation instead of form.checkValidity() to avoid hidden browser popups
-            var ctrlIdVal = document.getElementById('ec-ctrl-id');
-            if (ctrlIdVal && !ctrlIdVal.value.trim()) {
-                showNotification('Control ID is required.', 'danger');
-                ctrlIdVal.focus();
-                return;
-            }
-
-            // Validate file types for newly selected files
-            var fileTypeSelects = form.querySelectorAll('#ec-selected-files-list select[name="file_types[]"]');
-            var fileInput = document.getElementById('ec-evidences');
-            if (fileInput && fileInput.files.length > 0 && fileTypeSelects.length > 0) {
-                var allTypesSelected = true;
-                fileTypeSelects.forEach(function(sel) {
-                    if (!sel.value) allTypesSelected = false;
-                });
-                if (!allTypesSelected) {
-                    showNotification('Please select a File Type for each uploaded file.', 'danger');
-                    return;
-                }
-            }
-
-            var id = document.getElementById('ec-id').value;
-            if (!id) return;
-            
-            var msg = document.getElementById('ec-save-msg');
-            msg.innerHTML = '<i class="bi bi-hourglass-split"></i> Saving...';
-            btnSaveControl.disabled = true;
-
-            var formData = new FormData(form);
-            formData.append('_method', 'PUT');
-
-            // If no files are selected, do not send empty evidences[]
-            if (fileInput && fileInput.files.length === 0) {
-                formData.delete('evidences[]');
-            }
-
-            fetch('/controls/' + id, {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': csrfToken,
-                    'Accept': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                body: formData
-            })
-            .then(parseJsonResponse)
-            .then(data => {
-                if (data.success) {
-                    showNotification(data.message, 'success');
-                    location.reload();
-                } else {
-                    showNotification(data.message || 'Error occurred', 'danger');
-                }
-            })
-            .catch(err => {
-                showNotification(err.message || 'An error occurred while saving.', 'danger');
-            })
-            .finally(() => {
-                msg.innerHTML = '<i class="bi bi-info-circle"></i> Ready to save';
-                btnSaveControl.disabled = false;
-            });
-        });
-    }
-
-    /* ── View Evidence Modal Logic (iframe approach) ──────── */
-    var viewEvidenceModalEl = document.getElementById('viewEvidenceModal');
-    var viewEvidenceModal   = new bootstrap.Modal(viewEvidenceModalEl);
-
-    // Reset state when modal closes
-    viewEvidenceModalEl.addEventListener('hidden.bs.modal', function () {
-        var iframe = document.getElementById('ve-pdf-iframe');
-        if (iframe) iframe.src = 'about:blank';
-        veShowPanel('loading');
-        var listCont = document.getElementById('ve-files-list-container');
-        if (listCont) listCont.style.display = 'none';
-    });
-
-    /* Show one panel at a time: 'loading' | 'iframe' | 'error' */
-    function veShowPanel(state) {
-        var loading = document.getElementById('ve-loading-container');
-        var iframe  = document.getElementById('ve-pdf-iframe');
-        var errCont = document.getElementById('ve-error-container');
-        if (loading) loading.style.display = state === 'loading' ? 'flex'  : 'none';
-        if (iframe)  iframe.style.display  = state === 'iframe'  ? 'flex'  : 'none';
-        if (errCont) errCont.style.display = state === 'error'   ? 'flex'  : 'none';
-    }
-
-    function veSetError(msg, evidenceId) {
-        var errMsg  = document.getElementById('ve-error-msg');
-        var dlFallback = document.getElementById('ve-download-fallback');
-        if (errMsg) errMsg.textContent = msg || 'Could not load the document.';
-        if (dlFallback && evidenceId) dlFallback.href = '/evidence/' + evidenceId;
-        veShowPanel('error');
-    }
-
-    // Dynamic Multi-File Selection Preview Helper
-    function setupFilePickerPreview(inputId, previewListId) {
-        var input = document.getElementById(inputId);
-        var container = document.getElementById(previewListId);
-        if (!input || !container) return;
-
-        var FILE_TYPE_OPTIONS = [
-            { value: '',                               label: '-- Select File Type *' },
-            { value: 'Population Data',                label: 'Population Data' },
-            { value: 'Information provided by Entity', label: 'Information provided by Entity' },
-            { value: 'Supporting Document',            label: 'Supporting Document' },
-            { value: 'Others',                         label: 'Others' },
-        ];
-
-        input.addEventListener('change', function () {
-            container.innerHTML = '';
-            if (!this.files || this.files.length === 0) return;
-
-            if (this.files.length > 10) {
-                alert('You can only upload a maximum of 10 files at once.');
-                input.value = '';
-                return;
-            }
-
-            Array.from(this.files).forEach(function (file, idx) {
-                if (file.size > 10 * 1024 * 1024) {
-                    alert('File "' + file.name + '" is too large. Maximum allowed size is 10MB.');
-                    input.value = '';
-                    container.innerHTML = '';
-                    return;
-                }
-                var sizeMb = (file.size / (1024 * 1024)).toFixed(2);
-                var div = document.createElement('div');
-
-                div.style.cssText = 'background:#f0fdf4; border:1px solid #bbf7d0; padding:8px 12px; border-radius:8px; display:flex; flex-direction:column; gap:6px; font-size:12px;';
-
-                var optionsHtml = FILE_TYPE_OPTIONS.map(function(o) {
-                    return '<option value="' + o.value + '">' + o.label + '</option>';
-                }).join('');
-
-                div.innerHTML = `
-                    <div style="display:flex; align-items:center; gap:8px;">
-                        <i class="bi bi-file-earmark-arrow-up-fill text-success" style="font-size:15px; flex-shrink:0;"></i>
-                        <span style="font-weight:600; text-overflow:ellipsis; overflow:hidden; white-space:nowrap; max-width:220px;" title="${file.name}">${file.name}</span>
-                        <span style="font-size:11px; color:#6b7280; margin-left:auto; white-space:nowrap;">(${sizeMb} MB)</span>
-                    </div>
-                    <div style="display:flex; align-items:center; gap:8px;">
-                        <label style="font-size:11.5px; font-weight:600; color:#374151; white-space:nowrap; min-width:70px;">File Type <span style="color:#dc2626;">*</span></label>
-                        <select name="file_types[]" required
-                            style="flex:1; font-size:12px; padding:4px 8px; border:1px solid #d1d5db; border-radius:6px; background:#fff; color:#111827; min-width:0; cursor:pointer;">
-                            ${optionsHtml}
-                        </select>
                     </div>
                 `;
-                container.appendChild(div);
-            });
-        });
-    }
 
-    setupFilePickerPreview('ec-evidences', 'ec-selected-files-list');
+            }
 
-    /* Load a file into the iframe */
-    function veLoadInFrame(evidenceId, evidenceName, evidenceType) {
-        var iframe = document.getElementById('ve-pdf-iframe');
-        var dlBtn  = document.getElementById('ve-download-btn');
-        var modalTitle = document.getElementById('ve-modal-title-text');
-        if (dlBtn) dlBtn.href = '/evidence/' + evidenceId;
-
-        if (modalTitle && evidenceName) {
-            var typeBadge = evidenceType ? ' \u2014 [' + evidenceType + ']' : '';
-            modalTitle.textContent = 'Evidence Preview: ' + evidenceName + typeBadge;
         }
 
-        // Show spinner while iframe loads
-        veShowPanel('loading');
-        iframe.src = 'about:blank';
+        async function refreshControlIds() {
 
-        var url = '/evidence/' + evidenceId + '/preview-pdf';
-        console.log('[Preview] Loading iframe src:', url);
-
-        // When iframe finishes loading, show it (or catch an error)
-        iframe.onload = function () {
-            // If the src is still about:blank, skip
-            if (iframe.src === 'about:blank' || iframe.src === window.location.origin + '/blank') return;
-            try {
-                // If the server redirected to login, the iframe content-type won't be PDF
-                // We detect this by trying to access the iframe document
-                var iDoc = iframe.contentDocument || iframe.contentWindow.document;
-                var bodyText = iDoc && iDoc.body ? iDoc.body.innerText : '';
-                if (bodyText.includes('Login') || bodyText.includes('Unauthorized')) {
-                    veSetError('Session expired. Please refresh the page and log in again.', evidenceId);
-                    return;
-                }
-            } catch (e) {
-                // Cross-origin or PDF content — this is actually GOOD (PDF renders)
+            if (
+                !uptiList ||
+                !generatedIdsBox
+            ) {
+                return;
             }
-            veShowPanel('iframe');
-        };
 
-        iframe.onerror = function () {
-            veSetError('Failed to load the document. Please try downloading instead.', evidenceId);
-        };
+            const selectedUptis =
+                Array.from(
+                    uptiList.querySelectorAll(
+                        'input[name="uptis[]"]:checked'
+                    )
+                ).map(
+                    function (input) {
+                        return input.value;
+                    }
+                );
 
-        // Small delay to let the modal finish animating before setting src
-        setTimeout(function () {
-            iframe.src = url;
-        }, 200);
+            if (
+                !selectedUptis.length
+            ) {
+
+                generatedIdsBox.innerHTML = `
+                    <div
+                        style="
+                            font-size:12.5px;
+                            color:#64748b;
+                        "
+                    >
+                        Select UPTI to generate Control ID automatically.
+                    </div>
+                `;
+
+                return;
+
+            }
+
+            generatedIdsBox.innerHTML = `
+                <div
+                    style="
+                        font-size:12.5px;
+                        color:#64748b;
+                        display:flex;
+                        align-items:center;
+                        gap:7px;
+                    "
+                >
+
+                    <span
+                        class="spinner-border spinner-border-sm"
+                        role="status"
+                    ></span>
+
+                    Generating Control IDs...
+
+                </div>
+            `;
+
+            const params =
+                new URLSearchParams();
+
+            selectedUptis.forEach(
+                function (upti) {
+
+                    params.append(
+                        'uptis[]',
+                        upti
+                    );
+
+                }
+            );
+
+            try {
+
+                const response =
+                    await fetch(
+                        `{{ route('controls.nextIds') }}?${params.toString()}`,
+                        {
+                            method:
+                                'GET',
+
+                            headers:{
+                                'Accept':
+                                    'application/json',
+
+                                'X-Requested-With':
+                                    'XMLHttpRequest'
+                            }
+                        }
+                    );
+
+                const data =
+                    await parseJsonResponse(
+                        response
+                    );
+
+                if (
+                    !data.success
+                ) {
+
+                    throw new Error(
+                        data.message
+                        || 'Failed to generate Control IDs.'
+                    );
+
+                }
+
+                const controlIds =
+                    data.control_ids
+                    || {};
+
+                generatedIdsBox.innerHTML =
+                    Object
+                        .entries(
+                            controlIds
+                        )
+                        .map(
+                            function (
+                                [upti, controlId]
+                            ) {
+
+                                return `
+                                    <div class="mc-control-id-row">
+
+                                        <span class="mc-control-id-upti">
+
+                                            ${escapeHtml(
+                                                upti
+                                            )}
+
+                                        </span>
+
+                                        <span class="mc-control-id-value">
+
+                                            ${escapeHtml(
+                                                controlId
+                                            )}
+
+                                        </span>
+
+                                    </div>
+                                `;
+
+                            }
+                        )
+                        .join('');
+
+            } catch (error) {
+
+                generatedIdsBox.innerHTML = `
+                    <div
+                        style="
+                            color:#dc3545;
+                            font-size:12.5px;
+                        "
+                    >
+
+                        ${escapeHtml(
+                            error.message
+                        )}
+
+                    </div>
+                `;
+
+            }
+
+        }
+
+        uptiList.addEventListener(
+            'change',
+            async function (event) {
+
+                if (
+                    event.target &&
+                    event.target.matches(
+                        'input[name="uptis[]"]'
+                    )
+                ) {
+
+                    await refreshApplications();
+
+                }
+
+            }
+        );
+
+        addBtn.addEventListener(
+            'click',
+            function () {
+
+                addForm.reset();
+
+                applicationList.innerHTML = `
+                    <div
+                        style="
+                            font-size:12.5px;
+                            color:#64748b;
+                        "
+                    >
+                        Select UPTI first.
+                    </div>
+                `;
+
+                generatedIdsBox.innerHTML = `
+                    <div
+                        style="
+                            font-size:12.5px;
+                            color:#64748b;
+                        "
+                    >
+                        Select UPTI to generate Control ID automatically.
+                    </div>
+                `;
+
+                openModal(
+                    addModal
+                );
+
+            }
+        );
+
+        addSaveBtn.addEventListener(
+            'click',
+            async function () {
+
+                if (
+                    !addForm.checkValidity()
+                ) {
+
+                    addForm.reportValidity();
+
+                    return;
+
+                }
+
+                const selectedUptis =
+                    Array.from(
+                        document.querySelectorAll(
+                            '#mc-uptis-list input[name="uptis[]"]:checked'
+                        )
+                    );
+
+                const selectedApplication =
+                    document.querySelector(
+                        '#mc-applications-list input[name="application_id"]:checked'
+                    );
+
+                if (
+                    !selectedUptis.length
+                ) {
+
+                    showNotification(
+                        'Please select at least one UPTI.',
+                        'danger'
+                    );
+
+                    return;
+
+                }
+
+                if (
+                    !selectedApplication
+                ) {
+
+                    showNotification(
+                        'Please select an Application.',
+                        'danger'
+                    );
+
+                    return;
+
+                }
+
+                const formData =
+                    new FormData(
+                        addForm
+                    );
+
+                formData.set(
+                    'application_id',
+                    selectedApplication.value
+                );
+
+                addSaveBtn.disabled =
+                    true;
+
+                if (addSaveMsg) {
+
+                    addSaveMsg.innerHTML =
+                        '<i class="bi bi-hourglass-split"></i> Saving...';
+
+                }
+
+                try {
+
+                    const response =
+                        await fetch(
+                            '{{ route('controls.store') }}',
+                            {
+                                method:
+                                    'POST',
+
+                                headers:{
+                                    'X-CSRF-TOKEN':
+                                        csrfToken,
+
+                                    'Accept':
+                                        'application/json',
+
+                                    'X-Requested-With':
+                                        'XMLHttpRequest'
+                                },
+
+                                body:
+                                    formData
+                            }
+                        );
+
+                    const data =
+                        await parseJsonResponse(
+                            response
+                        );
+
+                    showNotification(
+                        data.message
+                        || 'Control created successfully.',
+                        'success'
+                    );
+
+                    closeModal(
+                        addModal
+                    );
+
+                    setTimeout(
+                        function () {
+
+                            window.location.reload();
+
+                        },
+                        500
+                    );
+
+                } catch (error) {
+
+                    showNotification(
+                        error.message
+                        || 'Failed to create control.',
+                        'danger'
+                    );
+
+                } finally {
+
+                    addSaveBtn.disabled =
+                        false;
+
+                    if (addSaveMsg) {
+
+                        addSaveMsg.innerHTML =
+                            '<i class="bi bi-info-circle"></i> Ready to save';
+
+                    }
+
+                }
+
+            }
+        );
+
     }
 
-    /* Called when the eye button is clicked */
-    document.addEventListener('click', function (e) {
-        var btnView = e.target.closest('.btn-view-files');
-        if (!btnView) return;
-        e.preventDefault();
-        e.stopPropagation();
 
-        var row = btnView.closest('tr');
-        if (!row) return;
+    /* ============================================================
+       EDIT / UPLOAD / VIEW
+       ============================================================ */
 
-        var controlDbId = row.dataset.id     || '';
-        var ctrlId      = row.dataset.ctrlId || '';
-        if (!controlDbId) {
-            showNotification('Cannot identify control record.', 'danger');
+    wireClose(
+        'editControlModal',
+        'editControlClose',
+        'editControlCancel'
+    );
+
+    document.addEventListener(
+        'click',
+        function (event) {
+
+            const btn =
+                event.target.closest(
+                    '.btn-edit-ctrl'
+                );
+
+            if (!btn) {
+                return;
+            }
+
+            const row =
+                btn.closest(
+                    'tr[data-id]'
+                );
+
+            if (!row) {
+                return;
+            }
+
+            const id =
+                row.dataset.id
+                || '';
+
+            const ctrlId =
+                row.dataset.ctrlId
+                || '';
+
+            const ctrlDesc =
+                row.dataset.ctrlDesc
+                || '';
+
+            const ctrlFrek =
+                row.dataset.ctrlFrek
+                || '';
+
+            const ctrlUpti =
+                row.dataset.ctrlUpti
+                || '';
+
+            const ctrlKey =
+                row.dataset.ctrlKeyctrl
+                || '';
+
+            const ctrlStatus =
+                row.dataset.ctrlStatus
+                || 'not_started';
+
+            const appId =
+                row.dataset.appId
+                || '';
+
+            const catId =
+                row.dataset.catId
+                || '';
+
+            const ecDbId =
+                document.getElementById(
+                    'ec-id'
+                );
+
+            const ecApp =
+                document.getElementById(
+                    'ec-application'
+                );
+
+            const ecCat =
+                document.getElementById(
+                    'ec-category'
+                );
+
+            const ecId =
+                document.getElementById(
+                    'ec-ctrl-id'
+                );
+
+            const ecDesc =
+                document.getElementById(
+                    'ec-description'
+                );
+
+            const ecFrek =
+                document.getElementById(
+                    'ec-frekuensi'
+                );
+
+            const ecUpti =
+                document.getElementById(
+                    'ec-upti'
+                );
+
+            const ecKey =
+                document.getElementById(
+                    'ec-key-control'
+                );
+
+            const ecStatus =
+                document.getElementById(
+                    'ec-status-control'
+                );
+
+            if (ecDbId) {
+                ecDbId.value =
+                    id;
+            }
+
+            if (ecApp) {
+                ecApp.value =
+                    appId;
+            }
+
+            if (ecCat) {
+                ecCat.value =
+                    catId;
+            }
+
+            if (ecId) {
+                ecId.value =
+                    ctrlId;
+            }
+
+            if (ecDesc) {
+                ecDesc.value =
+                    ctrlDesc.replace(
+                        /\\/g,
+                        ''
+                    );
+            }
+
+            if (ecFrek) {
+                ecFrek.value =
+                    ctrlFrek;
+            }
+
+            if (ecUpti) {
+                ecUpti.value =
+                    ctrlUpti;
+            }
+
+            if (ecKey) {
+                ecKey.value =
+                    ctrlKey;
+            }
+
+            if (ecStatus) {
+                ecStatus.value =
+                    ctrlStatus;
+            }
+
+            const saveButton =
+                document.getElementById(
+                    'btn-save-control'
+                );
+
+            const uploadSection =
+                document.getElementById(
+                    'ec-upload-section'
+                );
+
+            if (
+                isOfficer
+            ) {
+
+                const editable =
+                    [
+                        'not_started',
+                        'drafting',
+                        'return_to_officer',
+                    ].includes(
+                        ctrlStatus
+                    );
+
+                if (uploadSection) {
+
+                    uploadSection.style.display =
+                        editable
+                            ? 'block'
+                            : 'none';
+
+                }
+
+                if (saveButton) {
+
+                    saveButton.style.display =
+                        editable
+                            ? 'inline-flex'
+                            : 'none';
+
+                }
+
+            }
+
+            if (
+                !isAdmin &&
+                !isOfficer &&
+                saveButton
+            ) {
+
+                saveButton.style.display =
+                    'none';
+
+            }
+
+            const evidenceList =
+                document.getElementById(
+                    'ec-existing-files'
+                );
+
+            if (evidenceList) {
+
+                evidenceList.innerHTML = `
+                    <li
+                        style="
+                            font-size:12px;
+                            color:#94a3b8;
+                            font-style:italic;
+                        "
+                    >
+
+                        <i class="bi bi-hourglass-split"></i>
+
+                        Loading files...
+
+                    </li>
+                `;
+
+            }
+
+            fetch(
+                `/controls/${id}/evidence`,
+                {
+                    headers:{
+                        'Accept':
+                            'application/json',
+                        'X-CSRF-TOKEN':
+                            csrfToken
+                    }
+                }
+            )
+            .then(
+                parseJsonResponse
+            )
+            .then(
+                function (data) {
+
+                    renderExistingEvidences(
+                        data.evidences
+                        || [],
+                        ctrlStatus
+                    );
+
+                }
+            )
+            .catch(
+                function () {
+
+                    renderExistingEvidences(
+                        [],
+                        ctrlStatus
+                    );
+
+                }
+            );
+
+            openModal(
+                document.getElementById(
+                    'editControlModal'
+                )
+            );
+
+        }
+    );
+
+
+    function renderExistingEvidences(
+        evidences,
+        controlStatus
+    ) {
+
+        const list =
+            document.getElementById(
+                'ec-existing-files'
+            );
+
+        if (!list) {
             return;
         }
 
-        // Set modal title
-        var modalTitle = document.getElementById('ve-modal-title-text');
-        if (modalTitle) modalTitle.textContent = 'Evidence Preview \u2014 ' + ctrlId;
+        list.innerHTML =
+            '';
 
-        // Reset and open immediately showing spinner
-        document.getElementById('ve-files-list-container').style.display = 'none';
-        veShowPanel('loading');
-        viewEvidenceModal.show();
+        if (
+            !evidences.length
+        ) {
 
-        // Fetch evidence list from server
-        loadAndRenderEvidences(controlDbId, function (evidences) {
-            if (evidences.length === 0) {
-                veSetError('No evidence files attached to this control.\nUpload evidence using the Edit button.', null);
+            list.innerHTML = `
+                <li
+                    style="
+                        font-size:12px;
+                        color:#94a3b8;
+                        font-style:italic;
+                    "
+                >
+
+                    No evidence files currently attached.
+
+                </li>
+            `;
+
+            return;
+
+        }
+
+        const fileTypeOptions = [
+            {
+                value:'',
+                label:'-- File Type --'
+            },
+            {
+                value:'Population Data',
+                label:'Population Data'
+            },
+            {
+                value:'Information provided by Entity',
+                label:'Information provided by Entity'
+            },
+            {
+                value:'Supporting Document',
+                label:'Supporting Document'
+            },
+            {
+                value:'Others',
+                label:'Others'
+            }
+        ];
+
+        evidences.forEach(
+            function (ev) {
+
+                if (
+                    ev.file_type ===
+                    'Berita Acara'
+                ) {
+
+                    return;
+
+                }
+
+                const li =
+                    document.createElement(
+                        'li'
+                    );
+
+                li.style.cssText = `
+                    background:#f8fafc;
+                    padding:10px 12px;
+                    border-radius:6px;
+                    border:1px solid #e2e8f0;
+                    display:flex;
+                    align-items:center;
+                    gap:8px;
+                `;
+
+                let fileTypeHtml =
+                    '';
+
+                if (
+                    isAdmin
+                ) {
+
+                    const options =
+                        fileTypeOptions
+                            .map(
+                                function (
+                                    option
+                                ) {
+
+                                    return `
+                                        <option
+                                            value="${escapeHtml(option.value)}"
+                                            ${
+                                                option.value ===
+                                                (
+                                                    ev.file_type
+                                                    || ''
+                                                )
+                                                    ? 'selected'
+                                                    : ''
+                                            }
+                                        >
+
+                                            ${escapeHtml(
+                                                option.label
+                                            )}
+
+                                        </option>
+                                    `;
+
+                                }
+                            )
+                            .join('');
+
+                    fileTypeHtml = `
+                        <select
+                            class="existing-file-type-select"
+                            data-id="${ev.id}"
+                            data-original="${escapeHtml(ev.file_type || '')}"
+                            style="
+                                font-size:11.5px;
+                                padding:3px 7px;
+                                border:1px solid #d1d5db;
+                                border-radius:5px;
+                                background:#fff;
+                                color:#111827;
+                                min-width:160px;
+                            "
+                        >
+
+                            ${options}
+
+                        </select>
+                    `;
+
+                } else {
+
+                    fileTypeHtml = `
+                        <span
+                            style="
+                                background:#e0e7ff;
+                                color:#3730a3;
+                                font-size:11px;
+                                font-weight:600;
+                                padding:2px 8px;
+                                border-radius:4px;
+                                white-space:nowrap;
+                            "
+                        >
+
+                            ${escapeHtml(
+                                ev.file_type
+                                || 'No type'
+                            )}
+
+                        </span>
+                    `;
+
+                }
+
+                let deleteHtml =
+                    '';
+
+                if (
+                    isAdmin ||
+                    (
+                        isOfficer &&
+                        [
+                            'not_started',
+                            'drafting',
+                            'return_to_officer'
+                        ].includes(
+                            controlStatus
+                        )
+                    )
+                ) {
+
+                    deleteHtml = `
+                        <button
+                            type="button"
+                            class="btn-delete-ev"
+                            data-id="${ev.id}"
+                            style="
+                                color:#dc3545;
+                                background:#fef2f2;
+                                border:none;
+                                padding:4px 8px;
+                                border-radius:4px;
+                                cursor:pointer;
+                                font-size:11.5px;
+                            "
+                        >
+
+                            <i class="bi bi-trash3-fill"></i>
+
+                        </button>
+                    `;
+
+                }
+
+                li.innerHTML = `
+                    <a
+                        href="{{ url('/evidence') }}/${ev.id}"
+                        target="_blank"
+                        style="
+                            display:flex;
+                            align-items:center;
+                            gap:8px;
+                            flex:1;
+                            min-width:0;
+                            color:#198754;
+                            text-decoration:none;
+                            font-weight:600;
+                            font-size:12px;
+                        "
+                    >
+
+                        <i class="bi bi-file-earmark-text"></i>
+
+                        <span
+                            style="
+                                white-space:nowrap;
+                                overflow:hidden;
+                                text-overflow:ellipsis;
+                                max-width:220px;
+                            "
+                        >
+
+                            ${escapeHtml(
+                                ev.original_name
+                                || ev.file_name
+                            )}
+
+                        </span>
+
+                    </a>
+
+                    ${fileTypeHtml}
+
+                    ${deleteHtml}
+                `;
+
+                list.appendChild(
+                    li
+                );
+
+                const select =
+                    li.querySelector(
+                        '.existing-file-type-select'
+                    );
+
+                if (
+                    select &&
+                    isAdmin
+                ) {
+
+                    select.addEventListener(
+                        'change',
+                        async function () {
+
+                            const newValue =
+                                this.value;
+
+                            const originalValue =
+                                this.dataset.original
+                                || '';
+
+                            if (
+                                newValue ===
+                                originalValue
+                            ) {
+
+                                return;
+
+                            }
+
+                            const confirmed =
+                                await Swal.fire({
+                                    title:
+                                        'Change File Type?',
+
+                                    text:
+                                        'Changing the File Type may affect the control workflow.',
+
+                                    icon:
+                                        'warning',
+
+                                    showCancelButton:
+                                        true,
+
+                                    confirmButtonText:
+                                        'Yes, change it',
+
+                                    cancelButtonText:
+                                        'Cancel',
+
+                                    confirmButtonColor:
+                                        '#198754'
+                                });
+
+                            if (
+                                !confirmed.isConfirmed
+                            ) {
+
+                                this.value =
+                                    originalValue;
+
+                                return;
+
+                            }
+
+                            try {
+
+                                const response =
+                                    await fetch(
+                                        `/evidence/${ev.id}`,
+                                        {
+                                            method:
+                                                'PUT',
+
+                                            headers:{
+                                                'X-CSRF-TOKEN':
+                                                    csrfToken,
+
+                                                'Accept':
+                                                    'application/json',
+
+                                                'Content-Type':
+                                                    'application/json'
+                                            },
+
+                                            body:
+                                                JSON.stringify({
+                                                    file_type:
+                                                        newValue
+                                                })
+                                        }
+                                    );
+
+                                const data =
+                                    await parseJsonResponse(
+                                        response
+                                    );
+
+                                this.dataset.original =
+                                    newValue;
+
+                                showNotification(
+                                    data.message
+                                    || 'File Type updated.',
+                                    'success'
+                                );
+
+                            } catch (error) {
+
+                                this.value =
+                                    originalValue;
+
+                                showNotification(
+                                    error.message
+                                    || 'Failed to update File Type.',
+                                    'danger'
+                                );
+
+                            }
+
+                        }
+                    );
+
+                }
+
+            }
+        );
+
+    }
+
+
+    /* ============================================================
+       FILE PICKER
+       ============================================================ */
+
+    const fileInput =
+        document.getElementById(
+            'ec-evidences'
+        );
+
+    const selectedFilesContainer =
+        document.getElementById(
+            'ec-selected-files-list'
+        );
+
+    if (
+        fileInput &&
+        selectedFilesContainer
+    ) {
+
+        fileInput.addEventListener(
+            'change',
+            function () {
+
+                selectedFilesContainer.innerHTML =
+                    '';
+
+                if (
+                    !this.files ||
+                    !this.files.length
+                ) {
+
+                    return;
+
+                }
+
+                if (
+                    this.files.length > 10
+                ) {
+
+                    showNotification(
+                        'You can upload a maximum of 10 files at once.',
+                        'danger'
+                    );
+
+                    this.value =
+                        '';
+
+                    return;
+
+                }
+
+                Array.from(
+                    this.files
+                ).forEach(
+                    function (file, index) {
+
+                        if (
+                            file.size >
+                            10 * 1024 * 1024
+                        ) {
+
+                            showNotification(
+                                `File "${file.name}" is larger than 10MB.`,
+                                'danger'
+                            );
+
+                            return;
+
+                        }
+
+                        const div =
+                            document.createElement(
+                                'div'
+                            );
+
+                        div.style.cssText = `
+                            background:#f0fdf4;
+                            border:1px solid #bbf7d0;
+                            padding:8px 12px;
+                            border-radius:8px;
+                            display:flex;
+                            flex-direction:column;
+                            gap:6px;
+                            font-size:12px;
+                        `;
+
+                        const options =
+                            [
+                                '<option value="">-- Select File Type * --</option>'
+                            ]
+                            .concat(
+                                [
+                                    'Population Data',
+                                    'Information provided by Entity',
+                                    'Supporting Document',
+                                    'Others'
+                                ].map(
+                                    function (
+                                        type
+                                    ) {
+
+                                        return `
+                                            <option value="${escapeHtml(type)}">
+
+                                                ${escapeHtml(type)}
+
+                                            </option>
+                                        `;
+
+                                    }
+                                )
+                            )
+                            .join('');
+
+                        div.innerHTML = `
+                            <div
+                                style="
+                                    display:flex;
+                                    align-items:center;
+                                    gap:8px;
+                                "
+                            >
+
+                                <i
+                                    class="bi bi-file-earmark-arrow-up-fill"
+                                    style="
+                                        color:#198754;
+                                        font-size:15px;
+                                    "
+                                ></i>
+
+                                <span
+                                    style="
+                                        font-weight:600;
+                                        overflow:hidden;
+                                        white-space:nowrap;
+                                        text-overflow:ellipsis;
+                                        max-width:220px;
+                                    "
+                                >
+
+                                    ${escapeHtml(file.name)}
+
+                                </span>
+
+                            </div>
+
+                            <div
+                                style="
+                                    display:flex;
+                                    align-items:center;
+                                    gap:8px;
+                                "
+                            >
+
+                                <label
+                                    style="
+                                        font-size:11.5px;
+                                        font-weight:600;
+                                        color:#374151;
+                                    "
+                                >
+
+                                    File Type *
+
+                                </label>
+
+                                <select
+                                    name="file_types[]"
+                                    required
+                                    style="
+                                        flex:1;
+                                        font-size:12px;
+                                        padding:4px 8px;
+                                        border:1px solid #d1d5db;
+                                        border-radius:6px;
+                                        background:#fff;
+                                    "
+                                >
+
+                                    ${options}
+
+                                </select>
+
+                            </div>
+                        `;
+
+                        selectedFilesContainer.appendChild(
+                            div
+                        );
+
+                    }
+                );
+
+            }
+        );
+
+    }
+
+
+    /* ============================================================
+       SAVE EDIT / UPLOAD
+       ============================================================ */
+
+    const saveControlBtn =
+        document.getElementById(
+            'btn-save-control'
+        );
+
+    if (saveControlBtn) {
+
+        saveControlBtn.addEventListener(
+            'click',
+            async function () {
+
+                const form =
+                    document.getElementById(
+                        'editControlForm'
+                    );
+
+                const id =
+                    document
+                        .getElementById(
+                            'ec-id'
+                        )
+                        ?.value;
+
+                if (!id) {
+                    return;
+                }
+
+                if (
+                    isOfficer
+                ) {
+
+                    const input =
+                        document.getElementById(
+                            'ec-evidences'
+                        );
+
+                    if (
+                        !input ||
+                        !input.files.length
+                    ) {
+
+                        showNotification(
+                            'Please select at least one evidence file.',
+                            'danger'
+                        );
+
+                        return;
+
+                    }
+
+                    const typeSelects =
+                        form.querySelectorAll(
+                            'select[name="file_types[]"]'
+                        );
+
+                    for (
+                        const select
+                        of typeSelects
+                    ) {
+
+                        if (
+                            !select.value
+                        ) {
+
+                            showNotification(
+                                'Please select a File Type for each uploaded file.',
+                                'danger'
+                            );
+
+                            return;
+
+                        }
+
+                    }
+
+                }
+
+                saveControlBtn.disabled =
+                    true;
+
+                try {
+
+                    const formData =
+                        new FormData(
+                            form
+                        );
+
+                    formData.append(
+                        '_method',
+                        'PUT'
+                    );
+
+                    const response =
+                        await fetch(
+                            `/controls/${id}`,
+                            {
+                                method:
+                                    'POST',
+
+                                headers:{
+                                    'X-CSRF-TOKEN':
+                                        csrfToken,
+
+                                    'Accept':
+                                        'application/json',
+
+                                    'X-Requested-With':
+                                        'XMLHttpRequest'
+                                },
+
+                                body:
+                                    formData
+                            }
+                        );
+
+                    const data =
+                        await parseJsonResponse(
+                            response
+                        );
+
+                    showNotification(
+                        data.message
+                        || 'Saved successfully.',
+                        'success'
+                    );
+
+                    closeModal(
+                        document.getElementById(
+                            'editControlModal'
+                        )
+                    );
+
+                    setTimeout(
+                        function () {
+
+                            location.reload();
+
+                        },
+                        500
+                    );
+
+                } catch (error) {
+
+                    showNotification(
+                        error.message
+                        || 'Failed to save.',
+                        'danger'
+                    );
+
+                } finally {
+
+                    saveControlBtn.disabled =
+                        false;
+
+                }
+
+            }
+        );
+
+    }
+
+
+    /* ============================================================
+       DELETE EVIDENCE
+       ============================================================ */
+
+    document.addEventListener(
+        'click',
+        async function (event) {
+
+            const btn =
+                event.target.closest(
+                    '.btn-delete-ev'
+                );
+
+            if (!btn) {
                 return;
             }
 
-            var listCont = document.getElementById('ve-files-list-container');
-            var listUl   = document.getElementById('ve-files-ul');
+            const confirmed =
+                await Swal.fire({
+                    title:
+                        'Delete evidence?',
 
-            // Build tab strip if multiple files
-            if (evidences.length > 1 && listCont && listUl) {
-                listCont.style.display = 'block';
-                listUl.innerHTML = '';
+                    text:
+                        'This file will be permanently deleted.',
 
-                evidences.forEach(function (ev, idx) {
-                    var li       = document.createElement('li');
-                    var fileName = ev.original_name || ev.file_name || 'File ' + (idx + 1);
-                    var ext      = fileName.split('.').pop().toLowerCase();
-                    var iconCls  = ext === 'pdf'  ? 'bi-file-earmark-pdf-fill text-danger' :
-                                  (ext === 'xlsx' || ext === 'xls') ? 'bi-file-earmark-excel-fill text-success' :
-                                  'bi-file-earmark-word-fill text-primary';
-                    var isFirst  = idx === 0;
-                    var btnStyle = isFirst
-                        ? 'background:#198754; color:#fff; border:1px solid #198754;'
-                        : 'background:#f8f9fa; color:#495057; border:1px solid #dee2e6;';
-                    var ftBadge  = ev.file_type ? ' <span style="font-size:10px; font-weight:600; opacity:0.9; margin-left:4px;">(' + ev.file_type + ')</span>' : '';
-                    li.innerHTML = '<button type="button" class="ve-tab-btn btn btn-sm d-flex align-items-center gap-1" '
-                        + 'data-ev-id="' + ev.id + '" '
-                        + 'data-ev-name="' + encodeURIComponent(fileName) + '" '
-                        + 'data-ev-type="' + encodeURIComponent(ev.file_type || '') + '" '
-                        + 'style="' + btnStyle + ' padding:5px 12px; border-radius:6px; font-size:12.5px;">'
-                        + '<i class="bi ' + iconCls + '"></i>'
-                        + '<span style="max-width:140px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="' + fileName + '">' + fileName + '</span>'
-                        + ftBadge
-                        + '</button>';
-                    listUl.appendChild(li);
+                    icon:
+                        'warning',
+
+                    showCancelButton:
+                        true,
+
+                    confirmButtonText:
+                        'Delete',
+
+                    cancelButtonText:
+                        'Cancel',
+
+                    confirmButtonColor:
+                        '#dc3545'
                 });
 
-                listUl.querySelectorAll('.ve-tab-btn').forEach(function (btn) {
-                    btn.addEventListener('click', function () {
-                        listUl.querySelectorAll('.ve-tab-btn').forEach(function (b) {
-                            b.style.background  = '#f8f9fa';
-                            b.style.color       = '#495057';
-                            b.style.borderColor = '#dee2e6';
-                        });
-                        this.style.background  = '#198754';
-                        this.style.color       = '#fff';
-                        this.style.borderColor = '#198754';
-                        veLoadInFrame(this.dataset.evId,
-                                      decodeURIComponent(this.dataset.evName),
-                                      decodeURIComponent(this.dataset.evType));
-                    });
-                });
+            if (
+                !confirmed.isConfirmed
+            ) {
+
+                return;
+
             }
 
-            // Load the first (or only) file
-            veLoadInFrame(evidences[0].id,
-                          evidences[0].original_name || evidences[0].file_name,
-                          evidences[0].file_type || '');
-        });
-    });
+            const evId =
+                btn.dataset.id;
 
-    /* ── Delete Confirmation Modal ───────────────────────── */
-    var deleteModal  = document.getElementById('deleteControlModal');
-    var deleteLabel  = document.getElementById('delete-ctrl-id-label');
-    var btnConfirmDelete = document.getElementById('btn-confirm-delete');
-    var deleteDbId   = document.getElementById('delete-ctrl-db-id');
+            btn.disabled =
+                true;
 
-    wireClose('deleteControlModal', 'deleteControlClose', 'deleteControlCancel');
+            try {
 
-    document.addEventListener('click', function (e) {
-        var btn = e.target.closest('.btn-delete-ctrl');
-        if (!btn) return;
+                const response =
+                    await fetch(
+                        `/evidence/${evId}`,
+                        {
+                            method:
+                                'DELETE',
 
-        var row = btn.closest('tr');
-        var id = row.dataset.id;
-        var ctrlId = btn.dataset.ctrlId || '—';
-        
-        if (deleteLabel) deleteLabel.textContent = ctrlId;
-        if (deleteDbId) deleteDbId.value = id;
+                            headers:{
+                                'X-CSRF-TOKEN':
+                                    csrfToken,
 
-        openModal(deleteModal);
-    });
-    
-    if (btnConfirmDelete) {
-        btnConfirmDelete.addEventListener('click', function() {
-            var id = document.getElementById('delete-ctrl-db-id').value;
-            if (!id) return;
-            
-            btnConfirmDelete.disabled = true;
-            btnConfirmDelete.innerHTML = '<i class="bi bi-hourglass-split"></i> Deleting...';
+                                'Accept':
+                                    'application/json'
+                            }
+                        }
+                    );
 
-            fetch('/controls/' + id, {
-                method: 'DELETE',
-                headers: {
-                    'X-CSRF-TOKEN': csrfToken,
-                    'Accept': 'application/json'
+                const data =
+                    await parseJsonResponse(
+                        response
+                    );
+
+                showNotification(
+                    data.message
+                    || 'Evidence deleted.',
+                    'success'
+                );
+
+                setTimeout(
+                    function () {
+
+                        location.reload();
+
+                    },
+                    500
+                );
+
+            } catch (error) {
+
+                showNotification(
+                    error.message
+                    || 'Failed to delete evidence.',
+                    'danger'
+                );
+
+                btn.disabled =
+                    false;
+
+            }
+
+        }
+    );
+
+
+    /* ============================================================
+       DELETE CONTROL
+       ============================================================ */
+
+    if (
+        isAdmin
+    ) {
+
+        wireClose(
+            'deleteControlModal',
+            'deleteControlClose',
+            'deleteControlCancel'
+        );
+
+        const deleteDbId =
+            document.getElementById(
+                'delete-ctrl-db-id'
+            );
+
+        const deleteLabel =
+            document.getElementById(
+                'delete-ctrl-id-label'
+            );
+
+        document.addEventListener(
+            'click',
+            function (event) {
+
+                const btn =
+                    event.target.closest(
+                        '.btn-delete-ctrl'
+                    );
+
+                if (!btn) {
+                    return;
                 }
-            })
-            .then(parseJsonResponse)
-            .then(data => {
-                if (data.success) {
-                    showNotification(data.message, 'success');
-                    location.reload();
-                } else {
-                    showNotification(data.message || 'Error occurred', 'danger');
+
+                const row =
+                    btn.closest(
+                        'tr[data-id]'
+                    );
+
+                if (!row) {
+                    return;
                 }
-            })
-            .catch(err => {
-                showNotification(err.message || 'An error occurred while deleting.', 'danger');
-            })
-            .finally(() => {
-                btnConfirmDelete.disabled = false;
-                btnConfirmDelete.innerHTML = '<i class="bi bi-trash3-fill"></i> Confirm Delete';
-            });
-        });
+
+                const id =
+                    row.dataset.id;
+
+                const ctrlId =
+                    btn.dataset.ctrlId
+                    || '—';
+
+                if (deleteDbId) {
+                    deleteDbId.value =
+                        id;
+                }
+
+                if (deleteLabel) {
+                    deleteLabel.textContent =
+                        ctrlId;
+                }
+
+                openModal(
+                    document.getElementById(
+                        'deleteControlModal'
+                    )
+                );
+
+            }
+        );
+
+        const confirmDelete =
+            document.getElementById(
+                'btn-confirm-delete'
+            );
+
+        if (
+            confirmDelete
+        ) {
+
+            confirmDelete.addEventListener(
+                'click',
+                async function () {
+
+                    const id =
+                        deleteDbId?.value;
+
+                    if (!id) {
+                        return;
+                    }
+
+                    confirmDelete.disabled =
+                        true;
+
+                    try {
+
+                        const response =
+                            await fetch(
+                                `/controls/${id}`,
+                                {
+                                    method:
+                                        'DELETE',
+
+                                    headers:{
+                                        'X-CSRF-TOKEN':
+                                            csrfToken,
+
+                                        'Accept':
+                                            'application/json'
+                                    }
+                                }
+                            );
+
+                        const data =
+                            await parseJsonResponse(
+                                response
+                            );
+
+                        showNotification(
+                            data.message
+                            || 'Control deleted.',
+                            'success'
+                        );
+
+                        setTimeout(
+                            function () {
+                                location.reload();
+                            },
+                            500
+                        );
+
+                    } catch (error) {
+
+                        showNotification(
+                            error.message
+                            || 'Failed to delete Control.',
+                            'danger'
+                        );
+
+                    } finally {
+
+                        confirmDelete.disabled =
+                            false;
+
+                    }
+
+                }
+            );
+
+        }
+
+
+        /* ============================================================
+           DELETE ALL
+           ============================================================ */
+
+        wireClose(
+            'deleteAllControlModal',
+            'deleteAllControlClose',
+            'deleteAllControlCancel'
+        );
+
+        const deleteAllBtn =
+            document.getElementById(
+                'itc-delete-all-btn'
+            );
+
+        if (
+            deleteAllBtn
+        ) {
+
+            deleteAllBtn.addEventListener(
+                'click',
+                function () {
+
+                    openModal(
+                        document.getElementById(
+                            'deleteAllControlModal'
+                        )
+                    );
+
+                }
+            );
+
+        }
+
+        const confirmDeleteAll =
+            document.getElementById(
+                'btn-confirm-delete-all'
+            );
+
+        if (
+            confirmDeleteAll
+        ) {
+
+            confirmDeleteAll.addEventListener(
+                'click',
+                async function () {
+
+                    const appId =
+                        document.getElementById(
+                            'delete-all-app-id'
+                        )?.value;
+
+                    const catId =
+                        document.getElementById(
+                            'delete-all-cat-id'
+                        )?.value;
+
+                    const year =
+                        document.getElementById(
+                            'delete-all-year'
+                        )?.value;
+
+                    const quarter =
+                        document.getElementById(
+                            'delete-all-quarter'
+                        )?.value;
+
+                    confirmDeleteAll.disabled =
+                        true;
+
+                    try {
+
+                        const response =
+                            await fetch(
+                                '/controls/delete-all',
+                                {
+                                    method:
+                                        'DELETE',
+
+                                    headers:{
+                                        'Content-Type':
+                                            'application/json',
+
+                                        'X-CSRF-TOKEN':
+                                            csrfToken,
+
+                                        'Accept':
+                                            'application/json'
+                                    },
+
+                                    body:
+                                        JSON.stringify({
+                                            application_id:
+                                                appId,
+
+                                            it_category_id:
+                                                catId,
+
+                                            year:
+                                                year,
+
+                                            quarter:
+                                                quarter
+                                        })
+                                }
+                            );
+
+                        const data =
+                            await parseJsonResponse(
+                                response
+                            );
+
+                        showNotification(
+                            data.message
+                            || 'All controls deleted.',
+                            'success'
+                        );
+
+                        setTimeout(
+                            function () {
+
+                                location.reload();
+
+                            },
+                            500
+                        );
+
+                    } catch (error) {
+
+                        showNotification(
+                            error.message
+                            || 'Failed to delete controls.',
+                            'danger'
+                        );
+
+                    } finally {
+
+                        confirmDeleteAll.disabled =
+                            false;
+
+                    }
+
+                }
+            );
+
+        }
+
     }
 
-    /* ── Delete All Controls ─────────────────────────────── */
-    var btnConfirmDeleteAll = document.getElementById('btn-confirm-delete-all');
-    if (btnConfirmDeleteAll) {
-        btnConfirmDeleteAll.addEventListener('click', function() {
-            var appId = document.getElementById('delete-all-app-id').value;
-            var catId = document.getElementById('delete-all-cat-id').value;
-            var year = document.getElementById('delete-all-year').value;
-            var quarter = document.getElementById('delete-all-quarter').value;
-            
-            btnConfirmDeleteAll.disabled = true;
-            btnConfirmDeleteAll.innerHTML = '<i class="bi bi-hourglass-split"></i> Deleting...';
 
-            fetch('/controls/delete-all', {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': csrfToken,
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify({
-                    application_id: appId,
-                    it_category_id: catId,
-                    year: year,
-                    quarter: quarter
-                })
-            })
-            .then(parseJsonResponse)
-            .then(data => {
-                if (data.success) {
-                    showNotification(data.message, 'success');
-                    location.reload();
-                } else {
-                    showNotification(data.message || 'Error occurred', 'danger');
-                }
-            })
-            .catch(err => {
-                showNotification(err.message || 'An error occurred while deleting.', 'danger');
-            })
-            .finally(() => {
-                btnConfirmDeleteAll.disabled = false;
-                btnConfirmDeleteAll.innerHTML = '<i class="bi bi-trash3-fill"></i> Yes, Delete All';
-            });
-        });
-    }
+    /* ============================================================
+       ESCAPE
+       ============================================================ */
 
-    /* ── Quick Status Update from Table ──────────────────── */
-    document.addEventListener('change', function(e) {
-        if (e.target.classList.contains('status-quick-select')) {
-            var select = e.target;
-            var controlId = select.dataset.id;
-            var newStatus = select.value;
-            var originalValue = select.getAttribute('data-original-value') || select.querySelector('option[selected]')?.value;
+    document.addEventListener(
+        'keydown',
+        function (event) {
 
-            select.disabled = true;
+            if (
+                event.key !==
+                'Escape'
+            ) {
+                return;
+            }
 
-            fetch(`/controls/${controlId}/status`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify({ status_control: newStatus })
-            })
-            .then(response => {
-                if (!response.ok) throw new Error('Network error');
-                return response.json();
-            })
-            .then(data => {
-                if (data.success) {
-                    showNotification(data.message || 'Status updated successfully.', 'success');
-                    select.setAttribute('data-original-value', newStatus);
-                    // Update category status UI if needed (simple refresh is easiest)
-                    setTimeout(() => window.location.reload(), 800);
-                } else {
-                    throw new Error(data.message || 'Failed to update status.');
-                }
-            })
-            .catch(err => {
-                showNotification(err.message || 'An error occurred.', 'danger');
-                select.value = originalValue; // Revert change
-            })
-            .finally(() => {
-                select.disabled = false;
-            });
+            document
+                .querySelectorAll(
+                    '.itc-modal-backdrop.open'
+                )
+                .forEach(
+                    function (modal) {
+
+                        closeModal(
+                            modal
+                        );
+
+                    }
+                );
+
         }
-    });
+    );
 
-    // Store original values on load
-    document.querySelectorAll('.status-quick-select').forEach(function(select) {
-        select.setAttribute('data-original-value', select.value);
-    });
-
-    /* ── Global Escape to close any open modal ───────────── */
-    document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape') {
-            document.querySelectorAll('.itc-modal-backdrop.open').forEach(function (m) {
-                closeModal(m);
-            });
-        }
-    });
-
-}());
+})();
 </script>
 @endpush

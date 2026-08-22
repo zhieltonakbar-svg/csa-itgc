@@ -827,6 +827,16 @@ class ControlController extends Controller
             if ($toStatus === 'ongoing_review') {
                 $control->submitted_at =
                     now();
+
+                /*
+                 * Officer resubmit: clear the previous
+                 * reviewer/approver rejection notes so old
+                 * feedback doesn't linger on a fresh submission.
+                 */
+                if ($role === 'creator') {
+                    $control->reviewer_notes = null;
+                    $control->approver_notes = null;
+                }
             }
 
             if ($toStatus === 'ongoing_approval') {

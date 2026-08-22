@@ -661,6 +661,30 @@
     color:#fff;
 }
 
+.row-act-approve {
+    color:#198754;
+    border-color:rgba(25,135,84,.35);
+    background:rgba(25,135,84,.08);
+}
+
+.row-act-approve:hover {
+    background:#198754;
+    border-color:#198754;
+    color:#fff;
+}
+
+.row-act-reject {
+    color:#dc3545;
+    border-color:rgba(220,53,69,.35);
+    background:rgba(220,53,69,.08);
+}
+
+.row-act-reject:hover {
+    background:#dc3545;
+    border-color:#dc3545;
+    color:#fff;
+}
+
 .row-act-pdf {
     color:#e11d48;
     border-color:rgba(225,29,72,.3);
@@ -2097,6 +2121,109 @@
                                             @endif
 
                                         </div>
+
+                                    @elseif($isReviewer)
+
+                                        @if(
+                                            in_array(
+                                                $ctrl->status_control,
+                                                ['ongoing_review', 'return_to_reviewer'],
+                                                true
+                                            )
+                                        )
+
+                                            <button
+                                                type="button"
+                                                class="row-act-btn row-act-approve btn-approve-ctrl"
+                                                title="Approve"
+                                                aria-label="Approve {{ $ctrl->it_control_id }}"
+                                                data-ctrl-db-id="{{ $ctrl->id }}"
+                                                data-to-status="ongoing_approval"
+                                                data-notes-field="reviewer_notes"
+                                            >
+
+                                                <i class="bi bi-check-circle-fill"></i>
+
+                                            </button>
+
+                                            <button
+                                                type="button"
+                                                class="row-act-btn row-act-reject btn-reject-ctrl"
+                                                title="Reject"
+                                                aria-label="Reject {{ $ctrl->it_control_id }}"
+                                                data-ctrl-db-id="{{ $ctrl->id }}"
+                                                data-to-status="return_to_officer"
+                                                data-notes-field="reviewer_notes"
+                                            >
+
+                                                <i class="bi bi-x-circle-fill"></i>
+
+                                            </button>
+
+                                        @else
+
+                                            <button
+                                                type="button"
+                                                class="row-act-btn row-act-view btn-edit-ctrl"
+                                                title="View Control"
+                                                aria-label="View {{ $ctrl->it_control_id }}"
+                                            >
+
+                                                <i class="bi bi-eye-fill"></i>
+
+                                            </button>
+
+                                        @endif
+
+                                    @elseif($isApprover)
+
+                                        @if(
+                                            $ctrl->status_control ===
+                                            'ongoing_approval'
+                                        )
+
+                                            <button
+                                                type="button"
+                                                class="row-act-btn row-act-approve btn-approve-ctrl"
+                                                title="Approve"
+                                                aria-label="Approve {{ $ctrl->it_control_id }}"
+                                                data-ctrl-db-id="{{ $ctrl->id }}"
+                                                data-to-status="completed"
+                                                data-notes-field="approver_notes"
+                                            >
+
+                                                <i class="bi bi-check-circle-fill"></i>
+
+                                            </button>
+
+                                            <button
+                                                type="button"
+                                                class="row-act-btn row-act-reject btn-reject-ctrl"
+                                                title="Reject"
+                                                aria-label="Reject {{ $ctrl->it_control_id }}"
+                                                data-ctrl-db-id="{{ $ctrl->id }}"
+                                                data-to-status="return_to_officer"
+                                                data-notes-field="approver_notes"
+                                            >
+
+                                                <i class="bi bi-x-circle-fill"></i>
+
+                                            </button>
+
+                                        @else
+
+                                            <button
+                                                type="button"
+                                                class="row-act-btn row-act-view btn-edit-ctrl"
+                                                title="View Control"
+                                                aria-label="View {{ $ctrl->it_control_id }}"
+                                            >
+
+                                                <i class="bi bi-eye-fill"></i>
+
+                                            </button>
+
+                                        @endif
 
                                     @else
 
@@ -5860,6 +5987,200 @@
         );
 
     }
+
+
+    /* ============================================================
+       APPROVE / REJECT (Reviewer / Approver)
+       ============================================================ */
+
+    function countWords(text) {
+
+        return (text || '')
+            .trim()
+            .split(/\s+/)
+            .filter(Boolean)
+            .length;
+
+    }
+
+    async function performControlAction(
+        controlId,
+        toStatus,
+        actionLabel
+    ) {
+
+        const isReject =
+            toStatus === 'return_to_officer';
+
+        const result =
+            await Swal.fire({
+                title:
+                    `${actionLabel} this control?`,
+
+                input:
+                    'textarea',
+
+                inputLabel:
+                    'Notes (minimum 3 words, required)',
+
+                inputPlaceholder:
+                    'Write your notes here...',
+
+                inputAttributes:{
+                    'aria-label':
+                        'Notes'
+                },
+
+                showCancelButton:
+                    true,
+
+                confirmButtonText:
+                    actionLabel,
+
+                confirmButtonColor:
+                    isReject
+                        ? '#dc3545'
+                        : '#198754',
+
+                cancelButtonText:
+                    'Cancel',
+
+                inputValidator:
+                    function (value) {
+
+                        if (
+                            countWords(value) < 3
+                        ) {
+
+                            return 'Notes must contain at least 3 words.';
+
+                        }
+
+                    }
+            });
+
+        if (!result.isConfirmed) {
+            return;
+        }
+
+        const notes =
+            result.value;
+
+        try {
+
+            const response =
+                await fetch(
+                    `/controls/${controlId}/transition`,
+                    {
+                        method:
+                            'POST',
+
+                        headers:{
+                            'Content-Type':
+                                'application/json',
+
+                            'X-CSRF-TOKEN':
+                                csrfToken,
+
+                            'Accept':
+                                'application/json',
+
+                            'X-Requested-With':
+                                'XMLHttpRequest'
+                        },
+
+                        body:
+                            JSON.stringify({
+                                to_status:
+                                    toStatus,
+
+                                notes:
+                                    notes,
+                            })
+                    }
+                );
+
+            const data =
+                await parseJsonResponse(
+                    response
+                );
+
+            if (
+                !data.success
+            ) {
+
+                throw new Error(
+                    data.message
+                    || `Failed to ${actionLabel.toLowerCase()} control.`
+                );
+
+            }
+
+            showNotification(
+                data.message
+                || `Control ${actionLabel.toLowerCase()}d successfully.`,
+                'success'
+            );
+
+            setTimeout(
+                function () {
+
+                    location.reload();
+
+                },
+                500
+            );
+
+        } catch (error) {
+
+            showNotification(
+                error.message
+                || `Failed to ${actionLabel.toLowerCase()} control.`,
+                'danger'
+            );
+
+        }
+
+    }
+
+    document.addEventListener(
+        'click',
+        function (event) {
+
+            const approveBtn =
+                event.target.closest(
+                    '.btn-approve-ctrl'
+                );
+
+            if (approveBtn) {
+
+                performControlAction(
+                    approveBtn.dataset.ctrlDbId,
+                    approveBtn.dataset.toStatus,
+                    'Approve'
+                );
+
+                return;
+
+            }
+
+            const rejectBtn =
+                event.target.closest(
+                    '.btn-reject-ctrl'
+                );
+
+            if (rejectBtn) {
+
+                performControlAction(
+                    rejectBtn.dataset.ctrlDbId,
+                    rejectBtn.dataset.toStatus,
+                    'Reject'
+                );
+
+            }
+
+        }
+    );
 
 
     /* ============================================================

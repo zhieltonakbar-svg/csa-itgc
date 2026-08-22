@@ -577,8 +577,13 @@
 .row-act-stack {
     display:inline-flex;
     flex-direction:column;
-    align-items:flex-start;
+    align-items:stretch;
     gap:5px;
+}
+
+.row-act-stack .row-act-btn {
+    width:100%;
+    padding:0 10px;
 }
 
 .row-act-btn {
@@ -2033,18 +2038,43 @@
 
                                     @elseif($isOfficer)
 
+                                        @php
+                                            $officerCanEdit = in_array(
+                                                $ctrl->status_control,
+                                                ['not_started', 'drafting', 'return_to_officer'],
+                                                true
+                                            );
+                                        @endphp
+
                                         <div class="row-act-stack">
 
-                                            <button
-                                                type="button"
-                                                class="row-act-btn row-act-edit btn-edit-ctrl"
-                                                title="Upload Evidence"
-                                                aria-label="Upload Evidence {{ $ctrl->it_control_id }}"
-                                            >
+                                            @if($officerCanEdit)
 
-                                                <i class="bi bi-cloud-arrow-up-fill"></i>
+                                                <button
+                                                    type="button"
+                                                    class="row-act-btn row-act-edit btn-edit-ctrl"
+                                                    title="Upload Evidence"
+                                                    aria-label="Upload Evidence {{ $ctrl->it_control_id }}"
+                                                >
 
-                                            </button>
+                                                    <i class="bi bi-cloud-arrow-up-fill"></i>
+
+                                                </button>
+
+                                            @else
+
+                                                <button
+                                                    type="button"
+                                                    class="row-act-btn row-act-view btn-edit-ctrl"
+                                                    title="View Control"
+                                                    aria-label="View {{ $ctrl->it_control_id }}"
+                                                >
+
+                                                    <i class="bi bi-eye-fill"></i>
+
+                                                </button>
+
+                                            @endif
 
                                             @if(
                                                 in_array(
@@ -3511,6 +3541,52 @@
 
                 badge.textContent =
                     info.label;
+
+            }
+
+            if (isOfficer) {
+
+                const editIconBtn =
+                    row.querySelector(
+                        '.row-act-stack .btn-edit-ctrl'
+                    );
+
+                const canEdit =
+                    [
+                        'not_started',
+                        'drafting',
+                        'return_to_officer',
+                    ].includes(
+                        newStatus
+                    );
+
+                if (editIconBtn) {
+
+                    if (canEdit) {
+
+                        editIconBtn.className =
+                            'row-act-btn row-act-edit btn-edit-ctrl';
+
+                        editIconBtn.title =
+                            'Upload Evidence';
+
+                        editIconBtn.innerHTML =
+                            '<i class="bi bi-cloud-arrow-up-fill"></i>';
+
+                    } else {
+
+                        editIconBtn.className =
+                            'row-act-btn row-act-view btn-edit-ctrl';
+
+                        editIconBtn.title =
+                            'View Control';
+
+                        editIconBtn.innerHTML =
+                            '<i class="bi bi-eye-fill"></i>';
+
+                    }
+
+                }
 
             }
 
@@ -5966,43 +6042,13 @@
                         newStatus
                     );
 
-                    try {
-
-                        const refreshResponse =
-                            await fetch(
-                                `/controls/${controlIdForRefresh}/evidence`,
-                                {
-                                    headers:{
-                                        'Accept':
-                                            'application/json',
-                                        'X-CSRF-TOKEN':
-                                            csrfToken
-                                    }
-                                }
-                            );
-
-                        const refreshData =
-                            await parseJsonResponse(
-                                refreshResponse
-                            );
-
-                        renderExistingEvidences(
-                            refreshData.evidences
-                            || [],
-                            newStatus
-                        );
-
-                    } catch (refreshError) {
-
-                        // Non-fatal: the file has already
-                        // been deleted successfully.
-
-                    }
-
                 }
 
-                btn.disabled =
-                    false;
+                closeModal(
+                    document.getElementById(
+                        'editControlModal'
+                    )
+                );
 
             } catch (error) {
 

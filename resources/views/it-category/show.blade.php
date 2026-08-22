@@ -574,6 +574,12 @@
     gap:5px;
 }
 
+.row-act-stack {
+    display:inline-flex;
+    flex-direction:column;
+    gap:5px;
+}
+
 .row-act-btn {
     width:32px;
     height:32px;
@@ -588,6 +594,18 @@
     transition:.18s;
     font-family:inherit;
     flex-shrink:0;
+}
+
+.row-act-send {
+    color:#0f766e;
+    border-color:rgba(15,118,110,.35);
+    background:rgba(15,118,110,.08);
+}
+
+.row-act-send:hover {
+    background:#0f766e;
+    border-color:#0f766e;
+    color:#fff;
 }
 
 .row-act-view {
@@ -1998,16 +2016,43 @@
 
                                     @elseif($isOfficer)
 
-                                        <button
-                                            type="button"
-                                            class="row-act-btn row-act-edit btn-edit-ctrl"
-                                            title="Upload Evidence"
-                                            aria-label="Upload Evidence {{ $ctrl->it_control_id }}"
-                                        >
+                                        <div class="row-act-stack">
 
-                                            <i class="bi bi-cloud-arrow-up-fill"></i>
+                                            <button
+                                                type="button"
+                                                class="row-act-btn row-act-edit btn-edit-ctrl"
+                                                title="Upload Evidence"
+                                                aria-label="Upload Evidence {{ $ctrl->it_control_id }}"
+                                            >
 
-                                        </button>
+                                                <i class="bi bi-cloud-arrow-up-fill"></i>
+
+                                            </button>
+
+                                            @if(
+                                                in_array(
+                                                    $ctrl->status_control,
+                                                    ['drafting', 'return_to_officer'],
+                                                    true
+                                                )
+                                            )
+
+                                                <button
+                                                    type="button"
+                                                    class="row-act-btn row-act-send btn-send-ctrl"
+                                                    title="{{ $ctrl->status_control === 'return_to_officer' ? 'Resubmit to Manager' : 'Send to Manager' }}"
+                                                    aria-label="Send to Manager {{ $ctrl->it_control_id }}"
+                                                    data-ctrl-db-id="{{ $ctrl->id }}"
+                                                    data-send-label="{{ $ctrl->status_control === 'return_to_officer' ? 'Resubmit to Manager' : 'Send to Manager' }}"
+                                                >
+
+                                                    <i class="bi bi-send-fill"></i>
+
+                                                </button>
+
+                                            @endif
+
+                                        </div>
 
                                     @else
 
@@ -5371,6 +5416,133 @@
        SEND TO MANAGER (Officer → Reviewer)
        ============================================================ */
 
+    async function sendControlToManager(
+        controlId,
+        label,
+        triggerBtn
+    ) {
+
+        label =
+            label
+            || 'Send to Manager';
+
+        const confirmed =
+            await Swal.fire({
+                title:
+                    `${label}?`,
+
+                text:
+                    'This control will move to On Going Review and the Manager will be notified.',
+
+                icon:
+                    'question',
+
+                showCancelButton:
+                    true,
+
+                confirmButtonText:
+                    label,
+
+                confirmButtonColor:
+                    '#0f766e',
+            });
+
+        if (!confirmed.isConfirmed) {
+            return;
+        }
+
+        if (triggerBtn) {
+            triggerBtn.disabled =
+                true;
+        }
+
+        try {
+
+            const response =
+                await fetch(
+                    `/controls/${controlId}/transition`,
+                    {
+                        method:
+                            'POST',
+
+                        headers:{
+                            'Content-Type':
+                                'application/json',
+
+                            'X-CSRF-TOKEN':
+                                csrfToken,
+
+                            'Accept':
+                                'application/json',
+
+                            'X-Requested-With':
+                                'XMLHttpRequest'
+                        },
+
+                        body:
+                            JSON.stringify({
+                                to_status:
+                                    'ongoing_review',
+                            })
+                    }
+                );
+
+            const data =
+                await parseJsonResponse(
+                    response
+                );
+
+            if (
+                !data.success
+            ) {
+
+                throw new Error(
+                    data.message
+                    || 'Failed to send to manager.'
+                );
+
+            }
+
+            showNotification(
+                data.message
+                || 'Control sent to Manager successfully.',
+                'success'
+            );
+
+            closeModal(
+                document.getElementById(
+                    'editControlModal'
+                )
+            );
+
+            setTimeout(
+                function () {
+
+                    location.reload();
+
+                },
+                500
+            );
+
+        } catch (error) {
+
+            showNotification(
+                error.message
+                || 'Failed to send to manager.',
+                'danger'
+            );
+
+        } finally {
+
+            if (triggerBtn) {
+                triggerBtn.disabled =
+                    false;
+            }
+
+        }
+
+    }
+
     const sendToManagerBtnEl =
         document.getElementById(
             'btn-send-to-manager'
@@ -5380,7 +5552,7 @@
 
         sendToManagerBtnEl.addEventListener(
             'click',
-            async function () {
+            function () {
 
                 const id =
                     sendToManagerBtnEl.dataset.controlId;
@@ -5395,121 +5567,50 @@
                     )?.textContent.trim()
                     || 'Send to Manager';
 
-                const confirmed =
-                    await Swal.fire({
-                        title:
-                            `${label}?`,
-
-                        text:
-                            'This control will move to On Going Review and the Manager will be notified.',
-
-                        icon:
-                            'question',
-
-                        showCancelButton:
-                            true,
-
-                        confirmButtonText:
-                            label,
-
-                        confirmButtonColor:
-                            '#0f766e',
-                    });
-
-                if (!confirmed.isConfirmed) {
-                    return;
-                }
-
-                sendToManagerBtnEl.disabled =
-                    true;
-
-                try {
-
-                    const response =
-                        await fetch(
-                            `/controls/${id}/transition`,
-                            {
-                                method:
-                                    'POST',
-
-                                headers:{
-                                    'Content-Type':
-                                        'application/json',
-
-                                    'X-CSRF-TOKEN':
-                                        csrfToken,
-
-                                    'Accept':
-                                        'application/json',
-
-                                    'X-Requested-With':
-                                        'XMLHttpRequest'
-                                },
-
-                                body:
-                                    JSON.stringify({
-                                        to_status:
-                                            'ongoing_review',
-                                    })
-                            }
-                        );
-
-                    const data =
-                        await parseJsonResponse(
-                            response
-                        );
-
-                    if (
-                        !data.success
-                    ) {
-
-                        throw new Error(
-                            data.message
-                            || 'Failed to send to manager.'
-                        );
-
-                    }
-
-                    showNotification(
-                        data.message
-                        || 'Control sent to Manager successfully.',
-                        'success'
-                    );
-
-                    closeModal(
-                        document.getElementById(
-                            'editControlModal'
-                        )
-                    );
-
-                    setTimeout(
-                        function () {
-
-                            location.reload();
-
-                        },
-                        500
-                    );
-
-                } catch (error) {
-
-                    showNotification(
-                        error.message
-                        || 'Failed to send to manager.',
-                        'danger'
-                    );
-
-                } finally {
-
-                    sendToManagerBtnEl.disabled =
-                        false;
-
-                }
+                sendControlToManager(
+                    id,
+                    label,
+                    sendToManagerBtnEl
+                );
 
             }
         );
 
     }
+
+    // Row-level "Send to Manager" icon button (Officer, table row).
+    document.addEventListener(
+        'click',
+        function (event) {
+
+            const btn =
+                event.target.closest(
+                    '.btn-send-ctrl'
+                );
+
+            if (!btn) {
+                return;
+            }
+
+            const id =
+                btn.dataset.ctrlDbId;
+
+            if (!id) {
+                return;
+            }
+
+            const label =
+                btn.dataset.sendLabel
+                || 'Send to Manager';
+
+            sendControlToManager(
+                id,
+                label,
+                btn
+            );
+
+        }
+    );
 
 
     /* ============================================================
@@ -5532,10 +5633,10 @@
             const confirmed =
                 await Swal.fire({
                     title:
-                        'Delete evidence?',
+                        'Are you sure you want to delete this file?',
 
                     text:
-                        'This file will be permanently deleted.',
+                        'This file will be permanently deleted and cannot be undone.',
 
                     icon:
                         'warning',

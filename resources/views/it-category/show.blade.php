@@ -577,6 +577,7 @@
 .row-act-stack {
     display:inline-flex;
     flex-direction:column;
+    align-items:flex-start;
     gap:5px;
 }
 
@@ -596,16 +597,32 @@
     flex-shrink:0;
 }
 
-.row-act-send {
-    color:#0f766e;
-    border-color:rgba(15,118,110,.35);
-    background:rgba(15,118,110,.08);
+.row-act-send-btn {
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:5px;
+    padding:6px 10px;
+    border-radius:7px;
+    border:1.5px solid #ddd6fe;
+    background:#f5f3ff;
+    color:#7c3aed;
+    font-size:11px;
+    font-weight:700;
+    cursor:pointer;
+    white-space:nowrap;
+    transition:.18s;
+    font-family:inherit;
 }
 
-.row-act-send:hover {
-    background:#0f766e;
-    border-color:#0f766e;
+.row-act-send-btn:hover {
+    background:#7c3aed;
+    border-color:#7c3aed;
     color:#fff;
+}
+
+.row-act-send-btn .row-act-send-text {
+    line-height:1;
 }
 
 .row-act-view {
@@ -2039,7 +2056,7 @@
 
                                                 <button
                                                     type="button"
-                                                    class="row-act-btn row-act-send btn-send-ctrl"
+                                                    class="row-act-send-btn btn-send-ctrl"
                                                     title="{{ $ctrl->status_control === 'return_to_officer' ? 'Resubmit to Manager' : 'Send to Manager' }}"
                                                     aria-label="Send to Manager {{ $ctrl->it_control_id }}"
                                                     data-ctrl-db-id="{{ $ctrl->id }}"
@@ -2047,6 +2064,10 @@
                                                 >
 
                                                     <i class="bi bi-send-fill"></i>
+
+                                                    <span class="row-act-send-text">
+                                                        {{ $ctrl->status_control === 'return_to_officer' ? 'Resubmit to Manager' : 'Send to Manager' }}
+                                                    </span>
 
                                                 </button>
 
@@ -2928,7 +2949,7 @@
                         class="modal-btn-save"
                         id="btn-send-to-manager"
                         style="
-                            background:#0f766e;
+                            background:#8b5cf6;
                             display:none;
                         "
                     >
@@ -3351,6 +3372,230 @@
     // Application IDs auto-resolved from the selected UPTI(s).
     // No manual selection needed — filled by refreshApplications().
     let currentApplicationIds = [];
+
+    // Status of the Control currently open in the Edit modal.
+    // Kept in sync after in-place actions (e.g. deleting evidence)
+    // so the modal/table can update without a full page reload.
+    let currentEditingControlId = null;
+    let currentEditingControlStatus = 'not_started';
+
+    const scBadgeMapJs = {
+        not_started: { label: 'Not Started Yet', cls: 'sc-not-started' },
+        drafting: { label: 'Drafting', cls: 'sc-not-started' },
+        ongoing_review: { label: 'On Going Review', cls: 'sc-ongoing-review' },
+        ongoing_approval: { label: 'On Going Approval', cls: 'sc-ongoing-approval' },
+        return_to_officer: { label: 'Return to Officer', cls: 'sc-ongoing-review' },
+        return_to_reviewer: { label: 'Return to Reviewer', cls: 'sc-ongoing-review' },
+        completed: { label: 'Completed', cls: 'sc-completed' },
+    };
+
+    function applyControlStatusToUI(
+        controlId,
+        newStatus
+    ) {
+
+        currentEditingControlStatus =
+            newStatus;
+
+        const editable =
+            [
+                'not_started',
+                'drafting',
+                'return_to_officer',
+            ].includes(
+                newStatus
+            );
+
+        const uploadSectionEl =
+            document.getElementById(
+                'ec-upload-section'
+            );
+
+        const saveButtonEl =
+            document.getElementById(
+                'btn-save-control'
+            );
+
+        if (
+            isOfficer &&
+            uploadSectionEl
+        ) {
+            uploadSectionEl.style.display =
+                editable
+                    ? 'block'
+                    : 'none';
+        }
+
+        if (
+            isOfficer &&
+            saveButtonEl
+        ) {
+            saveButtonEl.style.display =
+                editable
+                    ? 'inline-flex'
+                    : 'none';
+        }
+
+        const modalSendBtn =
+            document.getElementById(
+                'btn-send-to-manager'
+            );
+
+        const modalSendLabel =
+            document.getElementById(
+                'btn-send-to-manager-label'
+            );
+
+        if (
+            isOfficer &&
+            modalSendBtn
+        ) {
+
+            modalSendBtn.dataset.controlId =
+                controlId;
+
+            if (newStatus === 'drafting') {
+
+                modalSendBtn.style.display =
+                    'inline-flex';
+
+                if (modalSendLabel) {
+                    modalSendLabel.textContent =
+                        'Send to Manager';
+                }
+
+            } else if (newStatus === 'return_to_officer') {
+
+                modalSendBtn.style.display =
+                    'inline-flex';
+
+                if (modalSendLabel) {
+                    modalSendLabel.textContent =
+                        'Resubmit to Manager';
+                }
+
+            } else {
+
+                modalSendBtn.style.display =
+                    'none';
+
+            }
+
+        }
+
+        // Keep the table row (behind the modal) in sync too,
+        // so no page reload is needed.
+        const row =
+            document.querySelector(
+                `tr[data-id="${controlId}"]`
+            );
+
+        if (row) {
+
+            row.dataset.ctrlStatus =
+                newStatus;
+
+            const badge =
+                row.querySelector(
+                    '.status-badge'
+                );
+
+            const info =
+                scBadgeMapJs[newStatus]
+                || scBadgeMapJs.not_started;
+
+            if (badge) {
+
+                badge.className =
+                    `status-badge ${info.cls}`;
+
+                badge.textContent =
+                    info.label;
+
+            }
+
+            const rowSendBtn =
+                row.querySelector(
+                    '.btn-send-ctrl'
+                );
+
+            const showRowSendBtn =
+                newStatus === 'drafting' ||
+                newStatus === 'return_to_officer';
+
+            const rowSendLabel =
+                newStatus === 'return_to_officer'
+                    ? 'Resubmit to Manager'
+                    : 'Send to Manager';
+
+            if (rowSendBtn) {
+
+                rowSendBtn.style.display =
+                    showRowSendBtn
+                        ? ''
+                        : 'none';
+
+                rowSendBtn.dataset.sendLabel =
+                    rowSendLabel;
+
+                rowSendBtn.title =
+                    rowSendLabel;
+
+                const textEl =
+                    rowSendBtn.querySelector(
+                        '.row-act-send-text'
+                    );
+
+                if (textEl) {
+                    textEl.textContent =
+                        rowSendLabel;
+                }
+
+            } else if (
+                showRowSendBtn
+            ) {
+
+                const stack =
+                    row.querySelector(
+                        '.row-act-stack'
+                    );
+
+                if (stack) {
+
+                    const newBtn =
+                        document.createElement(
+                            'button'
+                        );
+
+                    newBtn.type =
+                        'button';
+
+                    newBtn.className =
+                        'row-act-send-btn btn-send-ctrl';
+
+                    newBtn.title =
+                        rowSendLabel;
+
+                    newBtn.dataset.ctrlDbId =
+                        controlId;
+
+                    newBtn.dataset.sendLabel =
+                        rowSendLabel;
+
+                    newBtn.innerHTML =
+                        `<i class="bi bi-send-fill"></i><span class="row-act-send-text">${rowSendLabel}</span>`;
+
+                    stack.appendChild(
+                        newBtn
+                    );
+
+                }
+
+            }
+
+        }
+
+    }
 
     const searchEl =
         document.getElementById(
@@ -4354,6 +4599,9 @@
                 row.dataset.id
                 || '';
 
+            currentEditingControlId =
+                id;
+
             const ctrlId =
                 row.dataset.ctrlId
                 || '';
@@ -4377,6 +4625,9 @@
             const ctrlStatus =
                 row.dataset.ctrlStatus
                 || 'not_started';
+
+            currentEditingControlStatus =
+                ctrlStatus;
 
             const appId =
                 row.dataset.appId
@@ -5444,7 +5695,7 @@
                     label,
 
                 confirmButtonColor:
-                    '#0f766e',
+                    '#8b5cf6',
             });
 
         if (!confirmed.isConfirmed) {
@@ -5698,14 +5949,60 @@
                     'success'
                 );
 
-                setTimeout(
-                    function () {
+                const newStatus =
+                    data.new_status
+                    || currentEditingControlStatus;
 
-                        location.reload();
+                const controlIdForRefresh =
+                    currentEditingControlId
+                    || document.getElementById(
+                        'ec-id'
+                    )?.value;
 
-                    },
-                    500
-                );
+                if (controlIdForRefresh) {
+
+                    applyControlStatusToUI(
+                        controlIdForRefresh,
+                        newStatus
+                    );
+
+                    try {
+
+                        const refreshResponse =
+                            await fetch(
+                                `/controls/${controlIdForRefresh}/evidence`,
+                                {
+                                    headers:{
+                                        'Accept':
+                                            'application/json',
+                                        'X-CSRF-TOKEN':
+                                            csrfToken
+                                    }
+                                }
+                            );
+
+                        const refreshData =
+                            await parseJsonResponse(
+                                refreshResponse
+                            );
+
+                        renderExistingEvidences(
+                            refreshData.evidences
+                            || [],
+                            newStatus
+                        );
+
+                    } catch (refreshError) {
+
+                        // Non-fatal: the file has already
+                        // been deleted successfully.
+
+                    }
+
+                }
+
+                btn.disabled =
+                    false;
 
             } catch (error) {
 

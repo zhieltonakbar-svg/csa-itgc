@@ -577,13 +577,8 @@
 .row-act-stack {
     display:inline-flex;
     flex-direction:column;
-    align-items:stretch;
+    align-items:center;
     gap:5px;
-}
-
-.row-act-stack .row-act-btn {
-    width:100%;
-    padding:0 10px;
 }
 
 .row-act-btn {
@@ -1754,12 +1749,10 @@
 
                                 </div>
 
-                                @if(
-                                    isset($ctrl->evidences) &&
-                                    $ctrl->evidences->count() > 0
-                                )
+                                @if(isset($ctrl->evidences))
 
                                     <div
+                                        class="row-evidence-pills"
                                         style="
                                             display:flex;
                                             flex-wrap:wrap;
@@ -3418,6 +3411,136 @@
         return_to_reviewer: { label: 'Return to Reviewer', cls: 'sc-ongoing-review' },
         completed: { label: 'Completed', cls: 'sc-completed' },
     };
+
+    function evidenceIconFor(
+        originalName
+    ) {
+
+        const ext =
+            (
+                originalName
+                || ''
+            )
+                .split('.')
+                .pop()
+                .toLowerCase();
+
+        if (ext === 'pdf') {
+            return {
+                icon: 'bi-file-earmark-pdf-fill',
+                color: '#e11d48',
+            };
+        }
+
+        if (
+            ext === 'doc' ||
+            ext === 'docx'
+        ) {
+            return {
+                icon: 'bi-file-earmark-word-fill',
+                color: '#2563eb',
+            };
+        }
+
+        if (
+            ext === 'xls' ||
+            ext === 'xlsx' ||
+            ext === 'csv'
+        ) {
+            return {
+                icon: 'bi-file-earmark-excel-fill',
+                color: '#16a34a',
+            };
+        }
+
+        return {
+            icon: 'bi-paperclip',
+            color: '#198754',
+        };
+
+    }
+
+    function refreshRowEvidencePills(
+        controlId,
+        evidences
+    ) {
+
+        const row =
+            document.querySelector(
+                `tr[data-id="${controlId}"]`
+            );
+
+        if (!row) {
+            return;
+        }
+
+        const container =
+            row.querySelector(
+                '.row-evidence-pills'
+            );
+
+        if (!container) {
+            return;
+        }
+
+        const visibleEvidences =
+            (evidences || []).filter(
+                function (ev) {
+                    return ev.file_type !== 'Berita Acara';
+                }
+            );
+
+        if (!visibleEvidences.length) {
+
+            container.innerHTML =
+                '';
+
+            return;
+
+        }
+
+        container.innerHTML =
+            visibleEvidences
+                .map(
+                    function (ev) {
+
+                        const name =
+                            ev.original_name
+                            || ev.file_name
+                            || '';
+
+                        const iconInfo =
+                            evidenceIconFor(
+                                name
+                            );
+
+                        const shortName =
+                            name.length > 26
+                                ? name.slice(0, 26) + '…'
+                                : name;
+
+                        const typeBadge =
+                            ev.file_type
+                                ? `<span style="background:#e0e7ff;color:#3730a3;font-size:10px;font-weight:700;padding:1px 5px;border-radius:3px;border:1px solid #c7d2fe;white-space:nowrap;">${escapeHtml(ev.file_type)}</span>`
+                                : '';
+
+                        return `
+                            <a
+                                href="/evidence/${ev.id}"
+                                target="_blank"
+                                class="evidence-pill"
+                            >
+                                <i class="bi ${iconInfo.icon}" style="color:${iconInfo.color};"></i>
+                                <span title="${escapeHtml(name)}">${escapeHtml(shortName)}</span>
+                                ${typeBadge}
+                            </a>
+                        `;
+
+                    }
+                )
+                .join('');
+
+    }
 
     function applyControlStatusToUI(
         controlId,
@@ -6037,10 +6160,18 @@
 
                 if (controlIdForRefresh) {
 
-                    applyControlStatusToUI(
-                        controlIdForRefresh,
-                        newStatus
-                    );
+                    try {
+
+                        applyControlStatusToUI(
+                            controlIdForRefresh,
+                            newStatus
+                        );
+
+                    } catch (uiError) {
+
+                        // Non-fatal — don't block modal close.
+
+                    }
 
                 }
 
@@ -6049,6 +6180,41 @@
                         'editControlModal'
                     )
                 );
+
+                if (controlIdForRefresh) {
+
+                    fetch(
+                        `/controls/${controlIdForRefresh}/evidence`,
+                        {
+                            headers:{
+                                'Accept':
+                                    'application/json',
+                                'X-CSRF-TOKEN':
+                                    csrfToken
+                            }
+                        }
+                    )
+                    .then(
+                        parseJsonResponse
+                    )
+                    .then(
+                        function (refreshData) {
+
+                            refreshRowEvidencePills(
+                                controlIdForRefresh,
+                                refreshData.evidences
+                                || []
+                            );
+
+                        }
+                    )
+                    .catch(
+                        function () {
+                            // Non-fatal: file already deleted.
+                        }
+                    );
+
+                }
 
             } catch (error) {
 

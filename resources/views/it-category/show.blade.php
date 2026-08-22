@@ -2878,6 +2878,24 @@
 
                     </button>
 
+                    <button
+                        type="button"
+                        class="modal-btn-save"
+                        id="btn-send-to-manager"
+                        style="
+                            background:#0f766e;
+                            display:none;
+                        "
+                    >
+
+                        <i class="bi bi-send-fill"></i>
+
+                        <span id="btn-send-to-manager-label">
+                            Send to Manager
+                        </span>
+
+                    </button>
+
                 @endif
 
             </div>
@@ -4470,6 +4488,57 @@
 
             }
 
+            const sendToManagerBtn =
+                document.getElementById(
+                    'btn-send-to-manager'
+                );
+
+            const sendToManagerLabel =
+                document.getElementById(
+                    'btn-send-to-manager-label'
+                );
+
+            if (
+                isOfficer &&
+                sendToManagerBtn
+            ) {
+
+                sendToManagerBtn.dataset.controlId =
+                    id;
+
+                if (
+                    ctrlStatus === 'drafting'
+                ) {
+
+                    sendToManagerBtn.style.display =
+                        'inline-flex';
+
+                    if (sendToManagerLabel) {
+                        sendToManagerLabel.textContent =
+                            'Send to Manager';
+                    }
+
+                } else if (
+                    ctrlStatus === 'return_to_officer'
+                ) {
+
+                    sendToManagerBtn.style.display =
+                        'inline-flex';
+
+                    if (sendToManagerLabel) {
+                        sendToManagerLabel.textContent =
+                            'Resubmit to Manager';
+                    }
+
+                } else {
+
+                    sendToManagerBtn.style.display =
+                        'none';
+
+                }
+
+            }
+
             const evidenceList =
                 document.getElementById(
                     'ec-existing-files'
@@ -5288,6 +5357,151 @@
                 } finally {
 
                     saveControlBtn.disabled =
+                        false;
+
+                }
+
+            }
+        );
+
+    }
+
+
+    /* ============================================================
+       SEND TO MANAGER (Officer → Reviewer)
+       ============================================================ */
+
+    const sendToManagerBtnEl =
+        document.getElementById(
+            'btn-send-to-manager'
+        );
+
+    if (sendToManagerBtnEl) {
+
+        sendToManagerBtnEl.addEventListener(
+            'click',
+            async function () {
+
+                const id =
+                    sendToManagerBtnEl.dataset.controlId;
+
+                if (!id) {
+                    return;
+                }
+
+                const label =
+                    document.getElementById(
+                        'btn-send-to-manager-label'
+                    )?.textContent.trim()
+                    || 'Send to Manager';
+
+                const confirmed =
+                    await Swal.fire({
+                        title:
+                            `${label}?`,
+
+                        text:
+                            'This control will move to On Going Review and the Manager will be notified.',
+
+                        icon:
+                            'question',
+
+                        showCancelButton:
+                            true,
+
+                        confirmButtonText:
+                            label,
+
+                        confirmButtonColor:
+                            '#0f766e',
+                    });
+
+                if (!confirmed.isConfirmed) {
+                    return;
+                }
+
+                sendToManagerBtnEl.disabled =
+                    true;
+
+                try {
+
+                    const response =
+                        await fetch(
+                            `/controls/${id}/transition`,
+                            {
+                                method:
+                                    'POST',
+
+                                headers:{
+                                    'Content-Type':
+                                        'application/json',
+
+                                    'X-CSRF-TOKEN':
+                                        csrfToken,
+
+                                    'Accept':
+                                        'application/json',
+
+                                    'X-Requested-With':
+                                        'XMLHttpRequest'
+                                },
+
+                                body:
+                                    JSON.stringify({
+                                        to_status:
+                                            'ongoing_review',
+                                    })
+                            }
+                        );
+
+                    const data =
+                        await parseJsonResponse(
+                            response
+                        );
+
+                    if (
+                        !data.success
+                    ) {
+
+                        throw new Error(
+                            data.message
+                            || 'Failed to send to manager.'
+                        );
+
+                    }
+
+                    showNotification(
+                        data.message
+                        || 'Control sent to Manager successfully.',
+                        'success'
+                    );
+
+                    closeModal(
+                        document.getElementById(
+                            'editControlModal'
+                        )
+                    );
+
+                    setTimeout(
+                        function () {
+
+                            location.reload();
+
+                        },
+                        500
+                    );
+
+                } catch (error) {
+
+                    showNotification(
+                        error.message
+                        || 'Failed to send to manager.',
+                        'danger'
+                    );
+
+                } finally {
+
+                    sendToManagerBtnEl.disabled =
                         false;
 
                 }

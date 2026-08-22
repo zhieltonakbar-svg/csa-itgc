@@ -1053,6 +1053,15 @@
     background:#f0fdf4;
 }
 
+.mc-item-static {
+    cursor:default;
+}
+
+.mc-item-static:hover {
+    border-color:transparent;
+    background:#fff;
+}
+
 .mc-item input {
     width:15px;
     height:15px;
@@ -2251,10 +2260,6 @@
 
                         Application
 
-                        <span class="required">
-                            *
-                        </span>
-
                     </label>
 
                     <div
@@ -2269,9 +2274,21 @@
                             "
                         >
 
-                            Select UPTI to display applications.
+                            Select UPTI first.
 
                         </div>
+
+                    </div>
+
+                    <div
+                        style="
+                            font-size:11.5px;
+                            color:#64748b;
+                            margin-top:6px;
+                        "
+                    >
+
+                        Application is mapped automatically based on the selected UPTI(s).
 
                     </div>
 
@@ -3268,6 +3285,10 @@
             'mc-generated-control-ids'
         );
 
+    // Application IDs auto-resolved from the selected UPTI(s).
+    // No manual selection needed — filled by refreshApplications().
+    let currentApplicationIds = [];
+
     const searchEl =
         document.getElementById(
             'itc-search'
@@ -3683,6 +3704,8 @@
                 !selectedUptis.length
             ) {
 
+                currentApplicationIds = [];
+
                 applicationList.innerHTML = `
                     <div
                         style="
@@ -3769,6 +3792,13 @@
                     data.applications
                     || [];
 
+                currentApplicationIds =
+                    applications.map(
+                        function (app) {
+                            return app.id;
+                        }
+                    );
+
                 if (
                     !applications.length
                 ) {
@@ -3780,7 +3810,7 @@
                                 color:#dc3545;
                             "
                         >
-                            No application is mapped to the selected UPTI.
+                            No Application is mapped to the selected UPTI. Please contact Admin to map an Application first.
                         </div>
                     `;
 
@@ -3794,13 +3824,14 @@
                             function (app) {
 
                                 return `
-                                    <label class="mc-item">
-
-                                        <input
-                                            type="radio"
-                                            name="application_id"
-                                            value="${escapeHtml(app.id)}"
-                                        >
+                                    <div
+                                        class="mc-item mc-item-static"
+                                        style="
+                                            display:flex;
+                                            align-items:center;
+                                            justify-content:space-between;
+                                        "
+                                    >
 
                                         <span class="mc-item-text">
 
@@ -3817,7 +3848,7 @@
 
                                         </span>
 
-                                    </label>
+                                    </div>
                                 `;
 
                             }
@@ -3827,6 +3858,8 @@
                 await refreshControlIds();
 
             } catch (error) {
+
+                currentApplicationIds = [];
 
                 applicationList.innerHTML = `
                     <div
@@ -4041,6 +4074,8 @@
 
                 addForm.reset();
 
+                currentApplicationIds = [];
+
                 applicationList.innerHTML = `
                     <div
                         style="
@@ -4091,11 +4126,6 @@
                         )
                     );
 
-                const selectedApplication =
-                    document.querySelector(
-                        '#mc-applications-list input[name="application_id"]:checked'
-                    );
-
                 if (
                     !selectedUptis.length
                 ) {
@@ -4110,11 +4140,11 @@
                 }
 
                 if (
-                    !selectedApplication
+                    !currentApplicationIds.length
                 ) {
 
                     showNotification(
-                        'Please select an Application.',
+                        'The selected UPTI(s) have no mapped Application. Please contact Admin to map an Application first.',
                         'danger'
                     );
 
@@ -4127,9 +4157,15 @@
                         addForm
                     );
 
-                formData.set(
-                    'application_id',
-                    selectedApplication.value
+                currentApplicationIds.forEach(
+                    function (id) {
+
+                        formData.append(
+                            'application_ids[]',
+                            id
+                        );
+
+                    }
                 );
 
                 addSaveBtn.disabled =

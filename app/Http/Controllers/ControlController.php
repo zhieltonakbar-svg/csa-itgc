@@ -537,6 +537,19 @@ class ControlController extends Controller
                     ],
                     true
                 )) {
+
+                    /*
+                     * Officer is correcting/re-uploading after
+                     * a rejection: clear the old rejection notes
+                     * right away, before they even resubmit.
+                     */
+                    if (
+                        $control->status_control === 'return_to_officer'
+                    ) {
+                        $control->reviewer_notes = null;
+                        $control->approver_notes = null;
+                    }
+
                     $control->status_control = 'drafting';
                     $control->save();
                 }

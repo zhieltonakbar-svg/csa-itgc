@@ -314,8 +314,17 @@ class EvidenceController extends Controller
         if ($control) {
             $remainingCount = $control->evidences()->count();
 
+            $wasReturnedToOfficer =
+                $control->status_control === 'return_to_officer';
+
             if ($remainingCount === 0) {
                 $control->status_control = 'not_started';
+
+                if ($user->isCreator() && $wasReturnedToOfficer) {
+                    $control->reviewer_notes = null;
+                    $control->approver_notes = null;
+                }
+
                 $control->save();
 
                 $message =
@@ -325,6 +334,12 @@ class EvidenceController extends Controller
             } else {
                 if ($user->isCreator()) {
                     $control->status_control = 'drafting';
+
+                    if ($wasReturnedToOfficer) {
+                        $control->reviewer_notes = null;
+                        $control->approver_notes = null;
+                    }
+
                     $control->save();
 
                     $message =

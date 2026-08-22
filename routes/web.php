@@ -133,6 +133,15 @@ Route::middleware('auth')->group(function () {
      * This route must be before /controls/{control}
      * so "next-ids" is not interpreted as a Control ID.
      */
+    /*
+     * Application list filtered by selected UPTI(s), used by the
+     * "Add Control" form. Must also be defined before /controls/{control}.
+     */
+    Route::get('/controls/applications-by-uptis', [
+        \App\Http\Controllers\ControlController::class,
+        'applicationsByUptis'
+    ])->name('controls.applicationsByUptis');
+
     Route::get('/controls/next-ids', [
         \App\Http\Controllers\ControlController::class,
         'nextControlIds'
@@ -234,6 +243,11 @@ Route::middleware('auth')->group(function () {
         \App\Http\Controllers\NotificationController::class,
         'markRead'
     ])->name('notifications.markRead');
+
+    Route::post('/notifications/read-all', [
+        \App\Http\Controllers\NotificationController::class,
+        'markAllRead'
+    ])->name('notifications.readAll');
 
     Route::delete('/notifications/{id}', [
         \App\Http\Controllers\NotificationController::class,

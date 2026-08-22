@@ -243,6 +243,79 @@ class ControlController extends Controller
         }
     }
 
+    /**
+     * Return active Applications mapped to the selected UPTI(s).
+     *
+     * Used by the "Add Control" form (Admin) so the Application
+     * choices react to which UPTI(s) are checked.
+     *
+     * Hanya ADMIN yang membutuhkan endpoint ini.
+     */
+    public function applicationsByUptis(Request $request)
+    {
+        if (!auth()->check() || !auth()->user()->isAdmin()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda tidak memiliki akses.',
+            ], 403);
+        }
+
+        try {
+            $validated = $request->validate([
+                'uptis'   => 'required|array|min:1',
+                'uptis.*' => 'required|string|max:255',
+            ]);
+
+            $uptiNames = collect($validated['uptis'])
+                ->map(fn ($upti) => trim($upti))
+                ->filter()
+                ->unique()
+                ->values();
+
+            $uptiIds = \App\Models\Upti::query()
+                ->whereIn('name', $uptiNames)
+                ->pluck('id');
+
+            $applications = Application::query()
+                ->where('is_active', true)
+                ->whereIn('upti_id', $uptiIds)
+                ->with('upti')
+                ->orderBy('name')
+                ->get()
+                ->map(function ($app) {
+                    return [
+                        'id'        => $app->id,
+                        'name'      => $app->name,
+                        'upti_name' => $app->upti->name ?? '',
+                    ];
+                });
+
+            return response()->json([
+                'success'      => true,
+                'applications' => $applications,
+            ]);
+
+        } catch (ValidationException $e) {
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation Error',
+                'errors'  => $e->errors(),
+            ], 422);
+
+        } catch (\Throwable $e) {
+
+            Log::error('Fetch applications by UPTIs failed', [
+                'message' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch applications.',
+            ], 500);
+        }
+    }
+
     public function nextControlIds(Request $request)
     {
         $user = auth()->user();

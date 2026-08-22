@@ -41,11 +41,22 @@ class NotificationController extends Controller
         return redirect()->back()->with('success', 'All notification history successfully cleared.');
     }
     /**
-     * Mark all unread notifications as read.
+     * Mark all unread notifications as read (JSON — used by the header bell via JS).
      */
     public function markRead()
     {
         auth()->user()->unreadNotifications->markAsRead();
         return response()->json(['success' => true]);
+    }
+
+    /**
+     * Mark all unread notifications as read (form submit — used by the
+     * "Mark all as read" button on the Notifications page).
+     */
+    public function markAllRead()
+    {
+        auth()->user()->unreadNotifications->markAsRead();
+
+        return redirect()->back()->with('success', 'All notifications marked as read.');
     }
 }

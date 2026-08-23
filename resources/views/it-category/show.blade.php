@@ -1707,25 +1707,37 @@
                             Control Description
                         </th>
 
-                        <th>
-                            Frequency Description
-                        </th>
+                        @unless($isRcmView ?? false)
+
+                            <th>
+                                Frequency Description
+                            </th>
+
+                        @endunless
 
                         <th>
                             UPTI
                         </th>
 
-                        <th>
-                            Key Control
-                        </th>
+                        @unless($isRcmView ?? false)
+
+                            <th>
+                                Key Control
+                            </th>
+
+                        @endunless
 
                         <th class="col-status th-center">
                             Status Control
                         </th>
 
-                        <th class="col-actions">
-                            Actions
-                        </th>
+                        @unless($isRcmView ?? false)
+
+                            <th class="col-actions">
+                                Actions
+                            </th>
+
+                        @endunless
 
                     </tr>
 
@@ -1744,9 +1756,12 @@
                                 $prevUpti !== null &&
                                 $prevUpti !== $ctrl->upti
                             ) {
+                                $dividerColspan =
+                                    ($isRcmView ?? false) ? 4 : 7;
+
                                 echo '<tr aria-hidden="true">
                                     <td
-                                        colspan="7"
+                                        colspan="' . $dividerColspan . '"
                                         style="
                                             padding:0;
                                             height:8px;
@@ -1788,15 +1803,11 @@
                                     {{ $ctrl->control_description ?? '—' }}
                                 </td>
 
-                                <td>—</td>
-
                                 <td>
                                     {{ $ctrl->upti ?? '—' }}
                                 </td>
 
-                                <td>—</td>
-
-                                <td class="col-status td-center" colspan="2">
+                                <td class="col-status td-center">
                                     <span
                                         style="
                                             color:#15803d;
@@ -2066,11 +2077,15 @@
 
                             </td>
 
-                            <td class="col-frekuensi">
+                            @unless($isRcmView ?? false)
 
-                                {{ $ctrl->keterangan_frekuensi ?? '—' }}
+                                <td class="col-frekuensi">
 
-                            </td>
+                                    {{ $ctrl->keterangan_frekuensi ?? '—' }}
+
+                                </td>
+
+                            @endunless
 
                             <td class="col-upti">
 
@@ -2078,30 +2093,34 @@
 
                             </td>
 
-                            <td class="col-keyctrl">
+                            @unless($isRcmView ?? false)
 
-                                {{
-                                    $ctrl->key_control === null
-                                    ? '—'
-                                    : (
-                                        in_array(
-                                            strtoupper(
-                                                (string)
-                                                $ctrl->key_control
-                                            ),
-                                            [
-                                                'YES',
-                                                '1',
-                                                'TRUE',
-                                            ],
-                                            true
+                                <td class="col-keyctrl">
+
+                                    {{
+                                        $ctrl->key_control === null
+                                        ? '—'
+                                        : (
+                                            in_array(
+                                                strtoupper(
+                                                    (string)
+                                                    $ctrl->key_control
+                                                ),
+                                                [
+                                                    'YES',
+                                                    '1',
+                                                    'TRUE',
+                                                ],
+                                                true
+                                            )
+                                            ? 'Yes'
+                                            : 'No'
                                         )
-                                        ? 'Yes'
-                                        : 'No'
-                                    )
-                                }}
+                                    }}
 
-                            </td>
+                                </td>
+
+                            @endunless
 
                             <td class="col-status td-center">
 
@@ -2114,6 +2133,8 @@
                                 </span>
 
                             </td>
+
+                            @unless($isRcmView ?? false)
 
                             <td class="col-actions">
 
@@ -2355,6 +2376,8 @@
                                 </div>
 
                             </td>
+
+                            @endunless
 
                         </tr>
 

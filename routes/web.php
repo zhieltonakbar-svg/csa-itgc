@@ -75,6 +75,19 @@ Route::middleware('auth')->group(function () {
         'showControls'
     ])->name('dashboard.controls');
 
+    /*
+    |--------------------------------------------------------------------------
+    | IT RCM Management (Admin) — separate menu entry point, same
+    | underlying data/controller as IT Category above so the two
+    | always stay in sync. See DashboardController::showControls().
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get('/rcm/{category}/controls', [
+        DashboardController::class,
+        'showControls'
+    ])->name('rcm.controls');
+
     Route::get('/it-categories', [
         \App\Http\Controllers\ItCategoryController::class,
         'index'

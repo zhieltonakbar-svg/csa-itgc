@@ -788,6 +788,16 @@ class DashboardController extends Controller
                 ->orderBy('name')
                 ->get();
 
+        /*
+         * IT RCM (Admin sidebar) and IT Category (Dashboard) share
+         * this exact same controller method and Blade view, so the
+         * "not yet completed" rows are always guaranteed 100%
+         * identical between the two. Only rows already Completed
+         * render differently, and only under the rcm.controls route.
+         */
+        $isRcmView =
+            optional($request->route())->getName() === 'rcm.controls';
+
         return view(
             'it-category.show',
             compact(
@@ -799,7 +809,8 @@ class DashboardController extends Controller
                 'source',
                 'allApplications',
                 'allCategories',
-                'allUptis'
+                'allUptis',
+                'isRcmView'
             )
         );
     }

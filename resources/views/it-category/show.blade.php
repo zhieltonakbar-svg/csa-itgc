@@ -564,6 +564,14 @@
     background:#198754;
 }
 
+.rcm-completed-row {
+    background:rgba(25,135,84,.05);
+}
+
+.rcm-completed-row:hover {
+    background:rgba(25,135,84,.09);
+}
+
 /* ============================================================
    ACTION BUTTONS
    ============================================================ */
@@ -1357,6 +1365,18 @@
 
             </span>
 
+            @if($isRcmView ?? false)
+
+                <span class="bc-sep" style="color:#7c3aed; font-weight:700;">
+                    IT RCM
+                </span>
+
+                <span class="bc-sep">
+                    <i class="bi bi-chevron-right"></i>
+                </span>
+
+            @endif
+
             <span class="bc-cur">
 
                 {{ $category->name }}
@@ -1374,6 +1394,12 @@
             </span>
 
             {{ $category->name }}
+
+            @if($isRcmView ?? false)
+                <span style="font-size:12px; font-weight:700; color:#7c3aed; background:#f5f3ff; border:1px solid #ddd6fe; padding:3px 10px; border-radius:9999px; margin-left:10px; vertical-align:middle;">
+                    IT RCM
+                </span>
+            @endif
 
         </h1>
 
@@ -1732,7 +1758,9 @@
 
                             $prevUpti =
                                 $ctrl->upti;
+                        @endphp
 
+                        @php
                             $scKey =
                                 $ctrl->status_control
                                 ?? 'not_started';
@@ -1741,6 +1769,57 @@
                                 $scBadgeMap[$scKey]
                                 ?? $scBadgeMap['not_started'];
                         @endphp
+
+                        @if(($isRcmView ?? false) && $scKey === 'completed')
+
+                            <tr
+                                data-id="{{ $ctrl->id }}"
+                                data-ctrl-status="completed"
+                                class="rcm-completed-row"
+                            >
+
+                                <td class="col-ctrlid">
+                                    <span class="ctrl-id-pill">
+                                        {{ $ctrl->it_control_id ?? '—' }}
+                                    </span>
+                                </td>
+
+                                <td class="col-desc">
+                                    {{ $ctrl->control_description ?? '—' }}
+                                </td>
+
+                                <td>—</td>
+
+                                <td>
+                                    {{ $ctrl->upti ?? '—' }}
+                                </td>
+
+                                <td>—</td>
+
+                                <td class="col-status td-center" colspan="2">
+                                    <span
+                                        style="
+                                            color:#15803d;
+                                            font-weight:600;
+                                            font-size:12.5px;
+                                            display:inline-flex;
+                                            align-items:center;
+                                            gap:6px;
+                                        "
+                                    >
+                                        <i class="bi bi-check-circle-fill"></i>
+                                        Completed
+                                        @if($ctrl->approved_at)
+                                            &middot; {{ $ctrl->approved_at->format('d M Y') }}
+                                        @endif
+                                    </span>
+                                </td>
+
+                            </tr>
+
+                            @continue
+
+                        @endif
 
                         <tr
                             data-id="{{ $ctrl->id }}"

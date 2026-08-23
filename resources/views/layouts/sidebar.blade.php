@@ -2,8 +2,8 @@
     $user         = auth()->user();
     $currentRoute = request()->route() ? request()->route()->getName() : '';
 
-    // Detect if we are on an IT Category detail page
-    $isOnCategoryPage = in_array($currentRoute, ['dashboard.controls', 'it-category.show']);
+    // Detect if we are on an IT Category or IT RCM detail page
+    $isOnCategoryPage = in_array($currentRoute, ['dashboard.controls', 'rcm.controls', 'it-category.show']);
     $activeCategoryId = null;
 
     if ($isOnCategoryPage) {
@@ -55,11 +55,14 @@
             <ul class="nav-submenu {{ $isOnCategoryPage ? 'show' : '' }}">
                 @foreach($sidebarCategories as $cat)
                     <li>
-                        {{-- Same page/route for every role. Access & edit rights inside
-                             it-category.show are controlled by role (Admin vs Officer/
-                             Reviewer/Approver), filtered by year, quarter, and application
-                             selected on the Dashboard. --}}
-                        <a href="{{ route('dashboard.controls', ['category' => $cat->id]) . '?' . http_build_query(request()->only('year', 'quarter', 'upti_id', 'application_id')) }}"
+                        {{--
+                            Admin -> IT RCM Management (rcm.controls): completed
+                            rows are simplified there. Everyone else -> IT Category
+                            (dashboard.controls): full operational view.
+                            Same current filter (year/quarter/application) is
+                            carried over either way so the two stay in sync.
+                        --}}
+                        <a href="{{ route($user->isAdmin() ? 'rcm.controls' : 'dashboard.controls', ['category' => $cat->id]) . '?' . http_build_query(request()->only('year', 'quarter', 'upti_id', 'application_id')) }}"
                            class="nav-link {{ $activeCategoryId == $cat->id ? 'sub-active' : '' }}"
                            data-category-id="{{ $cat->id }}"
                            data-category-name="{{ $cat->name }}">

@@ -18,6 +18,8 @@ class User extends Authenticatable
         'upti_id',
         'is_active',
         'profile_photo_path',
+        'auth_type',
+        'username',
     ];
 
     protected $hidden = [
@@ -62,6 +64,15 @@ class User extends Authenticatable
     public function isOfficer(): bool
     {
         return $this->role === 'creator' || $this->role === 'officer';
+    }
+
+    /**
+     * Whether this account authenticates via the company LDAP
+     * server instead of a local password.
+     */
+    public function isLdap(): bool
+    {
+        return $this->auth_type === 'ldap';
     }
 
     /**

@@ -29,7 +29,8 @@
                         <tr>
                             <th style="padding: 16px 24px; color: #475569; font-weight: 600; width: 50px;">#</th>
                             <th style="padding: 16px 24px; color: #475569; font-weight: 600;">Name</th>
-                            <th style="padding: 16px 24px; color: #475569; font-weight: 600;">Email</th>
+                            <th style="padding: 16px 24px; color: #475569; font-weight: 600;">Email / Username</th>
+                            <th style="padding: 16px 24px; color: #475569; font-weight: 600; width: 90px;">Auth</th>
                             <th style="padding: 16px 24px; color: #475569; font-weight: 600; width: 120px;">Role</th>
                             <th style="padding: 16px 24px; color: #475569; font-weight: 600; width: 180px;">Assigned UPTI</th>
                             <th style="padding: 16px 24px; color: #475569; font-weight: 600; width: 120px; text-align: center;">Status</th>
@@ -44,7 +45,14 @@
                                 {{ $user->name }}
                             </td>
                             <td style="padding: 16px 24px; color: #64748b;">
-                                {{ $user->email }}
+                                {{ $user->email ?: $user->username }}
+                            </td>
+                            <td style="padding: 16px 24px;">
+                                @if($user->isLdap())
+                                    <span style="background:#ede9fe; color:#6d28d9; padding:3px 10px; border-radius:9999px; font-size:11px; font-weight:700;">LDAP</span>
+                                @else
+                                    <span style="background:#e0f2fe; color:#075985; padding:3px 10px; border-radius:9999px; font-size:11px; font-weight:700;">Local</span>
+                                @endif
                             </td>
                             <td style="padding: 16px 24px;">
                                 <span class="badge bg-primary" style="font-weight: 600; text-transform: capitalize;">{{ $user->role }}</span>
@@ -101,7 +109,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" style="padding: 48px; text-align: center; color: #64748b;">
+                            <td colspan="8" style="padding: 48px; text-align: center; color: #64748b;">
                                 <i class="bi bi-people" style="font-size: 32px; color: #cbd5e1; margin-bottom: 12px; display: block;"></i>
                                 No users found.
                             </td>
@@ -124,24 +132,50 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body" style="padding: 24px;">
+
+                <div class="mb-4">
+                    <label class="form-label" style="font-weight: 600; color: #475569; font-size: 14px;">Account Type <span class="text-danger">*</span></label>
+                    <div style="display:flex; gap:10px;">
+                        <label style="flex:1; display:flex; align-items:center; gap:8px; border:1.5px solid #cbd5e1; border-radius:8px; padding:10px 14px; cursor:pointer;">
+                            <input type="radio" name="auth_type" value="local" id="authTypeLocal" checked>
+                            <span>Local Account</span>
+                        </label>
+                        <label style="flex:1; display:flex; align-items:center; gap:8px; border:1.5px solid #cbd5e1; border-radius:8px; padding:10px 14px; cursor:pointer;">
+                            <input type="radio" name="auth_type" value="ldap" id="authTypeLdap">
+                            <span>LDAP Account</span>
+                        </label>
+                    </div>
+                    <div id="ldapHint" style="display:none; font-size:12px; color:#64748b; margin-top:6px;">
+                        <i class="bi bi-info-circle"></i>
+                        No password needed here — this user logs in with their company LDAP password.
+                    </div>
+                </div>
+
                 <div class="mb-4">
                     <label for="createName" class="form-label" style="font-weight: 600; color: #475569; font-size: 14px;">Name <span class="text-danger">*</span></label>
                     <input type="text" class="form-control" id="createName" name="name" required style="border-radius: 8px; border: 1px solid #cbd5e1; padding: 10px 14px;">
                 </div>
-                
-                <div class="mb-4">
-                    <label for="createEmail" class="form-label" style="font-weight: 600; color: #475569; font-size: 14px;">Email <span class="text-danger">*</span></label>
-                    <input type="email" class="form-control" id="createEmail" name="email" required style="border-radius: 8px; border: 1px solid #cbd5e1; padding: 10px 14px;">
+
+                <div class="mb-4" id="ldapUsernameGroup" style="display:none;">
+                    <label for="createUsername" class="form-label" style="font-weight: 600; color: #475569; font-size: 14px;">LDAP Username <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="createUsername" name="username" style="border-radius: 8px; border: 1px solid #cbd5e1; padding: 10px 14px;" placeholder="e.g. jdoe">
                 </div>
 
-                <div class="mb-4">
+                <div class="mb-4" id="emailGroup">
+                    <label for="createEmail" class="form-label" style="font-weight: 600; color: #475569; font-size: 14px;">
+                        Email <span class="text-danger" id="emailRequiredMark">*</span>
+                    </label>
+                    <input type="email" class="form-control" id="createEmail" name="email" style="border-radius: 8px; border: 1px solid #cbd5e1; padding: 10px 14px;">
+                </div>
+
+                <div class="mb-4" id="passwordGroup">
                     <label for="createPassword" class="form-label" style="font-weight: 600; color: #475569; font-size: 14px;">Password <span class="text-danger">*</span></label>
-                    <input type="password" class="form-control" id="createPassword" name="password" required style="border-radius: 8px; border: 1px solid #cbd5e1; padding: 10px 14px;">
+                    <input type="password" class="form-control" id="createPassword" name="password" style="border-radius: 8px; border: 1px solid #cbd5e1; padding: 10px 14px;">
                 </div>
 
-                <div class="mb-4">
+                <div class="mb-4" id="passwordConfirmGroup">
                     <label for="createPasswordConfirmation" class="form-label" style="font-weight: 600; color: #475569; font-size: 14px;">Confirm Password <span class="text-danger">*</span></label>
-                    <input type="password" class="form-control" id="createPasswordConfirmation" name="password_confirmation" required style="border-radius: 8px; border: 1px solid #cbd5e1; padding: 10px 14px;">
+                    <input type="password" class="form-control" id="createPasswordConfirmation" name="password_confirmation" style="border-radius: 8px; border: 1px solid #cbd5e1; padding: 10px 14px;">
                 </div>
 
                 <div class="mb-4">
@@ -153,7 +187,7 @@
                         <option value="approver">Senior Manager (Approver)</option>
                     </select>
                 </div>
-                
+
             </div>
             <div class="modal-footer" style="background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 16px 24px;">
                 <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="border-radius: 8px; font-weight: 600; border: 1px solid #e2e8f0;">Cancel</button>
@@ -208,8 +242,42 @@
 @push('scripts')
 <script>
     const createUserModal = new bootstrap.Modal(document.getElementById('createUserModal'));
+
+    const authTypeLocal = document.getElementById('authTypeLocal');
+    const authTypeLdap = document.getElementById('authTypeLdap');
+    const ldapUsernameGroup = document.getElementById('ldapUsernameGroup');
+    const ldapHint = document.getElementById('ldapHint');
+    const emailGroup = document.getElementById('emailGroup');
+    const emailInput = document.getElementById('createEmail');
+    const emailRequiredMark = document.getElementById('emailRequiredMark');
+    const passwordGroup = document.getElementById('passwordGroup');
+    const passwordConfirmGroup = document.getElementById('passwordConfirmGroup');
+    const passwordInput = document.getElementById('createPassword');
+    const passwordConfirmInput = document.getElementById('createPasswordConfirmation');
+    const usernameInput = document.getElementById('createUsername');
+
+    function applyAuthTypeUI() {
+        const isLdap = authTypeLdap.checked;
+
+        ldapUsernameGroup.style.display = isLdap ? 'block' : 'none';
+        ldapHint.style.display = isLdap ? 'block' : 'none';
+        passwordGroup.style.display = isLdap ? 'none' : 'block';
+        passwordConfirmGroup.style.display = isLdap ? 'none' : 'block';
+        emailRequiredMark.style.display = isLdap ? 'none' : 'inline';
+
+        usernameInput.required = isLdap;
+        passwordInput.required = !isLdap;
+        passwordConfirmInput.required = !isLdap;
+        emailInput.required = !isLdap;
+    }
+
+    authTypeLocal.addEventListener('change', applyAuthTypeUI);
+    authTypeLdap.addEventListener('change', applyAuthTypeUI);
+
     function openCreateUserModal() {
         document.getElementById('createUserForm').reset();
+        authTypeLocal.checked = true;
+        applyAuthTypeUI();
         createUserModal.show();
     }
 

@@ -31,6 +31,32 @@ class UserController extends Controller
             abort(403, 'Unauthorized.');
         }
 
+        $authType = $request->input('auth_type', 'local');
+
+        if ($authType === 'ldap') {
+
+            $request->validate([
+                'name' => 'required|string|max:255',
+                'username' => 'required|string|max:255|unique:users,username',
+                'email' => 'nullable|string|email|max:255|unique:users,email',
+                'role' => 'required|string|in:creator,reviewer,approver',
+            ]);
+
+            User::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'username' => $request->username,
+                'auth_type' => 'ldap',
+                'password' => null,
+                'role' => $request->role,
+                'upti_id' => null,
+                'is_active' => false,
+            ]);
+
+            return redirect()->route('users.index')
+                ->with('success', 'LDAP user created successfully. This account will authenticate using the company LDAP password — no local password is stored.');
+        }
+
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
@@ -41,6 +67,7 @@ class UserController extends Controller
         User::create([
             'name' => $request->name,
             'email' => $request->email,
+            'auth_type' => 'local',
             'password' => \Illuminate\Support\Facades\Hash::make($request->password),
             'role' => $request->role,
             'upti_id' => null,

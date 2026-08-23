@@ -33,20 +33,20 @@
             <form method="POST" action="{{ route('login.post') }}" class="login-form">
                 @csrf
 
-                {{-- Email --}}
+                {{-- Email or Username --}}
                 <div class="mb-3">
-                    <label for="email" class="form-label">Email</label>
+                    <label for="email" class="form-label">Email or Username</label>
                     <div class="input-group">
                         <span class="input-group-text login-input-addon">
                             <i class="bi bi-envelope text-muted"></i>
                         </span>
                         <input
-                            type="email"
+                            type="text"
                             class="form-control login-input @error('email') is-invalid @enderror"
                             id="email"
                             name="email"
                             value="{{ old('email') }}"
-                            placeholder="Enter your email address"
+                            placeholder="Enter your email or LDAP username"
                             required
                             autofocus
                         >

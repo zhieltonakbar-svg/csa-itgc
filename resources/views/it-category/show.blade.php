@@ -482,43 +482,15 @@
 }
 
 .col-handled-by {
-    width:340px;
+    width:280px;
 }
 
 .rcm-handled-by {
     display:flex;
-    flex-wrap:wrap;
-    gap:5px;
-}
-
-.rcm-role-chip {
-    display:inline-flex;
-    align-items:center;
-    gap:4px;
-    padding:3px 9px;
-    border-radius:20px;
-    font-size:10.5px;
-    font-weight:600;
-    white-space:nowrap;
-    border:1px solid transparent;
-}
-
-.rcm-role-officer {
-    background:rgba(15,118,110,.08);
-    color:#0f766e;
-    border-color:rgba(15,118,110,.2);
-}
-
-.rcm-role-manager {
-    background:rgba(180,83,9,.08);
-    color:#b45309;
-    border-color:rgba(180,83,9,.2);
-}
-
-.rcm-role-senior {
-    background:rgba(29,78,216,.08);
-    color:#1d4ed8;
-    border-color:rgba(29,78,216,.2);
+    flex-direction:column;
+    gap:3px;
+    font-size:11.5px;
+    color:#475569;
 }
 
 .col-actions {
@@ -1747,13 +1719,9 @@
                             Control ID
                         </th>
 
-                        @unless($isRcmView ?? false)
-
-                            <th>
-                                Control Description
-                            </th>
-
-                        @endunless
+                        <th>
+                            Control Description
+                        </th>
 
                         @unless($isRcmView ?? false)
 
@@ -1813,7 +1781,7 @@
                                 $prevUpti !== $ctrl->upti
                             ) {
                                 $dividerColspan =
-                                    ($isRcmView ?? false) ? 4 : 7;
+                                    ($isRcmView ?? false) ? 5 : 7;
 
                                 echo '<tr aria-hidden="true">
                                     <td
@@ -1889,43 +1857,48 @@
                                     </span>
                                 </td>
 
+                                <td class="col-desc">
+                                    {{ $ctrl->control_description ?? '—' }}
+                                </td>
+
                                 <td>
                                     {{ $ctrl->upti ?? '—' }}
                                 </td>
 
                                 <td class="col-handled-by">
                                     <div class="rcm-handled-by">
-                                        <span class="rcm-role-chip rcm-role-officer">
-                                            <i class="bi bi-person-fill"></i>
-                                            {{ $officerName }}
+                                        <span>
+                                            <i class="bi bi-person-fill" style="color:#0f766e;"></i>
+                                            Officer: {{ $officerName }}
                                         </span>
-                                        <span class="rcm-role-chip rcm-role-manager">
-                                            <i class="bi bi-person-check-fill"></i>
-                                            {{ $rowReviewer?->name ?? '—' }}
+                                        <span>
+                                            <i class="bi bi-person-check-fill" style="color:#b45309;"></i>
+                                            Manager: {{ $rowReviewer?->name ?? '—' }}
                                         </span>
-                                        <span class="rcm-role-chip rcm-role-senior">
-                                            <i class="bi bi-person-badge-fill"></i>
-                                            {{ $rowApprover?->name ?? '—' }}
+                                        <span>
+                                            <i class="bi bi-person-badge-fill" style="color:#1d4ed8;"></i>
+                                            Senior Manager: {{ $rowApprover?->name ?? '—' }}
                                         </span>
                                     </div>
                                 </td>
 
                                 <td class="col-status td-center">
-                                    <span class="status-badge sc-completed">
+                                    <span
+                                        style="
+                                            color:#15803d;
+                                            font-weight:600;
+                                            font-size:12.5px;
+                                            display:inline-flex;
+                                            align-items:center;
+                                            gap:6px;
+                                        "
+                                    >
+                                        <i class="bi bi-check-circle-fill"></i>
                                         Completed
+                                        @if($ctrl->approved_at)
+                                            &middot; {{ $ctrl->approved_at->format('d M Y') }}
+                                        @endif
                                     </span>
-
-                                    @if($ctrl->approved_at)
-                                        <div
-                                            style="
-                                                margin-top:5px;
-                                                font-size:11px;
-                                                color:#94a3b8;
-                                            "
-                                        >
-                                            {{ $ctrl->approved_at->format('d M Y') }}
-                                        </div>
-                                    @endif
                                 </td>
 
                             </tr>
@@ -1956,8 +1929,6 @@
                                 </span>
 
                             </td>
-
-                            @unless($isRcmView ?? false)
 
                             <td class="col-desc">
 
@@ -2181,8 +2152,6 @@
 
                             </td>
 
-                            @endunless
-
                             @unless($isRcmView ?? false)
 
                                 <td class="col-frekuensi">
@@ -2232,17 +2201,17 @@
 
                                 <td class="col-handled-by">
                                     <div class="rcm-handled-by">
-                                        <span class="rcm-role-chip rcm-role-officer">
-                                            <i class="bi bi-person-fill"></i>
-                                            {{ $officerName }}
+                                        <span>
+                                            <i class="bi bi-person-fill" style="color:#0f766e;"></i>
+                                            Officer: {{ $officerName }}
                                         </span>
-                                        <span class="rcm-role-chip rcm-role-manager">
-                                            <i class="bi bi-person-check-fill"></i>
-                                            {{ $rowReviewer?->name ?? '—' }}
+                                        <span>
+                                            <i class="bi bi-person-check-fill" style="color:#b45309;"></i>
+                                            Manager: {{ $rowReviewer?->name ?? '—' }}
                                         </span>
-                                        <span class="rcm-role-chip rcm-role-senior">
-                                            <i class="bi bi-person-badge-fill"></i>
-                                            {{ $rowApprover?->name ?? '—' }}
+                                        <span>
+                                            <i class="bi bi-person-badge-fill" style="color:#1d4ed8;"></i>
+                                            Senior Manager: {{ $rowApprover?->name ?? '—' }}
                                         </span>
                                     </div>
                                 </td>

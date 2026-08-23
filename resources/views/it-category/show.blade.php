@@ -1787,6 +1787,38 @@
 
                         @if(($isRcmView ?? false) && $scKey === 'completed')
 
+                            @php
+                                $officerEvidence =
+                                    $ctrl->evidences
+                                        ->where('file_type', '!=', 'Berita Acara')
+                                        ->first();
+
+                                $officerName =
+                                    $officerEvidence?->uploaded_by
+                                    ?? '—';
+
+                                $rowUptiModel =
+                                    $allUptis->firstWhere('name', $ctrl->upti);
+
+                                $rowReviewer =
+                                    \App\Models\User::query()
+                                        ->where('role', 'reviewer')
+                                        ->when(
+                                            $rowUptiModel,
+                                            fn ($q) => $q->where('upti_id', $rowUptiModel->id)
+                                        )
+                                        ->first();
+
+                                $rowApprover =
+                                    \App\Models\User::query()
+                                        ->where('role', 'approver')
+                                        ->when(
+                                            $rowUptiModel,
+                                            fn ($q) => $q->where('upti_id', $rowUptiModel->id)
+                                        )
+                                        ->first();
+                            @endphp
+
                             <tr
                                 data-id="{{ $ctrl->id }}"
                                 data-ctrl-status="completed"
@@ -1824,6 +1856,30 @@
                                             &middot; {{ $ctrl->approved_at->format('d M Y') }}
                                         @endif
                                     </span>
+
+                                    <div
+                                        style="
+                                            margin-top:6px;
+                                            font-size:11px;
+                                            color:#64748b;
+                                            display:flex;
+                                            flex-direction:column;
+                                            gap:2px;
+                                        "
+                                    >
+                                        <span>
+                                            <i class="bi bi-person-fill" style="color:#0f766e;"></i>
+                                            Officer: {{ $officerName }}
+                                        </span>
+                                        <span>
+                                            <i class="bi bi-person-check-fill" style="color:#b45309;"></i>
+                                            Manager: {{ $rowReviewer?->name ?? '—' }}
+                                        </span>
+                                        <span>
+                                            <i class="bi bi-person-badge-fill" style="color:#1d4ed8;"></i>
+                                            Senior Manager: {{ $rowApprover?->name ?? '—' }}
+                                        </span>
+                                    </div>
                                 </td>
 
                             </tr>

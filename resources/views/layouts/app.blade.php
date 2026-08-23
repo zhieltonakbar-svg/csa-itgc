@@ -111,36 +111,11 @@
 
         // Auto-dismiss disabled so users can close them manually
 
-        // ── IT CATEGORY LINKS — use filter stored in sessionStorage ────────────
-        (function () {
-            // Read filter values stored by the Dashboard filter form
-            function getFilter() {
-                try {
-                    var stored = sessionStorage.getItem('assessmentFilter');
-                    return stored ? JSON.parse(stored) : null;
-                } catch (e) { return null; }
-            }
-
-            document.querySelectorAll('.nav-submenu .nav-link[data-category-id]').forEach(function (link) {
-                link.addEventListener('click', function (e) {
-                    var filter = getFilter();
-                    if (!filter || !filter.year || !filter.quarter || !filter.appId) {
-                        // No complete filter set — navigate to Dashboard so user can choose
-                        e.preventDefault();
-                        window.location.href = '{{ route("dashboard") }}';
-                        return;
-                    }
-                    // Prevent default and use the JS route to ensure sessionStorage values are passed
-                    e.preventDefault();
-                    var catId = this.getAttribute('data-category-id');
-                    window.location.href = '/it-category/' + encodeURIComponent(catId) + '/controls'
-                        + '?year=' + encodeURIComponent(filter.year)
-                        + '&quarter=' + encodeURIComponent(filter.quarter)
-                        + '&application_id=' + encodeURIComponent(filter.appId);
-                });
-            });
-        }());
-        // ──────────────────────────────────────────────────────────────────────
+        // NOTE: category links now carry their correct URL (rcm.controls
+        // for Admin, dashboard.controls for everyone else, with the
+        // sticky year/quarter/application filter) directly in href,
+        // resolved server-side in layouts/sidebar.blade.php. No client-
+        // side interception needed anymore.
     </script>
 
     @if(auth()->check())

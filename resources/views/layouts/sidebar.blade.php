@@ -63,7 +63,7 @@
 
         <div class="nav-item">
             <a href="{{ route('dashboard') }}"
-               class="nav-link {{ $currentRoute === 'dashboard' ? 'active' : '' }}">
+               class="nav-link {{ in_array($currentRoute, ['dashboard', 'dashboard.controls']) ? 'active' : '' }}">
                 <i class="bi bi-grid-1x2-fill"></i>
                 <span class="nav-text">Dashboard</span>
             </a>

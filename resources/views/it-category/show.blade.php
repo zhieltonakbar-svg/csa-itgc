@@ -477,6 +477,10 @@
     text-align:center;
 }
 
+.col-status-wide {
+    width:340px !important;
+}
+
 .col-actions {
     width:120px;
     text-align:center;
@@ -1703,9 +1707,13 @@
                             Control ID
                         </th>
 
-                        <th>
-                            Control Description
-                        </th>
+                        @unless($isRcmView ?? false)
+
+                            <th>
+                                Control Description
+                            </th>
+
+                        @endunless
 
                         @unless($isRcmView ?? false)
 
@@ -1727,7 +1735,7 @@
 
                         @endunless
 
-                        <th class="col-status th-center">
+                        <th class="col-status {{ ($isRcmView ?? false) ? 'col-status-wide' : 'th-center' }}">
                             Status Control
                         </th>
 
@@ -1757,7 +1765,7 @@
                                 $prevUpti !== $ctrl->upti
                             ) {
                                 $dividerColspan =
-                                    ($isRcmView ?? false) ? 4 : 7;
+                                    ($isRcmView ?? false) ? 3 : 7;
 
                                 echo '<tr aria-hidden="true">
                                     <td
@@ -1831,15 +1839,11 @@
                                     </span>
                                 </td>
 
-                                <td class="col-desc">
-                                    {{ $ctrl->control_description ?? '—' }}
-                                </td>
-
                                 <td>
                                     {{ $ctrl->upti ?? '—' }}
                                 </td>
 
-                                <td class="col-status td-center">
+                                <td class="col-status col-status-wide">
                                     <span
                                         style="
                                             color:#15803d;
@@ -1910,6 +1914,8 @@
                                 </span>
 
                             </td>
+
+                            @unless($isRcmView ?? false)
 
                             <td class="col-desc">
 
@@ -2133,6 +2139,8 @@
 
                             </td>
 
+                            @endunless
+
                             @unless($isRcmView ?? false)
 
                                 <td class="col-frekuensi">
@@ -2178,7 +2186,7 @@
 
                             @endunless
 
-                            <td class="col-status td-center">
+                            <td class="col-status td-center {{ ($isRcmView ?? false) ? 'col-status-wide' : '' }}">
 
                                 <span
                                     class="status-badge {{ $scInfo['cls'] }}"

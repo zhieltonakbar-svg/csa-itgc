@@ -1558,7 +1558,7 @@
 
         </span>
 
-        @if($isAdmin && $controls->isNotEmpty())
+        @if($isAdmin && $controls->isNotEmpty() && !($isRcmView ?? false))
 
             <button
                 type="button"
@@ -1574,7 +1574,7 @@
 
         @endif
 
-        @if($isAdmin)
+        @if($isAdmin && !($isRcmView ?? false))
 
             <button
                 type="button"

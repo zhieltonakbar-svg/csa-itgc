@@ -56,6 +56,20 @@ class DashboardController extends Controller
             $quarter = 'q1';
         }
 
+        /*
+         * If the URL has no filter params at all (e.g. plain visit
+         * to /dashboard, or arriving from the sidebar), fall back
+         * to whatever was last searched — kept in session until the
+         * user explicitly clears it (dashboard.clearFilter).
+         */
+        if (
+            !$request->has('application_id') &&
+            session()->has('itgc_filter.application_id')
+        ) {
+            $year = (int) session('itgc_filter.year', $year);
+            $quarter = session('itgc_filter.quarter', $quarter);
+        }
+
         $userUptiName =
             trim(
                 (string) optional(
@@ -122,6 +136,14 @@ class DashboardController extends Controller
             );
 
         if (
+            $applicationId === null &&
+            session()->has('itgc_filter.application_id')
+        ) {
+            $applicationId =
+                session('itgc_filter.application_id');
+        }
+
+        if (
             $applicationId !== null &&
             $applications->contains(
                 'id',
@@ -142,6 +164,15 @@ class DashboardController extends Controller
                     'id',
                     $applicationId
                 );
+
+            // Keep this search "sticky" until the user clears it.
+            session([
+                'itgc_filter' => [
+                    'year' => $year,
+                    'quarter' => $quarter,
+                    'application_id' => $applicationId,
+                ],
+            ]);
         }
 
         $categories =
@@ -311,6 +342,18 @@ class DashboardController extends Controller
                 'selectedApplication'
             )
         );
+    }
+
+    /**
+     * Clear the sticky Dashboard search (year/quarter/application),
+     * so both Dashboard and the sidebar go back to requiring a
+     * fresh search before IT Category / IT RCM can be opened.
+     */
+    public function clearFilter()
+    {
+        session()->forget('itgc_filter');
+
+        return redirect()->route('dashboard');
     }
 
     public function getCategories(
@@ -597,11 +640,28 @@ class DashboardController extends Controller
             $quarter = 'q1';
         }
 
+        // Fall back to the sticky Dashboard search if this page was
+        // reached without explicit filter params (e.g. an old
+        // bookmark or a stale sidebar link).
+        if (
+            !$applicationId &&
+            session()->has('itgc_filter.application_id')
+        ) {
+            $applicationId =
+                session('itgc_filter.application_id');
+            $year =
+                (int) session('itgc_filter.year', $year);
+            $quarter =
+                session('itgc_filter.quarter', $quarter);
+        }
+
         if (!$applicationId) {
-            abort(
-                400,
-                'Application is required.'
-            );
+            return redirect()
+                ->route('dashboard')
+                ->with(
+                    'error',
+                    'Please select a Year, Quarter, and Application on the Dashboard first.'
+                );
         }
 
         $application =

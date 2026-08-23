@@ -10,6 +10,25 @@
         $activeCategoryId = request()->route('category') ? (is_object(request()->route('category')) ? request()->route('category')->id : request()->route('category')) : null;
     }
 
+    // The "sticky" search: prefer whatever is in the current URL,
+    // otherwise fall back to the last search stored in session by
+    // DashboardController@index. If neither exists, the user hasn't
+    // searched yet — category links are disabled until they do.
+    $sidebarFilterParams = array_filter(
+        request()->only('year', 'quarter', 'upti_id', 'application_id'),
+        fn ($value) => $value !== null && $value !== ''
+    );
+
+    if (empty($sidebarFilterParams['application_id'] ?? null)) {
+        $sidebarFilterParams = array_filter([
+            'year' => session('itgc_filter.year'),
+            'quarter' => session('itgc_filter.quarter'),
+            'application_id' => session('itgc_filter.application_id'),
+        ]);
+    }
+
+    $hasActiveSearch = !empty($sidebarFilterParams['application_id'] ?? null);
+
     // Load all IT categories for the submenu (from DB)
     $sidebarCategories = \App\Models\ItCategory::orderBy('name')->get();
 
@@ -55,19 +74,35 @@
             <ul class="nav-submenu {{ $isOnCategoryPage ? 'show' : '' }}">
                 @foreach($sidebarCategories as $cat)
                     <li>
-                        {{--
-                            Admin -> IT RCM Management (rcm.controls): completed
-                            rows are simplified there. Everyone else -> IT Category
-                            (dashboard.controls): full operational view.
-                            Same current filter (year/quarter/application) is
-                            carried over either way so the two stay in sync.
-                        --}}
-                        <a href="{{ route($user->isAdmin() ? 'rcm.controls' : 'dashboard.controls', ['category' => $cat->id]) . '?' . http_build_query(request()->only('year', 'quarter', 'upti_id', 'application_id')) }}"
-                           class="nav-link {{ $activeCategoryId == $cat->id ? 'sub-active' : '' }}"
-                           data-category-id="{{ $cat->id }}"
-                           data-category-name="{{ $cat->name }}">
-                            {{ $cat->name }}
-                        </a>
+                        @if($hasActiveSearch)
+
+                            {{--
+                                Admin -> IT RCM Management (rcm.controls): completed
+                                rows are simplified there. Everyone else -> IT Category
+                                (dashboard.controls): full operational view.
+                                Filter carried over from the current URL, or from the
+                                last search saved in session — "sticky" until cleared.
+                            --}}
+                            <a href="{{ route($user->isAdmin() ? 'rcm.controls' : 'dashboard.controls', ['category' => $cat->id]) . '?' . http_build_query($sidebarFilterParams) }}"
+                               class="nav-link {{ $activeCategoryId == $cat->id ? 'sub-active' : '' }}"
+                               data-category-id="{{ $cat->id }}"
+                               data-category-name="{{ $cat->name }}">
+                                {{ $cat->name }}
+                            </a>
+
+                        @else
+
+                            <a href="{{ route('dashboard') }}"
+                               class="nav-link"
+                               style="opacity:.5; cursor:not-allowed;"
+                               title="Search a year, quarter, and application on the Dashboard first"
+                               data-category-id="{{ $cat->id }}"
+                               data-category-name="{{ $cat->name }}">
+                                <i class="bi bi-lock-fill" style="font-size:11px; margin-right:4px;"></i>
+                                {{ $cat->name }}
+                            </a>
+
+                        @endif
                     </li>
                 @endforeach
             </ul>

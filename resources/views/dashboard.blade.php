@@ -714,6 +714,20 @@
                 ·
                 {{ $selectedApplication->name }}
 
+                <a
+                    href="{{ route('dashboard.clearFilter') }}"
+                    title="Clear search"
+                    style="
+                        margin-left:10px;
+                        color:inherit;
+                        opacity:.7;
+                        text-decoration:none;
+                    "
+                >
+                    <i class="bi bi-x-circle"></i>
+                    Change
+                </a>
+
             </div>
 
         @endif

@@ -64,6 +64,11 @@ Route::middleware('auth')->group(function () {
         'getCategories'
     ])->name('dashboard.categories');
 
+    Route::get('/dashboard/clear-filter', [
+        DashboardController::class,
+        'clearFilter'
+    ])->name('dashboard.clearFilter');
+
     /*
     |--------------------------------------------------------------------------
     | IT Category

@@ -2,8 +2,17 @@
     $user         = auth()->user();
     $currentRoute = request()->route() ? request()->route()->getName() : '';
 
-    // Detect if we are on an IT Category or IT RCM detail page
-    $isOnCategoryPage = in_array($currentRoute, ['dashboard.controls', 'rcm.controls', 'it-category.show']);
+    // Detect if we are on an IT Category or IT RCM detail page.
+    // For Admin, the "IT RCM Management" section should only ever
+    // highlight/expand when actually on the rcm.controls route —
+    // reaching the same category via the Dashboard (dashboard.controls)
+    // must NOT make the sidebar look like you're inside IT RCM.
+    if ($user->isAdmin()) {
+        $isOnCategoryPage = $currentRoute === 'rcm.controls';
+    } else {
+        $isOnCategoryPage = in_array($currentRoute, ['dashboard.controls', 'it-category.show']);
+    }
+
     $activeCategoryId = null;
 
     if ($isOnCategoryPage) {

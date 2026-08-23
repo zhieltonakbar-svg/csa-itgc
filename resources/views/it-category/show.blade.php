@@ -481,6 +481,18 @@
     width:340px !important;
 }
 
+.col-handled-by {
+    width:280px;
+}
+
+.rcm-handled-by {
+    display:flex;
+    flex-direction:column;
+    gap:3px;
+    font-size:11.5px;
+    color:#475569;
+}
+
 .col-actions {
     width:120px;
     text-align:center;
@@ -1735,7 +1747,15 @@
 
                         @endunless
 
-                        <th class="col-status {{ ($isRcmView ?? false) ? 'col-status-wide' : 'th-center' }}">
+                        @if($isRcmView ?? false)
+
+                            <th class="col-handled-by">
+                                Handled By
+                            </th>
+
+                        @endif
+
+                        <th class="col-status {{ ($isRcmView ?? false) ? '' : 'th-center' }}">
                             Status Control
                         </th>
 
@@ -1765,7 +1785,7 @@
                                 $prevUpti !== $ctrl->upti
                             ) {
                                 $dividerColspan =
-                                    ($isRcmView ?? false) ? 3 : 7;
+                                    ($isRcmView ?? false) ? 4 : 7;
 
                                 echo '<tr aria-hidden="true">
                                     <td
@@ -1791,11 +1811,9 @@
                             $scInfo =
                                 $scBadgeMap[$scKey]
                                 ?? $scBadgeMap['not_started'];
-                        @endphp
 
-                        @if(($isRcmView ?? false) && $scKey === 'completed')
+                            if ($isRcmView ?? false) {
 
-                            @php
                                 $officerEvidence =
                                     $ctrl->evidences
                                         ->where('file_type', '!=', 'Berita Acara')
@@ -1825,7 +1843,11 @@
                                             fn ($q) => $q->where('upti_id', $rowUptiModel->id)
                                         )
                                         ->first();
-                            @endphp
+
+                            }
+                        @endphp
+
+                        @if(($isRcmView ?? false) && $scKey === 'completed')
 
                             <tr
                                 data-id="{{ $ctrl->id }}"
@@ -1843,7 +1865,24 @@
                                     {{ $ctrl->upti ?? '—' }}
                                 </td>
 
-                                <td class="col-status col-status-wide">
+                                <td class="col-handled-by">
+                                    <div class="rcm-handled-by">
+                                        <span>
+                                            <i class="bi bi-person-fill" style="color:#0f766e;"></i>
+                                            Officer: {{ $officerName }}
+                                        </span>
+                                        <span>
+                                            <i class="bi bi-person-check-fill" style="color:#b45309;"></i>
+                                            Manager: {{ $rowReviewer?->name ?? '—' }}
+                                        </span>
+                                        <span>
+                                            <i class="bi bi-person-badge-fill" style="color:#1d4ed8;"></i>
+                                            Senior Manager: {{ $rowApprover?->name ?? '—' }}
+                                        </span>
+                                    </div>
+                                </td>
+
+                                <td class="col-status td-center">
                                     <span
                                         style="
                                             color:#15803d;
@@ -1860,30 +1899,6 @@
                                             &middot; {{ $ctrl->approved_at->format('d M Y') }}
                                         @endif
                                     </span>
-
-                                    <div
-                                        style="
-                                            margin-top:6px;
-                                            font-size:11px;
-                                            color:#64748b;
-                                            display:flex;
-                                            flex-direction:column;
-                                            gap:2px;
-                                        "
-                                    >
-                                        <span>
-                                            <i class="bi bi-person-fill" style="color:#0f766e;"></i>
-                                            Officer: {{ $officerName }}
-                                        </span>
-                                        <span>
-                                            <i class="bi bi-person-check-fill" style="color:#b45309;"></i>
-                                            Manager: {{ $rowReviewer?->name ?? '—' }}
-                                        </span>
-                                        <span>
-                                            <i class="bi bi-person-badge-fill" style="color:#1d4ed8;"></i>
-                                            Senior Manager: {{ $rowApprover?->name ?? '—' }}
-                                        </span>
-                                    </div>
                                 </td>
 
                             </tr>
@@ -2186,7 +2201,28 @@
 
                             @endunless
 
-                            <td class="col-status td-center {{ ($isRcmView ?? false) ? 'col-status-wide' : '' }}">
+                            @if($isRcmView ?? false)
+
+                                <td class="col-handled-by">
+                                    <div class="rcm-handled-by">
+                                        <span>
+                                            <i class="bi bi-person-fill" style="color:#0f766e;"></i>
+                                            Officer: {{ $officerName }}
+                                        </span>
+                                        <span>
+                                            <i class="bi bi-person-check-fill" style="color:#b45309;"></i>
+                                            Manager: {{ $rowReviewer?->name ?? '—' }}
+                                        </span>
+                                        <span>
+                                            <i class="bi bi-person-badge-fill" style="color:#1d4ed8;"></i>
+                                            Senior Manager: {{ $rowApprover?->name ?? '—' }}
+                                        </span>
+                                    </div>
+                                </td>
+
+                            @endif
+
+                            <td class="col-status td-center">
 
                                 <span
                                     class="status-badge {{ $scInfo['cls'] }}"

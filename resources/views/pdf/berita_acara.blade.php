@@ -181,6 +181,7 @@
         .sig-date {
             text-align: center;
             font-size: 8pt;
+            font-style: italic;
             color: #94a3b8;
             margin-top: 2px;
         }
@@ -359,12 +360,21 @@
         <tr>
             <td class="sig-space">
                 <div class="sig-ttd">( TTD )</div>
+                <div class="sig-date">
+                    {{ optional($control->submitted_at)->format('d/m/Y') ?? '-' }}
+                </div>
             </td>
             <td class="sig-space">
                 <div class="sig-ttd">( TTD )</div>
+                <div class="sig-date">
+                    {{ optional($control->reviewed_at)->format('d/m/Y') ?? '-' }}
+                </div>
             </td>
             <td class="sig-space">
                 <div class="sig-ttd">( TTD )</div>
+                <div class="sig-date">
+                    {{ optional($control->approved_at)->format('d/m/Y') ?? '-' }}
+                </div>
             </td>
         </tr>
         <tr>
@@ -385,20 +395,6 @@
             <td><strong>Jabatan :</strong> Officer</td>
             <td><strong>Jabatan :</strong> Manager</td>
             <td><strong>Jabatan :</strong> Senior Manager</td>
-        </tr>
-        <tr>
-            <td>
-                <strong>Tanggal :</strong>
-                {{ optional($control->submitted_at)->format('d/m/Y') ?? '-' }}
-            </td>
-            <td>
-                <strong>Tanggal :</strong>
-                {{ optional($control->reviewed_at)->format('d/m/Y') ?? '-' }}
-            </td>
-            <td>
-                <strong>Tanggal :</strong>
-                {{ optional($control->approved_at)->format('d/m/Y') ?? '-' }}
-            </td>
         </tr>
     </table>
 

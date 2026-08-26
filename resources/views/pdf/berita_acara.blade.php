@@ -20,27 +20,39 @@
             border-collapse: collapse;
         }
 
+        .header-table {
+            margin-bottom: 4px;
+        }
+
         .header-table td {
-            border: 1px solid #94a3b8;
-            padding: 6px 10px;
+            padding: 6px 14px;
             vertical-align: middle;
+            border: none;
+        }
+
+        .header-bottom-rule {
+            border-bottom: 2px solid #3457a6;
+            margin-bottom: 14px;
         }
 
         .header-logo {
             width: 22%;
-            text-align: center;
+            text-align: left;
         }
 
         .header-title {
             width: 46%;
             text-align: center;
+            border-left: 1px solid #cbd5e1;
+            border-right: 1px solid #cbd5e1;
         }
 
         .header-title h1 {
             margin: 0;
-            font-size: 13pt;
+            font-size: 14pt;
             font-style: italic;
             text-transform: uppercase;
+            color: #1e293b;
         }
 
         .header-meta {
@@ -49,7 +61,7 @@
 
         .header-meta table td {
             border: none;
-            padding: 2px 4px;
+            padding: 1px 4px;
             font-size: 8.5pt;
         }
 
@@ -215,7 +227,7 @@
         </tr>
     </table>
 
-    <br>
+    <div class="header-bottom-rule"></div>
 
     {{-- ============================================================
          A. INFORMASI DOKUMEN

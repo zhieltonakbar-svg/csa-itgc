@@ -1255,6 +1255,27 @@ class ControlController extends Controller
                 ->where('file_type', '!=', 'Berita Acara')
                 ->values();
 
+        $executionOfficerName =
+            $officerName !== '( Officer / Creator )'
+                ? $officerName
+                : 'Officer';
+
+        $executionDate =
+            optional($control->submitted_at)->format('d/m/Y')
+            ?? '-';
+
+        $evidenceFileNames =
+            $evidences
+                ->pluck('original_name')
+                ->filter()
+                ->implode(', ');
+
+        $executionNotes =
+            "Kontrol dilaksanakan oleh {$executionOfficerName} pada {$executionDate}."
+            . ($evidenceFileNames !== ''
+                ? " File: {$evidenceFileNames}."
+                : '');
+
         $logoPath =
             public_path('images/infranexia-logo.png');
 
@@ -1283,6 +1304,8 @@ class ControlController extends Controller
                         $evidences,
                     'logoBase64' =>
                         $logoBase64,
+                    'executionNotes' =>
+                        $executionNotes,
                 ]
             )->render();
 

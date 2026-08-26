@@ -283,7 +283,7 @@
         </tr>
         <tr>
             <td class="label">Catatan Pelaksanaan Kontrol</td>
-            <td class="value">{{ $control->control_description ?? '-' }}</td>
+            <td class="value">{{ $executionNotes ?? '-' }}</td>
         </tr>
     </table>
 

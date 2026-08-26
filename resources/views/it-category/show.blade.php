@@ -6300,7 +6300,7 @@
                             location.reload();
 
                         },
-                        500
+                        200
                     );
 
                 } catch (error) {

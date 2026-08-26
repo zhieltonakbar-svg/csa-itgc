@@ -1355,58 +1355,13 @@ class ControlController extends Controller
                         ?? 'System',
                 ]);
 
-            $extension =
-                strtolower(
-                    $file->getClientOriginalExtension()
-                );
-
-            if (
-                in_array(
-                    $extension,
-                    [
-                        'doc',
-                        'docx',
-                        'xls',
-                        'xlsx',
-                    ],
-                    true
-                ) &&
-                class_exists(
-                    \App\Services\DocumentConverter::class
-                )
-            ) {
-                try {
-                    $pdfContent =
-                        \App\Services\DocumentConverter::convertToPdf(
-                            Storage::disk('public')
-                                ->path($path),
-                            $extension
-                        );
-
-                    if ($pdfContent) {
-                        $previewPath =
-                            'evidence/previews/preview_' .
-                            $evidence->id .
-                            '.pdf';
-
-                        Storage::disk('public')
-                            ->put(
-                                $previewPath,
-                                $pdfContent
-                            );
-                    }
-                } catch (\Throwable $e) {
-                    Log::warning(
-                        'Office document PDF preview generation failed.',
-                        [
-                            'evidence_id' =>
-                                $evidence->id,
-                            'message' =>
-                                $e->getMessage(),
-                        ]
-                    );
-                }
-            }
+            // NOTE: PDF preview for Word/Excel files is intentionally
+            // NOT generated here. It's slow (LibreOffice conversion)
+            // and was making "Upload & Save" feel delayed for no
+            // benefit — EvidenceController::streamPreviewPdf() already
+            // converts on-demand the first time someone actually opens
+            // the preview, then caches the result. Doing it eagerly on
+            // every upload just duplicated that same work upfront.
         }
     }
 

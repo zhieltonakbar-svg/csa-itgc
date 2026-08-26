@@ -188,8 +188,7 @@
 
             <td class="header-title">
                 <h1>
-                    Berita Acara<br>
-                    Review Kontrol IT
+                    Berita Acara
                 </h1>
             </td>
 

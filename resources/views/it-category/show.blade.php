@@ -3218,30 +3218,44 @@
                             "
                         >
 
-                            You can select <strong>more than one file at once</strong>,
-                            and click "Choose Files" <strong>again</strong> anytime
-                            to add even more — previously added files stay.
-                            Hold <strong>Ctrl</strong> (Windows) or <strong>Cmd</strong> (Mac)
-                            while clicking to pick several files together, or
-                            <strong>Shift</strong> to select a range. Set the
-                            <strong>File Type</strong> for each file, then click
-                            <strong>Upload & Save</strong> once at the end.
+                            Click <strong>"+ Add File"</strong> to pick a file — you can
+                            pick several at once (hold <strong>Ctrl</strong>/<strong>Cmd</strong>
+                            or <strong>Shift</strong> in the dialog), and click
+                            <strong>"+ Add File" again anytime</strong> to add more —
+                            previously added files stay. Set the <strong>File Type</strong>
+                            for each file, then click <strong>Upload & Save</strong> once
+                            at the end.
 
                         </div>
 
                         <input
                             type="file"
-                            class="modal-input"
                             id="ec-evidences"
-                            name="evidences[]"
                             multiple
                             accept=".pdf,.doc,.docx,.xls,.xlsx"
+                            style="display:none;"
+                        >
+
+                        <button
+                            type="button"
+                            id="ec-add-file-btn"
                             style="
-                                padding:10px;
+                                display:inline-flex;
+                                align-items:center;
+                                gap:6px;
                                 background:#fff;
-                                border:1px solid #6ee7b7;
+                                border:1.5px dashed #34d399;
+                                color:#065f46;
+                                font-weight:700;
+                                font-size:13px;
+                                padding:8px 16px;
+                                border-radius:8px;
+                                cursor:pointer;
                             "
                         >
+                            <i class="bi bi-plus-circle-fill"></i>
+                            Add File
+                        </button>
 
                         <div
                             style="
@@ -3253,7 +3267,7 @@
 
                             <i class="bi bi-info-circle"></i>
 
-                            Max 10MB per file.
+                            Max 10MB per file, up to 10 files total.
 
                         </div>
 
@@ -5987,8 +6001,8 @@
 
     /* ============================================================
        FILE PICKER (accumulates files across multiple picks —
-       Officer can click "Upload Evidence" repeatedly to add more
-       files before saving once, instead of Save-ing after each pick)
+       Officer clicks "+ Add File" repeatedly to add more files
+       before saving once, instead of Save-ing after each pick)
        ============================================================ */
 
     const fileInput =
@@ -5996,35 +6010,21 @@
             'ec-evidences'
         );
 
+    const addFileBtn =
+        document.getElementById(
+            'ec-add-file-btn'
+        );
+
     const selectedFilesContainer =
         document.getElementById(
             'ec-selected-files-list'
         );
 
-    // Each entry: { id, file }. Kept in sync with the rendered rows
-    // AND with fileInput.files (via DataTransfer) so the existing
-    // save logic (new FormData(form)) keeps working unchanged.
+    // Each entry: { id, file }. This array is the single source of
+    // truth for what gets uploaded — the FormData sent on Save is
+    // built directly from it (see SAVE EDIT / UPLOAD below), so we
+    // don't depend on the native <input>'s FileList at all.
     let pendingEvidenceEntries = [];
-
-    function syncFileInputFromPending() {
-
-        const dt =
-            new DataTransfer();
-
-        pendingEvidenceEntries.forEach(
-            function (entry) {
-
-                dt.items.add(
-                    entry.file
-                );
-
-            }
-        );
-
-        fileInput.files =
-            dt.files;
-
-    }
 
     function removePendingEvidence(rowId) {
 
@@ -6046,7 +6046,21 @@
             row.remove();
         }
 
-        syncFileInputFromPending();
+    }
+
+    if (
+        addFileBtn &&
+        fileInput
+    ) {
+
+        addFileBtn.addEventListener(
+            'click',
+            function () {
+
+                fileInput.click();
+
+            }
+        );
 
     }
 
@@ -6280,8 +6294,6 @@
                     }
                 );
 
-                syncFileInputFromPending();
-
                 // Reset the native picker so opening it again always
                 // fires a fresh 'change' with just the new picks —
                 // previously added files stay in pendingEvidenceEntries.
@@ -6329,14 +6341,8 @@
                     isOfficer
                 ) {
 
-                    const input =
-                        document.getElementById(
-                            'ec-evidences'
-                        );
-
                     if (
-                        !input ||
-                        !input.files.length
+                        !pendingEvidenceEntries.length
                     ) {
 
                         showNotification(
@@ -6384,6 +6390,18 @@
                         new FormData(
                             form
                         );
+
+                    pendingEvidenceEntries.forEach(
+                        function (entry) {
+
+                            formData.append(
+                                'evidences[]',
+                                entry.file,
+                                entry.file.name
+                            );
+
+                        }
+                    );
 
                     formData.append(
                         '_method',

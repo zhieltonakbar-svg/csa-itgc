@@ -36,12 +36,12 @@
         }
 
         .header-logo {
-            width: 22%;
+            width: 20%;
             text-align: left;
         }
 
         .header-title {
-            width: 46%;
+            width: 36%;
             text-align: center;
             border-left: 1px solid #cbd5e1;
             border-right: 1px solid #cbd5e1;
@@ -49,20 +49,31 @@
 
         .header-title h1 {
             margin: 0;
-            font-size: 14pt;
-            font-style: italic;
+            font-size: 17pt;
+            font-weight: 800;
+            font-style: normal;
+            letter-spacing: 1.5px;
             text-transform: uppercase;
-            color: #1e293b;
+            color: #1e3a6e;
+            font-family: 'Helvetica', 'Arial', sans-serif;
         }
 
         .header-meta {
-            width: 32%;
+            width: 44%;
         }
 
         .header-meta table td {
             border: none;
-            padding: 1px 4px;
+            padding: 1.5px 4px;
             font-size: 8.5pt;
+            line-height: 1.3;
+        }
+
+        .header-meta .company-name {
+            font-weight: bold;
+            font-size: 9.5pt;
+            line-height: 1.35;
+            padding-bottom: 4px !important;
         }
 
         .section-title {
@@ -192,9 +203,9 @@
         <tr>
             <td class="header-logo">
                 @if($logoBase64)
-                    <img src="{{ $logoBase64 }}" style="max-width:100px; max-height:40px;">
+                    <img src="{{ $logoBase64 }}" style="max-width:150px; max-height:60px;">
                 @else
-                    <div style="font-weight:bold;">CSA - ITGC</div>
+                    <div style="font-weight:bold; font-size:12pt;">CSA - ITGC</div>
                 @endif
             </td>
 
@@ -207,11 +218,10 @@
             <td class="header-meta">
                 <table>
                     <tr>
-                        <td style="font-weight:bold; width:35%;">PT. Telkom Infrastruktur Indonesia</td>
-                        <td colspan="1"></td>
+                        <td colspan="2" class="company-name">PT. Telkom Infrastruktur Indonesia</td>
                     </tr>
                     <tr>
-                        <td style="font-weight:bold;">No. Dokumen</td>
+                        <td style="font-weight:bold; width:38%;">No. Dokumen</td>
                         <td>{{ $docNumber }}</td>
                     </tr>
                     <tr>

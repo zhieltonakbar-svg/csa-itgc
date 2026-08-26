@@ -1145,6 +1145,25 @@
     background:#fff;
 }
 
+.mc-item-locked {
+    background:#f0fdf4;
+    border-color:#86efac;
+    cursor:not-allowed;
+}
+
+.mc-item-locked:hover {
+    background:#f0fdf4;
+    border-color:#86efac;
+}
+
+.mc-item-locked .mc-item-text::after {
+    content: ' (required for this Application)';
+    color:#16a34a;
+    font-size:10px;
+    font-weight:600;
+    font-style:italic;
+}
+
 .mc-item input {
     width:15px;
     height:15px;
@@ -1616,6 +1635,7 @@
                 id="itc-add-btn"
                 aria-haspopup="dialog"
                 aria-controls="addControlModal"
+                data-locked-upti="{{ optional($application->upti)->name ?? '' }}"
             >
 
                 <i class="bi bi-plus-lg"></i>
@@ -3758,6 +3778,10 @@
     // No manual selection needed — filled by refreshApplications().
     let currentApplicationIds = [];
 
+    // UPTI that must stay checked in the Add Control modal because
+    // it matches the Application currently being viewed.
+    let lockedUptiName = '';
+
     // Status of the Control currently open in the Edit modal.
     // Kept in sync after in-place actions (e.g. deleting evidence)
     // so the modal/table can update without a full page reload.
@@ -4920,6 +4944,33 @@
         }
 
         uptiList.addEventListener(
+            'click',
+            function (event) {
+
+                const checkbox =
+                    event.target.closest(
+                        'input[name="uptis[]"]'
+                    );
+
+                if (
+                    checkbox &&
+                    lockedUptiName &&
+                    checkbox.value === lockedUptiName
+                ) {
+
+                    event.preventDefault();
+
+                    showNotification(
+                        `"${lockedUptiName}" is required for this Application and can't be removed here. You can still check other UPTI(s) to add this control there too.`,
+                        'info'
+                    );
+
+                }
+
+            }
+        );
+
+        uptiList.addEventListener(
             'change',
             async function (event) {
 
@@ -4944,6 +4995,24 @@
                 addForm.reset();
 
                 currentApplicationIds = [];
+
+                lockedUptiName =
+                    addBtn.dataset.lockedUpti
+                    || '';
+
+                uptiList
+                    .querySelectorAll(
+                        '.mc-item-locked'
+                    )
+                    .forEach(
+                        function (el) {
+
+                            el.classList.remove(
+                                'mc-item-locked'
+                            );
+
+                        }
+                    );
 
                 applicationList.innerHTML = `
                     <div
@@ -4970,6 +5039,37 @@
                 openModal(
                     addModal
                 );
+
+                if (lockedUptiName) {
+
+                    const lockedCheckbox =
+                        uptiList.querySelector(
+                            `input[name="uptis[]"][value="${CSS.escape(lockedUptiName)}"]`
+                        );
+
+                    if (lockedCheckbox) {
+
+                        lockedCheckbox.checked =
+                            true;
+
+                        const lockedLabel =
+                            lockedCheckbox.closest(
+                                'label'
+                            );
+
+                        if (lockedLabel) {
+
+                            lockedLabel.classList.add(
+                                'mc-item-locked'
+                            );
+
+                        }
+
+                        refreshApplications();
+
+                    }
+
+                }
 
             }
         );

@@ -1475,7 +1475,24 @@
 
                 <i class="bi bi-window-stack"></i>
 
-                {{ $application->name }}
+                @if($isAdmin)
+                    <form method="GET" action="{{ url()->current() }}" style="margin: 0; display: inline-block;">
+                        <input type="hidden" name="year" value="{{ $year }}">
+                        <input type="hidden" name="quarter" value="{{ $quarter }}">
+                        @if($isRcmView ?? false)
+                            <input type="hidden" name="source" value="rcm">
+                        @else
+                            <input type="hidden" name="source" value="{{ $source ?? 'dashboard' }}">
+                        @endif
+                        <select name="application_id" onchange="this.form.submit()" style="border: 1px solid #dbe3e8; border-radius: 6px; padding: 2px 8px; font-size: 13px; font-weight: 600; color: #152238; background: #f8fafb; outline: none; cursor: pointer; max-width: 220px;">
+                            @foreach($allApplications as $availApp)
+                                <option value="{{ $availApp->id }}" {{ (int) $application->id === (int) $availApp->id ? 'selected' : '' }}>{{ $availApp->name }}</option>
+                            @endforeach
+                        </select>
+                    </form>
+                @else
+                    {{ $application->name }}
+                @endif
 
             </div>
 

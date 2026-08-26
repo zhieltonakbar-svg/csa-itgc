@@ -675,6 +675,17 @@ class DashboardController extends Controller
                     $applicationId
                 );
 
+        // Keep the sticky Dashboard search in sync when Admin
+        // switches Application/Year/Quarter directly from this
+        // page's Assessment Overview dropdowns.
+        session([
+            'itgc_filter' => [
+                'year' => $year,
+                'quarter' => $quarter,
+                'application_id' => $application->id,
+            ],
+        ]);
+
         if (!$user->isAdmin()) {
             $userUptiName =
                 trim(

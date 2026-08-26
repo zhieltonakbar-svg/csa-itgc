@@ -207,6 +207,8 @@ class ControlController extends Controller
                     $control->year,
                     $control->quarter
                 );
+
+                $this->notifyUptiUsersOfNewControl($control);
             }
 
             foreach ($createdControls as $control) {
@@ -1400,6 +1402,77 @@ class ControlController extends Controller
             $userUpti,
             $controlUpti
         ) === 0;
+    }
+
+    /**
+     * When Admin adds a new Control, notify every Officer, Manager
+     * (Reviewer), and Senior Manager (Approver) who belongs to the
+     * same UPTI as that Control — they all need to know a new
+     * assessment item now exists for them.
+     */
+    private function notifyUptiUsersOfNewControl(Control $control): void
+    {
+        $controlUpti =
+            trim(
+                (string) $control->upti
+            );
+
+        if ($controlUpti === '') {
+            return;
+        }
+
+        $targetUsers =
+            User::query()
+                ->whereIn(
+                    'role',
+                    [
+                        'creator',
+                        'officer',
+                        'reviewer',
+                        'approver',
+                    ]
+                )
+                ->whereHas(
+                    'upti',
+                    function ($query) use (
+                        $controlUpti
+                    ) {
+                        $query->whereRaw(
+                            'LOWER(TRIM(name)) = LOWER(TRIM(?))',
+                            [$controlUpti]
+                        );
+                    }
+                )
+                ->get();
+
+        if ($targetUsers->isEmpty()) {
+            return;
+        }
+
+        $url =
+            route(
+                'dashboard',
+                [
+                    'year' =>
+                        $control->year,
+                    'quarter' =>
+                        $control->quarter,
+                    'application_id' =>
+                        $control->application_id,
+                ]
+            );
+
+        $message =
+            "A new control ({$control->it_control_id}) has been added for UPTI {$controlUpti}.";
+
+        Notification::send(
+            $targetUsers,
+            new ControlWorkflowNotification(
+                $message,
+                $url,
+                $control->id
+            )
+        );
     }
 
     private function getWorkflowRecipients(

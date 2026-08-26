@@ -3172,6 +3172,22 @@
 
                             Upload Evidence
 
+                            <span
+                                style="
+                                    display:inline-block;
+                                    background:#d1fae5;
+                                    color:#065f46;
+                                    font-size:10px;
+                                    font-weight:700;
+                                    padding:2px 8px;
+                                    border-radius:9999px;
+                                    margin-left:6px;
+                                    vertical-align:middle;
+                                "
+                            >
+                                Multiple files allowed
+                            </span>
+
                         </label>
 
                         <div
@@ -3182,9 +3198,12 @@
                             "
                         >
 
-                            Select files, then specify the
-                            <strong>File Type</strong>
-                            for each file.
+                            You can select <strong>more than one file at once</strong>:
+                            click "Choose Files", then hold
+                            <strong>Ctrl</strong> (Windows) or <strong>Cmd</strong> (Mac)
+                            while clicking each file — or hold <strong>Shift</strong>
+                            to select a range. Then set the
+                            <strong>File Type</strong> for each file below.
 
                         </div>
 

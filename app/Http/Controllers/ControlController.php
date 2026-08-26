@@ -1205,6 +1205,37 @@ class ControlController extends Controller
             $approver?->name
             ?? '( Senior Manager / Approver )';
 
+        $approvedYear =
+            optional($control->approved_at)->year
+            ?? now()->year;
+
+        $docSequence =
+            Control::query()
+                ->where('status_control', 'completed')
+                ->whereYear('approved_at', $approvedYear)
+                ->where(
+                    'approved_at',
+                    '<=',
+                    $control->approved_at
+                        ?? now()
+                )
+                ->count();
+
+        $docNumber =
+            str_pad(
+                (string) max($docSequence, 1),
+                2,
+                '0',
+                STR_PAD_LEFT
+            )
+            . '/IT/'
+            . $approvedYear;
+
+        $evidences =
+            $control->evidences
+                ->where('file_type', '!=', 'Berita Acara')
+                ->values();
+
         $html =
             view(
                 'pdf.berita_acara',
@@ -1217,6 +1248,10 @@ class ControlController extends Controller
                         $reviewerName,
                     'approverName' =>
                         $approverName,
+                    'docNumber' =>
+                        $docNumber,
+                    'evidences' =>
+                        $evidences,
                 ]
             )->render();
 

@@ -131,6 +131,35 @@
 
         .sig-space {
             height: 60px;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .checkbox-box {
+            display: inline-block;
+            width: 11px;
+            height: 11px;
+            border: 1.3px solid #1e293b;
+            text-align: center;
+            line-height: 10px;
+            font-size: 9px;
+            font-weight: bold;
+            margin-right: 4px;
+            vertical-align: middle;
+        }
+
+        .sig-ttd {
+            text-align: center;
+            font-style: italic;
+            color: #64748b;
+            font-size: 8.5pt;
+        }
+
+        .sig-date {
+            text-align: center;
+            font-size: 8pt;
+            color: #94a3b8;
+            margin-top: 2px;
         }
 
         .footer-note {
@@ -150,12 +179,11 @@
     <table class="header-table">
         <tr>
             <td class="header-logo">
-                <div style="width:40px; height:40px; margin:0 auto;">
-                    <x-logo />
-                </div>
-                <div style="font-size:8pt; font-weight:bold; margin-top:4px;">
-                    CSA - ITGC
-                </div>
+                @if($logoBase64)
+                    <img src="{{ $logoBase64 }}" style="max-width:100px; max-height:40px;">
+                @else
+                    <div style="font-weight:bold;">CSA - ITGC</div>
+                @endif
             </td>
 
             <td class="header-title">
@@ -271,9 +299,9 @@
         <tr class="checkbox-row">
             <td class="checkbox-label">Hasil Review</td>
             <td class="value">
-                &#9745; <i>Effective</i> &nbsp;&nbsp;
-                &#9744; <i>Partially Effective</i> &nbsp;&nbsp;
-                &#9744; <i>Ineffective</i>
+                <span class="checkbox-box">X</span> <i>Effective</i> &nbsp;&nbsp;
+                <span class="checkbox-box">&nbsp;</span> <i>Partially Effective</i> &nbsp;&nbsp;
+                <span class="checkbox-box">&nbsp;</span> <i>Ineffective</i>
             </td>
         </tr>
         <tr>
@@ -308,9 +336,15 @@
             <td class="sig-header">Disetujui Oleh:</td>
         </tr>
         <tr>
-            <td class="sig-space"></td>
-            <td class="sig-space"></td>
-            <td class="sig-space"></td>
+            <td class="sig-space">
+                <div class="sig-ttd">( TTD )</div>
+            </td>
+            <td class="sig-space">
+                <div class="sig-ttd">( TTD )</div>
+            </td>
+            <td class="sig-space">
+                <div class="sig-ttd">( TTD )</div>
+            </td>
         </tr>
         <tr>
             <td>
@@ -330,6 +364,20 @@
             <td><strong>Jabatan :</strong> Officer</td>
             <td><strong>Jabatan :</strong> Manager</td>
             <td><strong>Jabatan :</strong> Senior Manager</td>
+        </tr>
+        <tr>
+            <td>
+                <strong>Tanggal :</strong>
+                {{ optional($control->submitted_at)->format('d/m/Y') ?? '-' }}
+            </td>
+            <td>
+                <strong>Tanggal :</strong>
+                {{ optional($control->reviewed_at)->format('d/m/Y') ?? '-' }}
+            </td>
+            <td>
+                <strong>Tanggal :</strong>
+                {{ optional($control->approved_at)->format('d/m/Y') ?? '-' }}
+            </td>
         </tr>
     </table>
 

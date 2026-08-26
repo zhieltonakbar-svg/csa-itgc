@@ -1236,6 +1236,16 @@ class ControlController extends Controller
                 ->where('file_type', '!=', 'Berita Acara')
                 ->values();
 
+        $logoPath =
+            public_path('images/infranexia-logo.png');
+
+        $logoBase64 =
+            file_exists($logoPath)
+                ? 'data:image/png;base64,' . base64_encode(
+                    file_get_contents($logoPath)
+                )
+                : null;
+
         $html =
             view(
                 'pdf.berita_acara',
@@ -1252,6 +1262,8 @@ class ControlController extends Controller
                         $docNumber,
                     'evidences' =>
                         $evidences,
+                    'logoBase64' =>
+                        $logoBase64,
                 ]
             )->render();
 

@@ -3218,12 +3218,14 @@
                             "
                         >
 
-                            You can select <strong>more than one file at once</strong>:
-                            click "Choose Files", then hold
-                            <strong>Ctrl</strong> (Windows) or <strong>Cmd</strong> (Mac)
-                            while clicking each file — or hold <strong>Shift</strong>
-                            to select a range. Then set the
-                            <strong>File Type</strong> for each file below.
+                            You can select <strong>more than one file at once</strong>,
+                            and click "Choose Files" <strong>again</strong> anytime
+                            to add even more — previously added files stay.
+                            Hold <strong>Ctrl</strong> (Windows) or <strong>Cmd</strong> (Mac)
+                            while clicking to pick several files together, or
+                            <strong>Shift</strong> to select a range. Set the
+                            <strong>File Type</strong> for each file, then click
+                            <strong>Upload & Save</strong> once at the end.
 
                         </div>
 
@@ -5263,6 +5265,31 @@
             currentEditingControlId =
                 id;
 
+            // Fresh modal open — clear any leftover "files to upload"
+            // state from a previously opened control.
+            pendingEvidenceEntries =
+                [];
+
+            const selectedFilesContainerEl =
+                document.getElementById(
+                    'ec-selected-files-list'
+                );
+
+            if (selectedFilesContainerEl) {
+                selectedFilesContainerEl.innerHTML =
+                    '';
+            }
+
+            const fileInputEl =
+                document.getElementById(
+                    'ec-evidences'
+                );
+
+            if (fileInputEl) {
+                fileInputEl.value =
+                    '';
+            }
+
             const ctrlId =
                 row.dataset.ctrlId
                 || '';
@@ -5959,7 +5986,9 @@
 
 
     /* ============================================================
-       FILE PICKER
+       FILE PICKER (accumulates files across multiple picks —
+       Officer can click "Upload Evidence" repeatedly to add more
+       files before saving once, instead of Save-ing after each pick)
        ============================================================ */
 
     const fileInput =
@@ -5972,6 +6001,55 @@
             'ec-selected-files-list'
         );
 
+    // Each entry: { id, file }. Kept in sync with the rendered rows
+    // AND with fileInput.files (via DataTransfer) so the existing
+    // save logic (new FormData(form)) keeps working unchanged.
+    let pendingEvidenceEntries = [];
+
+    function syncFileInputFromPending() {
+
+        const dt =
+            new DataTransfer();
+
+        pendingEvidenceEntries.forEach(
+            function (entry) {
+
+                dt.items.add(
+                    entry.file
+                );
+
+            }
+        );
+
+        fileInput.files =
+            dt.files;
+
+    }
+
+    function removePendingEvidence(rowId) {
+
+        pendingEvidenceEntries =
+            pendingEvidenceEntries.filter(
+                function (entry) {
+
+                    return entry.id !== rowId;
+
+                }
+            );
+
+        const row =
+            selectedFilesContainer.querySelector(
+                `[data-row-id="${rowId}"]`
+            );
+
+        if (row) {
+            row.remove();
+        }
+
+        syncFileInputFromPending();
+
+    }
+
     if (
         fileInput &&
         selectedFilesContainer
@@ -5981,24 +6059,22 @@
             'change',
             function () {
 
-                selectedFilesContainer.innerHTML =
-                    '';
+                const newFiles =
+                    Array.from(
+                        this.files || []
+                    );
 
-                if (
-                    !this.files ||
-                    !this.files.length
-                ) {
-
+                if (!newFiles.length) {
                     return;
-
                 }
 
                 if (
-                    this.files.length > 10
+                    pendingEvidenceEntries.length +
+                    newFiles.length > 10
                 ) {
 
                     showNotification(
-                        'You can upload a maximum of 10 files at once.',
+                        'You can attach a maximum of 10 files in total.',
                         'danger'
                     );
 
@@ -6009,10 +6085,8 @@
 
                 }
 
-                Array.from(
-                    this.files
-                ).forEach(
-                    function (file, index) {
+                newFiles.forEach(
+                    function (file) {
 
                         if (
                             file.size >
@@ -6028,10 +6102,22 @@
 
                         }
 
+                        const rowId =
+                            'ev_' + Date.now() + '_' +
+                            Math.random().toString(36).slice(2, 8);
+
+                        pendingEvidenceEntries.push({
+                            id: rowId,
+                            file: file,
+                        });
+
                         const div =
                             document.createElement(
                                 'div'
                             );
+
+                        div.dataset.rowId =
+                            rowId;
 
                         div.style.cssText = `
                             background:#f0fdf4;
@@ -6077,31 +6163,60 @@
                                 style="
                                     display:flex;
                                     align-items:center;
+                                    justify-content:space-between;
                                     gap:8px;
                                 "
                             >
 
-                                <i
-                                    class="bi bi-file-earmark-arrow-up-fill"
+                                <div
                                     style="
-                                        color:#198754;
-                                        font-size:15px;
-                                    "
-                                ></i>
-
-                                <span
-                                    style="
-                                        font-weight:600;
+                                        display:flex;
+                                        align-items:center;
+                                        gap:8px;
                                         overflow:hidden;
-                                        white-space:nowrap;
-                                        text-overflow:ellipsis;
-                                        max-width:220px;
                                     "
                                 >
 
-                                    ${escapeHtml(file.name)}
+                                    <i
+                                        class="bi bi-file-earmark-arrow-up-fill"
+                                        style="
+                                            color:#198754;
+                                            font-size:15px;
+                                            flex-shrink:0;
+                                        "
+                                    ></i>
 
-                                </span>
+                                    <span
+                                        style="
+                                            font-weight:600;
+                                            overflow:hidden;
+                                            white-space:nowrap;
+                                            text-overflow:ellipsis;
+                                        "
+                                    >
+
+                                        ${escapeHtml(file.name)}
+
+                                    </span>
+
+                                </div>
+
+                                <button
+                                    type="button"
+                                    class="btn-remove-pending-evidence"
+                                    title="Remove this file"
+                                    style="
+                                        border:none;
+                                        background:transparent;
+                                        color:#dc3545;
+                                        cursor:pointer;
+                                        font-size:14px;
+                                        flex-shrink:0;
+                                        padding:0 4px;
+                                    "
+                                >
+                                    <i class="bi bi-x-circle-fill"></i>
+                                </button>
 
                             </div>
 
@@ -6145,12 +6260,33 @@
                             </div>
                         `;
 
+                        div.querySelector(
+                            '.btn-remove-pending-evidence'
+                        ).addEventListener(
+                            'click',
+                            function () {
+
+                                removePendingEvidence(
+                                    rowId
+                                );
+
+                            }
+                        );
+
                         selectedFilesContainer.appendChild(
                             div
                         );
 
                     }
                 );
+
+                syncFileInputFromPending();
+
+                // Reset the native picker so opening it again always
+                // fires a fresh 'change' with just the new picks —
+                // previously added files stay in pendingEvidenceEntries.
+                this.value =
+                    '';
 
             }
         );

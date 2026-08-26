@@ -3227,24 +3227,6 @@
 
                         </label>
 
-                        <div
-                            style="
-                                font-size:12px;
-                                color:#047857;
-                                margin-bottom:10px;
-                            "
-                        >
-
-                            Click <strong>"+ Add File"</strong> to pick a file — you can
-                            pick several at once (hold <strong>Ctrl</strong>/<strong>Cmd</strong>
-                            or <strong>Shift</strong> in the dialog), and click
-                            <strong>"+ Add File" again anytime</strong> to add more —
-                            previously added files stay. Set the <strong>File Type</strong>
-                            for each file, then click <strong>Upload & Save</strong> once
-                            at the end.
-
-                        </div>
-
                         <input
                             type="file"
                             id="ec-evidences"

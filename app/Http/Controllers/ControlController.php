@@ -683,6 +683,52 @@ class ControlController extends Controller
                 );
             }
 
+            /*
+             * Admin edited a control that had already been reviewed
+             * and/or approved — the underlying data changed, so any
+             * prior review/approval (and the PDF it produced) is now
+             * stale. Send it back into the review pipeline: Manager
+             * reviews again, Senior Manager approves again.
+             */
+            if (in_array(
+                $control->status_control,
+                [
+                    'ongoing_approval',
+                    'completed',
+                    'return_to_reviewer',
+                ],
+                true
+            )) {
+                $control->status_control = 'ongoing_review';
+                $control->reviewer_notes = null;
+                $control->approver_notes = null;
+                $control->review_result = null;
+                $control->reviewed_at = null;
+                $control->approved_at = null;
+                $control->submitted_at = now();
+                $control->save();
+
+                $reviewers = $this->getWorkflowRecipients(
+                    $control,
+                    'ongoing_review'
+                );
+
+                if ($reviewers->isNotEmpty()) {
+                    Notification::send(
+                        $reviewers,
+                        new ControlWorkflowNotification(
+                            "Control {$control->it_control_id} was edited by Admin and needs to be reviewed again.",
+                            route('dashboard', [
+                                'year' => $control->year,
+                                'quarter' => $control->quarter,
+                                'application_id' => $control->application_id,
+                            ]),
+                            $control->id
+                        )
+                    );
+                }
+            }
+
             $this->recalculateCategoryStatus(
                 $control->application_id,
                 $control->it_category_id,

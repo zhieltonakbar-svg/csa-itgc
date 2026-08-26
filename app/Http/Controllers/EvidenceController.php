@@ -325,6 +325,14 @@ class EvidenceController extends Controller
                     $control->approver_notes = null;
                 }
 
+                if ($user->isAdmin()) {
+                    $control->reviewer_notes = null;
+                    $control->approver_notes = null;
+                    $control->review_result = null;
+                    $control->reviewed_at = null;
+                    $control->approved_at = null;
+                }
+
                 $control->save();
 
                 $message =
@@ -347,8 +355,16 @@ class EvidenceController extends Controller
 
                     $newStatus = 'drafting';
                 } else {
-                    // Admin
+                    // Admin: always bounce back to the Officer for
+                    // re-confirmation, and wipe any prior review/
+                    // approval so it goes through the full cycle
+                    // again (Officer -> Manager -> Senior Manager).
                     $control->status_control = 'return_to_officer';
+                    $control->reviewer_notes = null;
+                    $control->approver_notes = null;
+                    $control->review_result = null;
+                    $control->reviewed_at = null;
+                    $control->approved_at = null;
                     $control->save();
 
                     $url = route('applications.index');

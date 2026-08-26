@@ -6501,59 +6501,165 @@
         const isReject =
             toStatus === 'return_to_officer';
 
-        const result =
-            await Swal.fire({
-                title:
-                    `${actionLabel} this control?`,
+        // Only the Senior Manager's final Approve (-> completed)
+        // needs the Hasil Review rating.
+        const needsReviewResult =
+            toStatus === 'completed';
 
-                input:
-                    'textarea',
+        let result;
 
-                inputLabel:
-                    'Notes (minimum 3 words, required)',
+        if (needsReviewResult) {
 
-                inputPlaceholder:
-                    'Write your notes here...',
+            result =
+                await Swal.fire({
+                    title:
+                        `${actionLabel} this control?`,
 
-                inputAttributes:{
-                    'aria-label':
-                        'Notes'
-                },
+                    html:
+                        `
+                            <div style="text-align:left; margin-bottom:10px;">
+                                <label style="font-size:13px; font-weight:600; display:block; margin-bottom:6px;">
+                                    Hasil Review <span style="color:#dc3545;">*</span>
+                                </label>
+                                <select id="swal-review-result" class="swal2-input" style="margin:0; width:100%;">
+                                    <option value="">-- Select Hasil Review --</option>
+                                    <option value="effective">Effective</option>
+                                    <option value="partially_effective">Partially Effective</option>
+                                    <option value="ineffective">Ineffective</option>
+                                </select>
+                            </div>
+                            <div style="text-align:left;">
+                                <label style="font-size:13px; font-weight:600; display:block; margin-bottom:6px;">
+                                    Notes (minimum 3 words) <span style="color:#dc3545;">*</span>
+                                </label>
+                                <textarea id="swal-notes" class="swal2-textarea" style="margin:0; width:100%;" placeholder="Write your notes here..."></textarea>
+                            </div>
+                        `,
 
-                showCancelButton:
-                    true,
+                    showCancelButton:
+                        true,
 
-                confirmButtonText:
-                    actionLabel,
+                    confirmButtonText:
+                        actionLabel,
 
-                confirmButtonColor:
-                    isReject
-                        ? '#dc3545'
-                        : '#198754',
+                    confirmButtonColor:
+                        isReject
+                            ? '#dc3545'
+                            : '#198754',
 
-                cancelButtonText:
-                    'Cancel',
+                    cancelButtonText:
+                        'Cancel',
 
-                inputValidator:
-                    function (value) {
+                    focusConfirm:
+                        false,
 
-                        if (
-                            countWords(value) < 3
-                        ) {
+                    preConfirm:
+                        function () {
 
-                            return 'Notes must contain at least 3 words.';
+                            const reviewResult =
+                                document.getElementById(
+                                    'swal-review-result'
+                                ).value;
+
+                            const notesValue =
+                                document.getElementById(
+                                    'swal-notes'
+                                ).value;
+
+                            if (!reviewResult) {
+
+                                Swal.showValidationMessage(
+                                    'Please select the Hasil Review first.'
+                                );
+
+                                return false;
+
+                            }
+
+                            if (
+                                countWords(notesValue) < 3
+                            ) {
+
+                                Swal.showValidationMessage(
+                                    'Notes must contain at least 3 words.'
+                                );
+
+                                return false;
+
+                            }
+
+                            return {
+                                reviewResult: reviewResult,
+                                notes: notesValue,
+                            };
 
                         }
+                });
 
-                    }
-            });
+        } else {
+
+            result =
+                await Swal.fire({
+                    title:
+                        `${actionLabel} this control?`,
+
+                    input:
+                        'textarea',
+
+                    inputLabel:
+                        'Notes (minimum 3 words, required)',
+
+                    inputPlaceholder:
+                        'Write your notes here...',
+
+                    inputAttributes:{
+                        'aria-label':
+                            'Notes'
+                    },
+
+                    showCancelButton:
+                        true,
+
+                    confirmButtonText:
+                        actionLabel,
+
+                    confirmButtonColor:
+                        isReject
+                            ? '#dc3545'
+                            : '#198754',
+
+                    cancelButtonText:
+                        'Cancel',
+
+                    inputValidator:
+                        function (value) {
+
+                            if (
+                                countWords(value) < 3
+                            ) {
+
+                                return 'Notes must contain at least 3 words.';
+
+                            }
+
+                        }
+                });
+
+        }
 
         if (!result.isConfirmed) {
             return;
         }
 
         const notes =
-            result.value;
+            needsReviewResult
+                ? result.value.notes
+                : result.value;
+
+        const reviewResult =
+            needsReviewResult
+                ? result.value.reviewResult
+                : null;
 
         try {
 
@@ -6585,6 +6691,9 @@
 
                                 notes:
                                     notes,
+
+                                review_result:
+                                    reviewResult,
                             })
                     }
                 );

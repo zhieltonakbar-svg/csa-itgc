@@ -321,9 +321,9 @@
         <tr class="checkbox-row">
             <td class="checkbox-label">Hasil Review</td>
             <td class="value">
-                <span class="checkbox-box">X</span> <i>Effective</i> &nbsp;&nbsp;
-                <span class="checkbox-box">&nbsp;</span> <i>Partially Effective</i> &nbsp;&nbsp;
-                <span class="checkbox-box">&nbsp;</span> <i>Ineffective</i>
+                <span class="checkbox-box">{{ $control->review_result === 'effective' ? 'X' : '' }}</span> <i>Effective</i> &nbsp;&nbsp;
+                <span class="checkbox-box">{{ $control->review_result === 'partially_effective' ? 'X' : '' }}</span> <i>Partially Effective</i> &nbsp;&nbsp;
+                <span class="checkbox-box">{{ $control->review_result === 'ineffective' ? 'X' : '' }}</span> <i>Ineffective</i>
             </td>
         </tr>
         <tr>

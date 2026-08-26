@@ -754,6 +754,7 @@ class ControlController extends Controller
             $validated = $request->validate([
                 'to_status' => 'required|string',
                 'notes' => 'nullable|string',
+                'review_result' => 'nullable|string|in:effective,partially_effective,ineffective',
             ]);
 
             $fromStatus =
@@ -789,6 +790,22 @@ class ControlController extends Controller
                     'message' =>
                         'This workflow transition is not allowed.',
                 ], 403);
+            }
+
+            if (
+                $user->isApprover() &&
+                $toStatus === 'completed'
+            ) {
+                if (empty($validated['review_result'])) {
+                    return response()->json([
+                        'success' => false,
+                        'message' =>
+                            'Please select the Hasil Review (Effective / Partially Effective / Ineffective) before approving.',
+                    ], 422);
+                }
+
+                $control->review_result =
+                    $validated['review_result'];
             }
 
             $notes =

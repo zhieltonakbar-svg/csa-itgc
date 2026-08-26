@@ -28,6 +28,7 @@ class Control extends Model
         'approved_at',
         'reviewer_notes',
         'approver_notes',
+        'review_result',
     ];
 
     protected $casts = [

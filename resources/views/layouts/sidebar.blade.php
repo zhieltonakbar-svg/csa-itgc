@@ -3,7 +3,7 @@
     $currentRoute = request()->route() ? request()->route()->getName() : '';
 
     // Detect if we are on an IT Category or IT RCM detail page.
-    // For Admin, the "IT RCM Management" section should only ever
+    // For Admin, the "IT RCM" section should only ever
     // highlight/expand when actually on the rcm.controls route —
     // reaching the same category via the Dashboard (dashboard.controls)
     // must NOT make the sidebar look like you're inside IT RCM.
@@ -71,13 +71,13 @@
 
         <div class="nav-section">Modules</div>
 
-        {{-- IT RCM Management (Admin) / IT Category (Officer, Reviewer, Approver) → submenu with categories --}}
+        {{-- IT RCM (Admin) / IT Category (Officer, Reviewer, Approver) → submenu with categories --}}
         <div class="nav-item">
             <a href="#" class="nav-link nav-toggle"
                style="color: #ffffff !important;"
                aria-expanded="{{ $isOnCategoryPage ? 'true' : 'false' }}">
                 <i class="bi bi-shield-lock"></i>
-                <span class="nav-text">{{ $user->isAdmin() ? 'IT RCM Management' : 'IT Category' }}</span>
+                <span class="nav-text">{{ $user->isAdmin() ? 'IT RCM' : 'IT Category' }}</span>
                 <i class="bi bi-chevron-right nav-arrow"></i>
             </a>
             <ul class="nav-submenu {{ $isOnCategoryPage ? 'show' : '' }}">
@@ -86,7 +86,7 @@
                         @if($hasActiveSearch)
 
                             {{--
-                                Admin -> IT RCM Management (rcm.controls): completed
+                                Admin -> IT RCM (rcm.controls): completed
                                 rows are simplified there. Everyone else -> IT Category
                                 (dashboard.controls): full operational view.
                                 Filter carried over from the current URL, or from the
@@ -116,13 +116,12 @@
                 @endforeach
             </ul>
         </div>
-
         @if(auth()->user()->isAdmin())
         <div class="nav-item">
             <a href="{{ route('applications.index') }}"
                class="nav-link {{ $currentRoute === 'applications.index' ? 'active' : '' }}">
                 <i class="bi bi-app-indicator"></i>
-                <span class="nav-text">Application Mgt</span>
+                <span class="nav-text">App Management</span>
             </a>
         </div>
         

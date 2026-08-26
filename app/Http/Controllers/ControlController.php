@@ -1605,4 +1605,61 @@ class ControlController extends Controller
                 );
         }
     }
+
+    public function destroyPeriod(Request $request)
+    {
+        $user = auth()->user();
+
+        if (!$user || !$user->isAdmin()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized.',
+            ], 403);
+        }
+
+        try {
+            $validated = $request->validate([
+                'application_id' => 'required|exists:applications,id',
+                'year' => 'required|integer',
+                'quarter' => 'required|string|in:q1,q2,q3,q4',
+            ]);
+
+            DB::transaction(function () use ($validated) {
+                $controls = Control::where('application_id', $validated['application_id'])
+                    ->where('year', $validated['year'])
+                    ->where('quarter', $validated['quarter'])
+                    ->get();
+
+                foreach ($controls as $control) {
+                    foreach ($control->evidences as $evidence) {
+                        if ($evidence->file_path && Storage::disk('public')->exists($evidence->file_path)) {
+                            Storage::disk('public')->delete($evidence->file_path);
+                        }
+                        $evidence->delete();
+                    }
+                    $control->delete();
+                }
+            });
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Period deleted successfully.',
+            ]);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation Error.',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Throwable $e) {
+            Log::error('Delete Period failed', [
+                'message' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to delete period.',
+            ], 500);
+        }
+    }
 }

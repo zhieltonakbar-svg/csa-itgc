@@ -105,7 +105,35 @@ class ApplicationController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => "Application \"{$application->name}\" has been removed.",
+            'message' => "Application \"{$application->name}\" has been deactivated.",
+        ]);
+    }
+
+    /**
+     * Permanently delete an application.
+     * Admin only.
+     */
+    public function forceDestroy(Application $application)
+    {
+        if (!auth()->user()->isAdmin()) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized.'], 403);
+        }
+
+        \Illuminate\Support\Facades\DB::transaction(function () use ($application) {
+            $controls = \App\Models\Control::where('application_id', $application->id)->get();
+            foreach ($controls as $control) {
+                foreach ($control->evidences as $evidence) {
+                    if ($evidence->file_path && \Illuminate\Support\Facades\Storage::disk('public')->exists($evidence->file_path)) {
+                        \Illuminate\Support\Facades\Storage::disk('public')->delete($evidence->file_path);
+                    }
+                }
+            }
+            $application->delete();
+        });
+
+        return response()->json([
+            'success' => true,
+            'message' => "Application \"{$application->name}\" has been permanently deleted.",
         ]);
     }
 }

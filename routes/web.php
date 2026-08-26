@@ -283,6 +283,21 @@ Route::middleware('auth')->group(function () {
         'index'
     ])->name('applications.index');
 
+    Route::post('/uptis', [
+        \App\Http\Controllers\UptiController::class,
+        'store'
+    ])->name('uptis.store');
+
+    Route::put('/uptis/{upti}', [
+        \App\Http\Controllers\UptiController::class,
+        'update'
+    ])->name('uptis.update');
+
+    Route::delete('/uptis/{upti}', [
+        \App\Http\Controllers\UptiController::class,
+        'destroy'
+    ])->name('uptis.destroy');
+
     Route::post('/applications', [
         \App\Http\Controllers\ApplicationController::class,
         'store'
@@ -297,6 +312,11 @@ Route::middleware('auth')->group(function () {
         \App\Http\Controllers\ApplicationController::class,
         'destroy'
     ])->name('applications.destroy');
+
+    Route::delete('/applications/{application}/force', [
+        \App\Http\Controllers\ApplicationController::class,
+        'forceDestroy'
+    ])->name('applications.forceDestroy');
 
     /*
     |--------------------------------------------------------------------------

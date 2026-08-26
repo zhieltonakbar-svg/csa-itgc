@@ -1,12 +1,12 @@
 @extends('layouts.app')
 
-@section('title', 'Application Management')
+@section('title', 'App Management')
 
 @section('content')
 <div class="welcome-hero" style="padding: 24px 32px; background: linear-gradient(135deg, #0f172a, #1e293b); border-radius: 16px; margin-bottom: 24px; position: relative; overflow: hidden;">
     <div style="position: relative; z-index: 2; display: flex; align-items: center; justify-content: space-between; flex-wrap:wrap; gap:16px;">
         <div>
-            <h1 style="color: #fff; font-size: 24px; font-weight: 700; margin: 0 0 8px 0; letter-spacing: -0.5px;">Application Management</h1>
+            <h1 style="color: #fff; font-size: 24px; font-weight: 700; margin: 0 0 8px 0; letter-spacing: -0.5px;">App Management</h1>
             <p style="color: #94a3b8; font-size: 14px; margin: 0; max-width: 600px; line-height: 1.5;">
                 Manage the list of applications, UPTI, and their mappings.
             </p>
@@ -83,11 +83,14 @@
                                     </button>
                                     @if($app->is_active)
                                     <button type="button" class="btn btn-sm btn-outline-danger btn-delete-app" data-id="{{ $app->id }}" data-name="{{ $app->name }}" style="border-radius: 8px; font-weight: 600;">
-                                        <i class="bi bi-trash"></i> Deact.
+                                        <i class="bi bi-pause-circle"></i> Deact.
                                     </button>
                                     @else
-                                    <button type="button" class="btn btn-sm btn-outline-success btn-activate-app" data-id="{{ $app->id }}" data-name="{{ $app->name }}" style="border-radius: 8px; font-weight: 600;">
+                                    <button type="button" class="btn btn-sm btn-outline-success btn-activate-app" data-id="{{ $app->id }}" data-name="{{ $app->name }}" style="border-radius: 8px; font-weight: 600; margin-right:5px;">
                                         <i class="bi bi-check-circle"></i> Act.
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-danger btn-force-delete-app" data-id="{{ $app->id }}" data-name="{{ $app->name }}" style="border-radius: 8px; font-weight: 600;">
+                                        <i class="bi bi-trash"></i> Del.
                                     </button>
                                     @endif
                                 </td>
@@ -527,6 +530,22 @@ document.getElementById('mappingModalSave')?.addEventListener('click', function(
             }).then(res => res.json()).then(data => {
                 if(data.success) { location.reload(); }
             });
+        });
+    });
+
+    document.querySelectorAll('.btn-force-delete-app').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var appId = this.getAttribute('data-id');
+            var appName = this.getAttribute('data-name');
+            if (confirm('Are you sure you want to PERMANENTLY delete "' + appName + '"? This will remove all associated controls and evidences!')) {
+                fetch('{{ url("applications") }}/' + appId + '/force', {
+                    method: 'DELETE',
+                    headers: { 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' }
+                }).then(res => res.json()).then(data => {
+                    if(data.success) { location.reload(); }
+                    else { alert('Error: ' + (data.message || 'Failed to delete.')); }
+                }).catch(err => alert('Network error.'));
+            }
         });
     });
 

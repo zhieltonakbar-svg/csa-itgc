@@ -1463,35 +1463,53 @@
         </div>
 
         <div class="itc-sum-cell">
-
-            <span class="itc-sum-label">
-                Year
-            </span>
-
+            <span class="itc-sum-label">Year</span>
             <div class="itc-sum-value">
-
                 <i class="bi bi-calendar3"></i>
-
-                {{ $year }}
-
+                @if($isAdmin)
+                    <form method="GET" action="{{ url()->current() }}" style="margin: 0; display: inline-block;">
+                        <input type="hidden" name="application_id" value="{{ $application->id }}">
+                        <input type="hidden" name="quarter" value="{{ $quarter }}">
+                        @if($isRcmView ?? false)
+                            <input type="hidden" name="source" value="rcm">
+                        @else
+                            <input type="hidden" name="source" value="{{ $source ?? 'dashboard' }}">
+                        @endif
+                        <select name="year" onchange="this.form.submit()" style="border: 1px solid #dbe3e8; border-radius: 6px; padding: 2px 8px; font-size: 13px; font-weight: 600; color: #152238; background: #f8fafb; outline: none; cursor: pointer;">
+                            @foreach($availableYears as $availYear)
+                                <option value="{{ $availYear }}" {{ (int) $year === (int) $availYear ? 'selected' : '' }}>{{ $availYear }}</option>
+                            @endforeach
+                        </select>
+                    </form>
+                @else
+                    {{ $year }}
+                @endif
             </div>
-
         </div>
 
         <div class="itc-sum-cell">
-
-            <span class="itc-sum-label">
-                Quarter
-            </span>
-
+            <span class="itc-sum-label">Quarter</span>
             <div class="itc-sum-value">
-
                 <i class="bi bi-calendar-range"></i>
-
-                {{ $quarterLabel }}
-
+                @if($isAdmin)
+                    <form method="GET" action="{{ url()->current() }}" style="margin: 0; display: inline-block;">
+                        <input type="hidden" name="application_id" value="{{ $application->id }}">
+                        <input type="hidden" name="year" value="{{ $year }}">
+                        @if($isRcmView ?? false)
+                            <input type="hidden" name="source" value="rcm">
+                        @else
+                            <input type="hidden" name="source" value="{{ $source ?? 'dashboard' }}">
+                        @endif
+                        <select name="quarter" onchange="this.form.submit()" style="border: 1px solid #dbe3e8; border-radius: 6px; padding: 2px 8px; font-size: 13px; font-weight: 600; color: #152238; background: #f8fafb; outline: none; cursor: pointer;">
+                            @foreach(['q1' => 'Q1', 'q2' => 'Q2', 'q3' => 'Q3', 'q4' => 'Q4'] as $qVal => $qLabel)
+                                <option value="{{ $qVal }}" {{ $quarter === $qVal ? 'selected' : '' }}>{{ $qLabel }}</option>
+                            @endforeach
+                        </select>
+                    </form>
+                @else
+                    {{ $quarterLabel }}
+                @endif
             </div>
-
         </div>
 
     </div>

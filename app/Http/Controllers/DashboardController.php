@@ -858,6 +858,24 @@ class DashboardController extends Controller
         $isRcmView =
             optional($request->route())->getName() === 'rcm.controls';
 
+        $availableYears = \App\Models\Control::query()
+            ->whereNotNull('year')
+            ->select('year')
+            ->distinct()
+            ->orderByDesc('year')
+            ->pluck('year')
+            ->map(fn ($year) => (int) $year)
+            ->values();
+
+        if ($availableYears->isEmpty()) {
+            $availableYears = collect([
+                now()->year,
+                now()->year - 1,
+                now()->year - 2,
+                now()->year - 3,
+            ]);
+        }
+
         return view(
             'it-category.show',
             compact(
@@ -870,7 +888,8 @@ class DashboardController extends Controller
                 'allApplications',
                 'allCategories',
                 'allUptis',
-                'isRcmView'
+                'isRcmView',
+                'availableYears'
             )
         );
     }

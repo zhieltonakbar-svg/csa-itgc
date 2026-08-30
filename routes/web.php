@@ -283,6 +283,11 @@ Route::middleware('auth')->group(function () {
         'index'
     ])->name('applications.index');
 
+    Route::get('/applications/existing-periods', [
+        \App\Http\Controllers\ApplicationController::class,
+        'existingPeriods'
+    ])->name('applications.existingPeriods');
+
     Route::post('/applications', [
         \App\Http\Controllers\ApplicationController::class,
         'store'

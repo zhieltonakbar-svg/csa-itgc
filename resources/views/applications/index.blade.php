@@ -237,7 +237,7 @@
         <div style="padding:24px; display:flex; flex-direction:column; gap:16px;">
             <div>
                 <label style="display:block; font-size:12.5px; font-weight:600; color:#374151; margin-bottom:6px;">Year <span style="color:#dc2626;">*</span></label>
-                <input type="number" id="ap-year" placeholder="e.g. 2026" style="width:100%; padding:9px 12px; border:1.5px solid #d1d5db; border-radius:8px; font-size:13.5px; background:#fff; outline:none;" required>
+                <input type="number" id="ap-year" min="{{ now()->year }}" placeholder="e.g. 2026" style="width:100%; padding:9px 12px; border:1.5px solid #d1d5db; border-radius:8px; font-size:13.5px; background:#fff; outline:none;" required>
             </div>
             <div>
                 <label style="display:block; font-size:12.5px; font-weight:600; color:#374151; margin-bottom:6px;">Quarter <span style="color:#dc2626;">*</span></label>
@@ -248,6 +248,10 @@
                         {{$lbl}}
                     </label>
                     @endforeach
+                </div>
+                <div id="ap-quarter-taken-msg" style="display:none; font-size:11.5px; color:#dc2626; margin-top:6px;">
+                    <i class="bi bi-exclamation-circle"></i>
+                    That quarter already exists for this application/year — pick another one.
                 </div>
             </div>
             <div>
@@ -506,11 +510,99 @@ function deleteUpti(id, name) {
 var apQuarterRadios = document.querySelectorAll('input[name="ap-quarter"]');
 var dpQuarterRadios = document.querySelectorAll('input[name="dp-quarter"]');
 
-function openAddPeriodModal() { document.getElementById('addPeriodModal').style.display='flex'; }
+function openAddPeriodModal() {
+    document.getElementById('addPeriodModal').style.display='flex';
+    document.getElementById('ap-year').value = '';
+    document.getElementById('ap-application').value = '';
+    refreshTakenPeriods();
+}
 function closeAddPeriodModal() { document.getElementById('addPeriodModal').style.display='none'; }
 document.getElementById('btn-add-period')?.addEventListener('click', openAddPeriodModal);
 document.getElementById('addPeriodClose')?.addEventListener('click', closeAddPeriodModal);
 document.getElementById('addPeriodCancel')?.addEventListener('click', closeAddPeriodModal);
+
+var currentYear = {{ now()->year }};
+var takenPeriods = [];
+
+function applyTakenPeriods() {
+    var year = parseInt(document.getElementById('ap-year').value, 10);
+    var takenQuartersForYear = takenPeriods
+        .filter(function(p) { return p.year === year; })
+        .map(function(p) { return p.quarter; });
+
+    var anyTaken = false;
+
+    ['q1','q2','q3','q4'].forEach(function(val) {
+        var input = document.getElementById('ap-q-' + val);
+        var label = document.getElementById('ap-q-label-' + val);
+        if (!input || !label) return;
+
+        var isTaken = takenQuartersForYear.indexOf(val) !== -1;
+
+        input.disabled = isTaken;
+
+        if (isTaken) {
+            anyTaken = true;
+            label.style.opacity = '0.45';
+            label.style.cursor = 'not-allowed';
+            label.style.textDecoration = 'line-through';
+            if (input.checked) {
+                input.checked = false;
+            }
+        } else {
+            label.style.opacity = '1';
+            label.style.cursor = 'pointer';
+            label.style.textDecoration = 'none';
+        }
+    });
+
+    document.getElementById('ap-quarter-taken-msg').style.display = anyTaken ? 'block' : 'none';
+
+    // If nothing is checked anymore (its quarter just got disabled),
+    // auto-select the first available one so the form still has a value.
+    if (!document.querySelector('input[name="ap-quarter"]:checked')) {
+        for (var i = 0; i < 4; i++) {
+            var v = 'q' + (i + 1);
+            var inp = document.getElementById('ap-q-' + v);
+            if (inp && !inp.disabled) {
+                inp.checked = true;
+                break;
+            }
+        }
+    }
+
+    wireQuarterPills('ap');
+}
+
+function refreshTakenPeriods() {
+    var appName = document.getElementById('ap-application').value.trim();
+
+    if (!appName) {
+        takenPeriods = [];
+        applyTakenPeriods();
+        return;
+    }
+
+    fetch('{{ route("applications.existingPeriods") }}?name=' + encodeURIComponent(appName), {
+        headers: { 'Accept': 'application/json' }
+    })
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+            takenPeriods = (data && data.periods) ? data.periods : [];
+            applyTakenPeriods();
+        })
+        .catch(function() {
+            takenPeriods = [];
+            applyTakenPeriods();
+        });
+}
+
+var apPeriodDebounce;
+document.getElementById('ap-application')?.addEventListener('input', function() {
+    clearTimeout(apPeriodDebounce);
+    apPeriodDebounce = setTimeout(refreshTakenPeriods, 350);
+});
+document.getElementById('ap-year')?.addEventListener('input', applyTakenPeriods);
 
 function openDeletePeriodModal() { document.getElementById('deletePeriodModal').style.display='flex'; }
 function closeDeletePeriodModal() { document.getElementById('deletePeriodModal').style.display='none'; }
@@ -555,6 +647,17 @@ document.getElementById('addPeriodConfirm')?.addEventListener('click', function(
     var quarter = 'q1';
     apQuarterRadios.forEach(function(r) { if(r.checked) quarter = r.value; });
     if(!year || !appName) return;
+
+    if (parseInt(year, 10) < currentYear) {
+        alert('Year cannot be earlier than ' + currentYear + '.');
+        return;
+    }
+
+    var checkedInput = document.querySelector('input[name="ap-quarter"]:checked');
+    if (!checkedInput || checkedInput.disabled) {
+        alert('Please select an available Quarter for this Application/Year.');
+        return;
+    }
     
     fetch('{{ route("applications.store") }}', {
         method: 'POST',

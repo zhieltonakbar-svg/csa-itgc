@@ -24,6 +24,50 @@ class ApplicationController extends Controller
     }
 
     /**
+     * Return year/quarter combinations that already have Controls
+     * for an application matching this name (used by "Add Period"
+     * to disable quarters that already exist for the chosen year).
+     */
+    public function existingPeriods(Request $request)
+    {
+        if (!auth()->user()->isAdmin()) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized.'], 403);
+        }
+
+        $name = trim((string) $request->query('name', ''));
+
+        if ($name === '') {
+            return response()->json(['success' => true, 'periods' => []]);
+        }
+
+        $application = Application::whereRaw(
+            'LOWER(TRIM(name)) = LOWER(TRIM(?))',
+            [$name]
+        )->first();
+
+        if (!$application) {
+            return response()->json(['success' => true, 'periods' => []]);
+        }
+
+        $periods = \App\Models\Control::query()
+            ->where('application_id', $application->id)
+            ->select('year', 'quarter')
+            ->distinct()
+            ->get()
+            ->map(function ($row) {
+                return [
+                    'year' => (int) $row->year,
+                    'quarter' => strtolower($row->quarter),
+                ];
+            });
+
+        return response()->json([
+            'success' => true,
+            'periods' => $periods,
+        ]);
+    }
+
+    /**
      * Store a newly created application and attach all existing IT categories.
      * Admin only.
      */

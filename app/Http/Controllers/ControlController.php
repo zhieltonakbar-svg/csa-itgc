@@ -959,12 +959,27 @@ class ControlController extends Controller
                         ]
                     );
 
-                $label =
-                    Control::$statusLabels[$toStatus]
-                    ?? $toStatus;
+                $rejectingRole =
+                    $user->isApprover()
+                        ? 'Senior Manager'
+                        : 'Manager';
 
-                $message =
-                    "Control {$control->it_control_id} is now {$label}.";
+                $message = match ($toStatus) {
+                    'ongoing_review' =>
+                        "Control {$control->it_control_id} has been submitted. Please review it.",
+
+                    'ongoing_approval' =>
+                        "Control {$control->it_control_id} has been reviewed by the Manager. Please approve it.",
+
+                    'return_to_officer' =>
+                        "{$rejectingRole} rejected Control {$control->it_control_id}. Please review the notes and fix it.",
+
+                    'return_to_reviewer' =>
+                        "Control {$control->it_control_id} was updated by Admin and needs your review again.",
+
+                    default =>
+                        "Control {$control->it_control_id} is now " . (Control::$statusLabels[$toStatus] ?? $toStatus) . '.',
+                };
 
                 Notification::send(
                     $targetUsers,
@@ -1507,6 +1522,11 @@ class ControlController extends Controller
             return;
         }
 
+        /*
+         * Only the Officer needs to act at this point — they're
+         * first in line. Manager/Senior Manager will be notified
+         * later, only once it actually reaches their stage.
+         */
         $targetUsers =
             User::query()
                 ->whereIn(
@@ -1514,8 +1534,6 @@ class ControlController extends Controller
                     [
                         'creator',
                         'officer',
-                        'reviewer',
-                        'approver',
                     ]
                 )
                 ->whereHas(
@@ -1549,7 +1567,7 @@ class ControlController extends Controller
             );
 
         $message =
-            "A new control ({$control->it_control_id}) has been added for UPTI {$controlUpti}.";
+            "Please complete Control {$control->it_control_id} — upload the required evidence for UPTI {$controlUpti}.";
 
         Notification::send(
             $targetUsers,

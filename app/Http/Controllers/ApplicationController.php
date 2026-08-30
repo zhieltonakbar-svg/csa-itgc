@@ -30,20 +30,24 @@ class ApplicationController extends Controller
             return [$app->id => $quarters];
         });
 
-        // Real-time IT Category count per application — the union of
-        // categories still actually attached to ANY of its periods
-        // right now (not the old global pivot, which only ever grows
-        // and never reflects categories Admin has since removed).
-        $activeCategoryCounts = $applications->mapWithKeys(function ($app) {
-            $count = $app->periods
-                ->flatMap(fn ($period) => $period->itCategories->pluck('id'))
-                ->unique()
-                ->count();
+        // Real-time IT Category count per application, broken down
+        // PER PERIOD (since different Year/Quarter periods can have
+        // different categories attached) — not one lump aggregate.
+        $categoryCountsByPeriod = $applications->mapWithKeys(function ($app) {
+            $rows = $app->periods
+                ->sortByDesc(fn ($p) => $p->year . $p->quarter)
+                ->map(function ($period) {
+                    return [
+                        'label' => $period->year . ' · ' . strtoupper($period->quarter),
+                        'count' => $period->itCategories->count(),
+                    ];
+                })
+                ->values();
 
-            return [$app->id => $count];
+            return [$app->id => $rows];
         });
 
-        return view('applications.index', compact('applications', 'uptis', 'itRcmCount', 'activeQuarters', 'activeCategoryCounts'));
+        return view('applications.index', compact('applications', 'uptis', 'itRcmCount', 'activeQuarters', 'categoryCountsByPeriod'));
     }
 
     /**

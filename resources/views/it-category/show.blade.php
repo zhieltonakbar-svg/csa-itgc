@@ -1600,19 +1600,6 @@
         <button
             type="button"
             class="itc-tb-btn"
-            id="itc-filter-btn"
-            title="Filter"
-        >
-
-            <i class="bi bi-funnel"></i>
-
-            Filter
-
-        </button>
-
-        <button
-            type="button"
-            class="itc-tb-btn"
             onclick="location.reload()"
             title="Refresh"
         >
@@ -4533,31 +4520,6 @@
                     showingEl.textContent =
                         count;
                 }
-
-            }
-        );
-
-    }
-
-
-    /* ============================================================
-       FILTER
-       ============================================================ */
-
-    const filterBtn =
-        document.getElementById(
-            'itc-filter-btn'
-        );
-
-    if (filterBtn) {
-
-        filterBtn.addEventListener(
-            'click',
-            function () {
-
-                this.classList.toggle(
-                    'active'
-                );
 
             }
         );

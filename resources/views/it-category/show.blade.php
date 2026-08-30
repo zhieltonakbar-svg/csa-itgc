@@ -7500,8 +7500,9 @@
         }
     );
 
-    // Arrived here via a notification link — automatically open
-    // and scroll to the specific control it pointed to.
+    // Arrived here via a notification link — scroll to and
+    // highlight the specific control it pointed to (without
+    // automatically opening its detail/edit modal).
     (function () {
 
         const params =
@@ -7531,7 +7532,7 @@
         });
 
         targetRow.style.transition =
-            'background-color 0.3s ease';
+            'background-color 1.5s ease';
 
         targetRow.style.backgroundColor =
             '#fef9c3';
@@ -7539,20 +7540,11 @@
         setTimeout(
             function () {
 
-                const editBtn =
-                    targetRow.querySelector(
-                        '.btn-edit-ctrl'
-                    );
-
-                if (editBtn) {
-                    editBtn.click();
-                }
-
                 targetRow.style.backgroundColor =
                     '';
 
             },
-            600
+            2500
         );
 
     })();

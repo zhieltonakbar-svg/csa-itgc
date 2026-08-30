@@ -650,14 +650,14 @@
 }
 
 .row-act-view {
-    color:#0891b2;
-    border-color:rgba(8,145,178,.3);
-    background:rgba(8,145,178,.06);
+    color:#198754;
+    border-color:rgba(25,135,84,.3);
+    background:rgba(25,135,84,.06);
 }
 
 .row-act-view:hover {
-    background:#0891b2;
-    border-color:#0891b2;
+    background:#198754;
+    border-color:#198754;
     color:#fff;
 }
 

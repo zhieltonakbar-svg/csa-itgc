@@ -177,7 +177,7 @@
                 <label style="display:block; font-size:13px; font-weight:600; color:#374151; margin-bottom:6px;">Application Name <span style="color:#dc2626;">*</span></label>
                 <input type="text" id="am-name" style="width:100%; padding:10px 12px; border:1.5px solid #d1d5db; border-radius:8px; font-size:13.5px; outline:none;" required>
             </div>
-            <div>
+            <div id="am-upti-wrapper">
                 <label style="display:block; font-size:13px; font-weight:600; color:#374151; margin-bottom:6px;">UPTI Mapping</label>
                 <select id="am-upti" style="width:100%; padding:10px 12px; border:1.5px solid #d1d5db; border-radius:8px; font-size:13.5px; outline:none;">
                     <option value="">-- None --</option>
@@ -341,6 +341,7 @@ function openAppModal(id = '', name = '', upti = '') {
     amId.value = id;
     amName.value = name;
     document.getElementById('am-upti').value = upti;
+    document.getElementById('am-upti-wrapper').style.display = id ? 'block' : 'none';
     appModal.style.display = 'flex';
     amName.focus();
 }

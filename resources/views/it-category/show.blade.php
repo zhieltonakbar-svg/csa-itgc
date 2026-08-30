@@ -7500,6 +7500,63 @@
         }
     );
 
+    // Arrived here via a notification link — automatically open
+    // and scroll to the specific control it pointed to.
+    (function () {
+
+        const params =
+            new URLSearchParams(
+                window.location.search
+            );
+
+        const openControlId =
+            params.get('open_control');
+
+        if (!openControlId) {
+            return;
+        }
+
+        const targetRow =
+            document.querySelector(
+                `tr[data-id="${openControlId}"]`
+            );
+
+        if (!targetRow) {
+            return;
+        }
+
+        targetRow.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center',
+        });
+
+        targetRow.style.transition =
+            'background-color 0.3s ease';
+
+        targetRow.style.backgroundColor =
+            '#fef9c3';
+
+        setTimeout(
+            function () {
+
+                const editBtn =
+                    targetRow.querySelector(
+                        '.btn-edit-ctrl'
+                    );
+
+                if (editBtn) {
+                    editBtn.click();
+                }
+
+                targetRow.style.backgroundColor =
+                    '';
+
+            },
+            600
+        );
+
+    })();
+
 })();
 </script>
 @endpush

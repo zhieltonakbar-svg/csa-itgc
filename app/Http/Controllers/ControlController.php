@@ -718,11 +718,7 @@ class ControlController extends Controller
                         $reviewers,
                         new ControlWorkflowNotification(
                             "Control {$control->it_control_id} was edited by Admin and needs to be reviewed again.",
-                            route('dashboard', [
-                                'year' => $control->year,
-                                'quarter' => $control->quarter,
-                                'application_id' => $control->application_id,
-                            ]),
+                            $this->buildControlUrl($control),
                             $control->id
                         )
                     );
@@ -947,17 +943,7 @@ class ControlController extends Controller
 
             if ($targetUsers->isNotEmpty()) {
                 $url =
-                    route(
-                        'dashboard',
-                        [
-                            'year' =>
-                                $control->year,
-                            'quarter' =>
-                                $control->quarter,
-                            'application_id' =>
-                                $control->application_id,
-                        ]
-                    );
+                    $this->buildControlUrl($control);
 
                 $rejectingRole =
                     $user->isApprover()
@@ -1554,17 +1540,7 @@ class ControlController extends Controller
         }
 
         $url =
-            route(
-                'dashboard',
-                [
-                    'year' =>
-                        $control->year,
-                    'quarter' =>
-                        $control->quarter,
-                    'application_id' =>
-                        $control->application_id,
-                ]
-            );
+            $this->buildControlUrl($control);
 
         $message =
             "Please complete Control {$control->it_control_id} — upload the required evidence for UPTI {$controlUpti}.";
@@ -1576,6 +1552,25 @@ class ControlController extends Controller
                 $url,
                 $control->id
             )
+        );
+    }
+
+    /**
+     * Build a URL that takes the user straight to the IT Category
+     * page containing this control, with ?open_control={id} so the
+     * page can automatically open that control's modal on load.
+     */
+    private function buildControlUrl(Control $control): string
+    {
+        return route(
+            'dashboard.controls',
+            [
+                'category' => $control->it_category_id,
+                'application_id' => $control->application_id,
+                'year' => $control->year,
+                'quarter' => $control->quarter,
+                'open_control' => $control->id,
+            ]
         );
     }
 

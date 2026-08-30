@@ -114,15 +114,15 @@
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h5 style="font-weight:700; color:#1e293b; margin:0;">UPTI List</h5>
         </div>
-        <div class="card border-0 shadow-sm" style="border-radius: 16px; overflow: hidden;">
+        <div class="card border-0 shadow-sm" style="border-radius: 16px; overflow: visible;">
             <div class="card-body p-0">
-                <div class="table-responsive">
+                <div class="table-responsive" style="overflow: visible;">
                     <table class="table table-hover align-middle mb-0" style="font-size: 14px;">
-                        <thead style="background: #f8fafc; border-bottom: 2px solid #e2e8f0;">
+                        <thead style="background: #f8fafc; border-bottom: 2px solid #e2e8f0; border-radius: 16px 16px 0 0;">
                             <tr>
                                 <th style="padding: 16px 24px; color: #475569; font-weight: 600; width: 50px;">#</th>
                                 <th style="padding: 16px 24px; color: #475569; font-weight: 600;">UPTI Name</th>
-                                <th style="padding: 16px 24px; color: #475569; font-weight: 600; width: 200px; text-align: center;">Action</th>
+                                <th style="padding: 16px 24px; color: #475569; font-weight: 600; width: 120px; text-align: center;">Action</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -130,16 +130,20 @@
                             <tr>
                                 <td style="padding: 16px 24px; color: #64748b;">{{ $index + 1 }}</td>
                                 <td style="padding: 16px 24px; font-weight: 500; color: #1e293b;">{{ $u->name }}</td>
-                                <td style="padding: 16px 24px; text-align: center;">
-                                    <button type="button" class="btn btn-sm btn-outline-primary" style="border-radius: 8px; font-weight: 600; margin-right:5px;" onclick="openUptiModal({{ $u->id }}, '{{ addslashes($u->name) }}')">
-                                        <i class="bi bi-pencil-square"></i> Edit
-                                    </button>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary" style="border-radius: 8px; font-weight: 600; margin-right:5px;" onclick="openMappingModal({{ $u->id }}, '{{ addslashes($u->name) }}')">
-                                        <i class="bi bi-link-45deg"></i> Map App
-                                    </button>
-                                    <button type="button" class="btn btn-sm btn-outline-danger" style="border-radius: 8px; font-weight: 600;" onclick="deleteUpti({{ $u->id }}, '{{ addslashes($u->name) }}')">
-                                        <i class="bi bi-trash"></i> Del
-                                    </button>
+                                <td style="padding: 16px 24px; text-align: center; position: relative;">
+                                    <div class="dropdown">
+                                        <button type="button" class="btn btn-sm btn-light" style="border-radius: 8px; border: 1px solid #e2e8f0; width: 34px;" onclick="toggleUptiActionMenu(event, {{ $u->id }})">
+                                            <i class="bi bi-three-dots-vertical"></i>
+                                        </button>
+                                        <div id="upti-menu-{{ $u->id }}" class="upti-action-menu" style="display:none; position:absolute; right:24px; top:100%; margin-top:4px; background:#fff; border:1px solid #e2e8f0; border-radius:10px; box-shadow:0 8px 24px rgba(0,0,0,0.12); z-index:50; min-width:140px; overflow:hidden; text-align:left;">
+                                            <button type="button" style="width:100%; padding:10px 14px; background:none; border:none; text-align:left; font-size:13.5px; font-weight:600; color:#1d4ed8; cursor:pointer; display:flex; align-items:center; gap:8px;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='none'" onclick="openUptiModal({{ $u->id }}, '{{ addslashes($u->name) }}'); closeAllUptiMenus();">
+                                                <i class="bi bi-pencil-square"></i> Edit
+                                            </button>
+                                            <button type="button" style="width:100%; padding:10px 14px; background:none; border:none; text-align:left; font-size:13.5px; font-weight:600; color:#dc2626; cursor:pointer; display:flex; align-items:center; gap:8px; border-top:1px solid #f1f5f9;" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='none'" onclick="deleteUpti({{ $u->id }}, '{{ addslashes($u->name) }}'); closeAllUptiMenus();">
+                                                <i class="bi bi-trash"></i> Delete
+                                            </button>
+                                        </div>
+                                    </div>
                                 </td>
                             </tr>
                             @empty
@@ -209,37 +213,6 @@
         <div style="padding:16px 24px; background:#f8fafc; border-top:1px solid #e5e7eb; display:flex; align-items:center; justify-content:flex-end; gap:10px;">
             <button type="button" onclick="closeUptiModal()" style="padding:8px 18px; border:1px solid #d1d5db; background:#fff; border-radius:7px; font-size:13px; font-weight:600; color:#374151; cursor:pointer;">Cancel</button>
             <button type="button" id="uptiModalSave" style="padding:8px 20px; background:#2563eb; color:#fff; border:none; border-radius:7px; font-size:13px; font-weight:600; cursor:pointer;">Save UPTI</button>
-        </div>
-    </div>
-</div>
-
-{{-- 3. Mapping Modal (Map existing app to specific UPTI) --}}
-<div id="mappingModal" style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,0.45); backdrop-filter:blur(3px); align-items:center; justify-content:center;">
-    <div style="background:#fff; border-radius:16px; width:100%; max-width:440px; margin:16px; box-shadow:0 20px 60px rgba(0,0,0,0.2); overflow:hidden;">
-        <div style="background:linear-gradient(135deg,#64748b,#475569); padding:20px 24px; display:flex; align-items:center; justify-content:space-between;">
-            <div>
-                <h5 style="margin:0; color:#fff; font-size:16px; font-weight:700;">Map Application</h5>
-                <p id="mappingModalSubtitle" style="margin:0; color:rgba(255,255,255,0.7); font-size:12px;"></p>
-            </div>
-            <button type="button" onclick="closeMappingModal()" style="background:rgba(255,255,255,0.15); border:none; color:#fff; width:32px; height:32px; border-radius:6px; cursor:pointer; font-size:18px; display:flex; align-items:center; justify-content:center;">
-                <i class="bi bi-x-lg"></i>
-            </button>
-        </div>
-        <div style="padding:24px; display:flex; flex-direction:column; gap:16px;">
-            <input type="hidden" id="mm-upti-id">
-            <div>
-                <label style="display:block; font-size:13px; font-weight:600; color:#374151; margin-bottom:6px;">Select Application to Map <span style="color:#dc2626;">*</span></label>
-                <select id="mm-app-id" style="width:100%; padding:10px 12px; border:1.5px solid #d1d5db; border-radius:8px; font-size:13.5px; outline:none;">
-                    <option value="">— Select Application —</option>
-                    @foreach($applications as $app)
-                        <option value="{{ $app->id }}">{{ $app->name }} @if($app->upti) (Currently: {{ $app->upti->name }}) @endif</option>
-                    @endforeach
-                </select>
-            </div>
-        </div>
-        <div style="padding:16px 24px; background:#f8fafc; border-top:1px solid #e5e7eb; display:flex; align-items:center; justify-content:flex-end; gap:10px;">
-            <button type="button" onclick="closeMappingModal()" style="padding:8px 18px; border:1px solid #d1d5db; background:#fff; border-radius:7px; font-size:13px; font-weight:600; color:#374151; cursor:pointer;">Cancel</button>
-            <button type="button" id="mappingModalSave" style="padding:8px 20px; background:#475569; color:#fff; border:none; border-radius:7px; font-size:13px; font-weight:600; cursor:pointer;">Save Mapping</button>
         </div>
     </div>
 </div>
@@ -405,6 +378,24 @@ var uptiModal = document.getElementById('uptiModal');
 var umId = document.getElementById('um-id');
 var umName = document.getElementById('um-name');
 
+function closeAllUptiMenus() {
+    document.querySelectorAll('.upti-action-menu').forEach(function(menu) {
+        menu.style.display = 'none';
+    });
+}
+
+function toggleUptiActionMenu(event, id) {
+    event.stopPropagation();
+    var menu = document.getElementById('upti-menu-' + id);
+    var isOpen = menu.style.display === 'block';
+    closeAllUptiMenus();
+    menu.style.display = isOpen ? 'none' : 'block';
+}
+
+document.addEventListener('click', function() {
+    closeAllUptiMenus();
+});
+
 function openUptiModal(id = '', name = '') {
     if(!uptiModal) return;
     document.getElementById('uptiModalTitle').textContent = id ? 'Edit UPTI' : 'Add UPTI';
@@ -464,45 +455,6 @@ function deleteUpti(id, name) {
         .catch(err => alert('Network error.'));
     }
 }
-
-// ---- Mapping Modal Logic ----
-var mappingModal = document.getElementById('mappingModal');
-var mmUptiId = document.getElementById('mm-upti-id');
-var mmAppId = document.getElementById('mm-app-id');
-var mappingModalSubtitle = document.getElementById('mappingModalSubtitle');
-
-function openMappingModal(uptiId, uptiName) {
-    if(!mappingModal) return;
-    mmUptiId.value = uptiId;
-    mappingModalSubtitle.textContent = 'Mapping applications to: ' + uptiName;
-    mmAppId.value = '';
-    mappingModal.style.display = 'flex';
-}
-function closeMappingModal() { if(mappingModal) mappingModal.style.display = 'none'; }
-
-document.getElementById('mappingModalSave')?.addEventListener('click', function() {
-    var uptiId = mmUptiId.value;
-    var appId = mmAppId.value;
-    if(!appId) { alert('Please select an application.'); return; }
-
-    var url = `{{ url('applications') }}/${appId}`;
-    fetch(url, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'X-CSRF-TOKEN': csrfToken,
-            'X-Requested-With': 'XMLHttpRequest',
-        },
-        body: JSON.stringify({ upti_id: uptiId })
-    })
-    .then(res => res.json())
-    .then(data => {
-        if(data.success) { location.reload(); }
-        else { alert('Error: ' + (data.message || 'Validation failed.')); }
-    })
-    .catch(err => alert('Network error.'));
-});
 
     // App Activation logic
     document.querySelectorAll('.btn-delete-app').forEach(function(btn) {

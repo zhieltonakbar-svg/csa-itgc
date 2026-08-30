@@ -61,7 +61,7 @@
                                 </td>
                                 <td style="padding: 16px 24px; text-align: center; color: #475569; font-weight: 600;">
                                     <span style="background: #f1f5f9; padding: 4px 10px; border-radius: 6px; font-size: 13px;">
-                                        {{ $app->itCategories->count() }}
+                                        {{ $activeCategoryCounts[$app->id] ?? 0 }}
                                     </span>
                                 </td>
                                 <td style="padding: 16px 24px;">

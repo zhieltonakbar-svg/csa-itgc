@@ -17,7 +17,7 @@ class ApplicationController extends Controller
             abort(403, 'Unauthorized.');
         }
 
-        $applications = Application::with(['upti', 'itCategories', 'periods'])->orderBy('created_at', 'asc')->get();
+        $applications = Application::with(['upti', 'itCategories', 'periods.itCategories'])->orderBy('created_at', 'asc')->get();
         $uptis = \App\Models\Upti::orderBy('created_at', 'asc')->get();
         $itRcmCount = ItCategory::count();
 
@@ -30,7 +30,20 @@ class ApplicationController extends Controller
             return [$app->id => $quarters];
         });
 
-        return view('applications.index', compact('applications', 'uptis', 'itRcmCount', 'activeQuarters'));
+        // Real-time IT Category count per application — the union of
+        // categories still actually attached to ANY of its periods
+        // right now (not the old global pivot, which only ever grows
+        // and never reflects categories Admin has since removed).
+        $activeCategoryCounts = $applications->mapWithKeys(function ($app) {
+            $count = $app->periods
+                ->flatMap(fn ($period) => $period->itCategories->pluck('id'))
+                ->unique()
+                ->count();
+
+            return [$app->id => $count];
+        });
+
+        return view('applications.index', compact('applications', 'uptis', 'itRcmCount', 'activeQuarters', 'activeCategoryCounts'));
     }
 
     /**

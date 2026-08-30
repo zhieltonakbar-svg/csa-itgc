@@ -25,8 +25,8 @@ class ApplicationController extends Controller
 
     /**
      * Return year/quarter combinations that already have Controls
-     * for an application matching this name (used by "Add Period"
-     * to disable quarters that already exist for the chosen year).
+     * for the given application (used by "Add Period" to disable
+     * quarters that already exist for the chosen year).
      */
     public function existingPeriods(Request $request)
     {
@@ -34,23 +34,14 @@ class ApplicationController extends Controller
             return response()->json(['success' => false, 'message' => 'Unauthorized.'], 403);
         }
 
-        $name = trim((string) $request->query('name', ''));
+        $applicationId = $request->query('application_id');
 
-        if ($name === '') {
-            return response()->json(['success' => true, 'periods' => []]);
-        }
-
-        $application = Application::whereRaw(
-            'LOWER(TRIM(name)) = LOWER(TRIM(?))',
-            [$name]
-        )->first();
-
-        if (!$application) {
+        if (!$applicationId) {
             return response()->json(['success' => true, 'periods' => []]);
         }
 
         $periods = \App\Models\Control::query()
-            ->where('application_id', $application->id)
+            ->where('application_id', $applicationId)
             ->select('year', 'quarter')
             ->distinct()
             ->get()

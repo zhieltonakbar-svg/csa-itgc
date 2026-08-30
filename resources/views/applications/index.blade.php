@@ -236,8 +236,23 @@
         </div>
         <div style="padding:24px; display:flex; flex-direction:column; gap:16px;">
             <div>
+                <label style="display:block; font-size:12.5px; font-weight:600; color:#374151; margin-bottom:6px;">Application <span style="color:#dc2626;">*</span></label>
+                <select id="ap-application" style="width:100%; padding:9px 12px; border:1.5px solid #d1d5db; border-radius:8px; font-size:13.5px; background:#fff; outline:none; cursor:pointer;">
+                    <option value="">— Select Application —</option>
+                    @foreach($applications as $app)
+                        @if($app->is_active)
+                            <option value="{{ $app->id }}">{{ $app->name }}</option>
+                        @endif
+                    @endforeach
+                </select>
+            </div>
+            <div>
                 <label style="display:block; font-size:12.5px; font-weight:600; color:#374151; margin-bottom:6px;">Year <span style="color:#dc2626;">*</span></label>
                 <input type="number" id="ap-year" min="{{ now()->year }}" placeholder="e.g. 2026" style="width:100%; padding:9px 12px; border:1.5px solid #d1d5db; border-radius:8px; font-size:13.5px; background:#fff; outline:none;" required>
+                <div id="ap-year-error" style="display:none; font-size:11.5px; color:#dc2626; margin-top:6px;">
+                    <i class="bi bi-exclamation-circle"></i>
+                    Year cannot be earlier than {{ now()->year }}.
+                </div>
             </div>
             <div>
                 <label style="display:block; font-size:12.5px; font-weight:600; color:#374151; margin-bottom:6px;">Quarter <span style="color:#dc2626;">*</span></label>
@@ -253,10 +268,6 @@
                     <i class="bi bi-exclamation-circle"></i>
                     That quarter already exists for this application/year — pick another one.
                 </div>
-            </div>
-            <div>
-                <label style="display:block; font-size:12.5px; font-weight:600; color:#374151; margin-bottom:6px;">Application <span style="color:#dc2626;">*</span></label>
-                <input type="text" id="ap-application" placeholder="e.g. SAP S/4HANA" style="width:100%; padding:9px 12px; border:1.5px solid #d1d5db; border-radius:8px; font-size:13.5px; background:#fff; outline:none;" required>
             </div>
         </div>
         <div style="padding:16px 24px; background:#f8fafc; border-top:1px solid #e5e7eb; display:flex; align-items:center; justify-content:flex-end; gap:10px;">
@@ -514,7 +525,11 @@ function openAddPeriodModal() {
     document.getElementById('addPeriodModal').style.display='flex';
     document.getElementById('ap-year').value = '';
     document.getElementById('ap-application').value = '';
-    refreshTakenPeriods();
+    document.getElementById('ap-year-error').style.display = 'none';
+    document.getElementById('ap-year').style.borderColor = '#d1d5db';
+    takenPeriods = [];
+    applyTakenPeriods();
+    updateAddPeriodButtonState();
 }
 function closeAddPeriodModal() { document.getElementById('addPeriodModal').style.display='none'; }
 document.getElementById('btn-add-period')?.addEventListener('click', openAddPeriodModal);
@@ -523,6 +538,44 @@ document.getElementById('addPeriodCancel')?.addEventListener('click', closeAddPe
 
 var currentYear = {{ now()->year }};
 var takenPeriods = [];
+
+function isYearValid() {
+    var year = parseInt(document.getElementById('ap-year').value, 10);
+    return !isNaN(year) && year >= currentYear;
+}
+
+function validateYearRealtime() {
+    var yearInput = document.getElementById('ap-year');
+    var errorMsg = document.getElementById('ap-year-error');
+    var hasValue = yearInput.value !== '';
+
+    if (hasValue && !isYearValid()) {
+        yearInput.style.borderColor = '#dc2626';
+        yearInput.style.background = '#fef2f2';
+        errorMsg.style.display = 'block';
+    } else {
+        yearInput.style.borderColor = '#d1d5db';
+        yearInput.style.background = '#fff';
+        errorMsg.style.display = 'none';
+    }
+
+    updateAddPeriodButtonState();
+}
+
+function updateAddPeriodButtonState() {
+    var btn = document.getElementById('addPeriodConfirm');
+    if (!btn) return;
+
+    var appId = document.getElementById('ap-application').value;
+    var checkedInput = document.querySelector('input[name="ap-quarter"]:checked');
+    var yearOk = document.getElementById('ap-year').value !== '' && isYearValid();
+
+    var ready = !!appId && yearOk && !!checkedInput && !checkedInput.disabled;
+
+    btn.disabled = !ready;
+    btn.style.opacity = ready ? '1' : '0.5';
+    btn.style.cursor = ready ? 'pointer' : 'not-allowed';
+}
 
 function applyTakenPeriods() {
     var year = parseInt(document.getElementById('ap-year').value, 10);
@@ -571,19 +624,37 @@ function applyTakenPeriods() {
         }
     }
 
-    wireQuarterPills('ap');
+    updateAddPeriodQuarterStyles();
+    updateAddPeriodButtonState();
+}
+
+function updateAddPeriodQuarterStyles() {
+    ['q1','q2','q3','q4'].forEach(function(v) {
+        var l = document.getElementById('ap-q-label-' + v);
+        var i = document.getElementById('ap-q-' + v);
+        if (!l || !i) return;
+        if (i.checked) {
+            l.style.borderColor = '#059669';
+            l.style.background = '#ecfdf5';
+            l.style.color = '#047857';
+        } else if (!i.disabled) {
+            l.style.borderColor = '#d1d5db';
+            l.style.background = '#fff';
+            l.style.color = '#111827';
+        }
+    });
 }
 
 function refreshTakenPeriods() {
-    var appName = document.getElementById('ap-application').value.trim();
+    var appId = document.getElementById('ap-application').value;
 
-    if (!appName) {
+    if (!appId) {
         takenPeriods = [];
         applyTakenPeriods();
         return;
     }
 
-    fetch('{{ route("applications.existingPeriods") }}?name=' + encodeURIComponent(appName), {
+    fetch('{{ route("applications.existingPeriods") }}?application_id=' + encodeURIComponent(appId), {
         headers: { 'Accept': 'application/json' }
     })
         .then(function(res) { return res.json(); })
@@ -597,12 +668,17 @@ function refreshTakenPeriods() {
         });
 }
 
-var apPeriodDebounce;
-document.getElementById('ap-application')?.addEventListener('input', function() {
-    clearTimeout(apPeriodDebounce);
-    apPeriodDebounce = setTimeout(refreshTakenPeriods, 350);
+document.getElementById('ap-application')?.addEventListener('change', refreshTakenPeriods);
+document.getElementById('ap-year')?.addEventListener('input', function() {
+    validateYearRealtime();
+    applyTakenPeriods();
 });
-document.getElementById('ap-year')?.addEventListener('input', applyTakenPeriods);
+['q1','q2','q3','q4'].forEach(function(val) {
+    document.getElementById('ap-q-' + val)?.addEventListener('change', function() {
+        updateAddPeriodQuarterStyles();
+        updateAddPeriodButtonState();
+    });
+});
 
 function openDeletePeriodModal() { document.getElementById('deletePeriodModal').style.display='flex'; }
 function closeDeletePeriodModal() { document.getElementById('deletePeriodModal').style.display='none'; }
@@ -638,41 +714,34 @@ function wireQuarterPills(prefix) {
 
     updateAll();
 }
-wireQuarterPills('ap');
 wireQuarterPills('dp');
 
 document.getElementById('addPeriodConfirm')?.addEventListener('click', function() {
     var year = document.getElementById('ap-year').value;
-    var appName = document.getElementById('ap-application').value;
-    var quarter = 'q1';
-    apQuarterRadios.forEach(function(r) { if(r.checked) quarter = r.value; });
-    if(!year || !appName) return;
+    var appId = document.getElementById('ap-application').value;
+    var checkedInput = document.querySelector('input[name="ap-quarter"]:checked');
 
-    if (parseInt(year, 10) < currentYear) {
+    if (!appId) {
+        alert('Please select an Application.');
+        return;
+    }
+
+    if (!year || !isYearValid()) {
         alert('Year cannot be earlier than ' + currentYear + '.');
         return;
     }
 
-    var checkedInput = document.querySelector('input[name="ap-quarter"]:checked');
     if (!checkedInput || checkedInput.disabled) {
         alert('Please select an available Quarter for this Application/Year.');
         return;
     }
-    
-    fetch('{{ route("applications.store") }}', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'X-Requested-With': 'XMLHttpRequest' },
-        body: JSON.stringify({ name: appName })
-    }).then(res => res.json()).then(data => {
-        if(data.success) {
-            var params = new URLSearchParams({
-                year: year,
-                quarter: quarter,
-                application_id: data.application.id
-            });
-            window.location.href = '{{ route("dashboard") }}?' + params.toString();
-        }
+
+    var params = new URLSearchParams({
+        year: year,
+        quarter: checkedInput.value,
+        application_id: appId
     });
+    window.location.href = '{{ route("dashboard") }}?' + params.toString();
 });
 
 document.getElementById('deletePeriodConfirm')?.addEventListener('click', function() {

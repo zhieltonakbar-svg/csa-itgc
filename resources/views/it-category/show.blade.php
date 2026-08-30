@@ -1463,6 +1463,15 @@
 
     </div>
 
+    @if($isAdmin)
+        <form method="GET" action="{{ url()->current() }}" style="margin: 0;">
+            @if($isRcmView ?? false)
+                <input type="hidden" name="source" value="rcm">
+            @else
+                <input type="hidden" name="source" value="{{ $source ?? 'dashboard' }}">
+            @endif
+    @endif
+
     <div class="itc-summary-grid">
 
         <div class="itc-sum-cell">
@@ -1476,20 +1485,11 @@
                 <i class="bi bi-window-stack"></i>
 
                 @if($isAdmin)
-                    <form method="GET" action="{{ url()->current() }}" style="margin: 0; display: inline-block;">
-                        <input type="hidden" name="year" value="{{ $year }}">
-                        <input type="hidden" name="quarter" value="{{ $quarter }}">
-                        @if($isRcmView ?? false)
-                            <input type="hidden" name="source" value="rcm">
-                        @else
-                            <input type="hidden" name="source" value="{{ $source ?? 'dashboard' }}">
-                        @endif
-                        <select name="application_id" onchange="this.form.submit()" style="border: 1px solid #dbe3e8; border-radius: 6px; padding: 2px 8px; font-size: 13px; font-weight: 600; color: #152238; background: #f8fafb; outline: none; cursor: pointer; max-width: 220px;">
-                            @foreach($allApplications as $availApp)
-                                <option value="{{ $availApp->id }}" {{ (int) $application->id === (int) $availApp->id ? 'selected' : '' }}>{{ $availApp->name }}</option>
-                            @endforeach
-                        </select>
-                    </form>
+                    <select name="application_id" style="border: 1px solid #dbe3e8; border-radius: 6px; padding: 2px 8px; font-size: 13px; font-weight: 600; color: #152238; background: #f8fafb; outline: none; cursor: pointer; max-width: 220px;">
+                        @foreach($allApplications as $availApp)
+                            <option value="{{ $availApp->id }}" {{ (int) $application->id === (int) $availApp->id ? 'selected' : '' }}>{{ $availApp->name }}</option>
+                        @endforeach
+                    </select>
                 @else
                     {{ $application->name }}
                 @endif
@@ -1503,20 +1503,11 @@
             <div class="itc-sum-value">
                 <i class="bi bi-calendar3"></i>
                 @if($isAdmin)
-                    <form method="GET" action="{{ url()->current() }}" style="margin: 0; display: inline-block;">
-                        <input type="hidden" name="application_id" value="{{ $application->id }}">
-                        <input type="hidden" name="quarter" value="{{ $quarter }}">
-                        @if($isRcmView ?? false)
-                            <input type="hidden" name="source" value="rcm">
-                        @else
-                            <input type="hidden" name="source" value="{{ $source ?? 'dashboard' }}">
-                        @endif
-                        <select name="year" onchange="this.form.submit()" style="border: 1px solid #dbe3e8; border-radius: 6px; padding: 2px 8px; font-size: 13px; font-weight: 600; color: #152238; background: #f8fafb; outline: none; cursor: pointer;">
-                            @foreach($availableYears as $availYear)
-                                <option value="{{ $availYear }}" {{ (int) $year === (int) $availYear ? 'selected' : '' }}>{{ $availYear }}</option>
-                            @endforeach
-                        </select>
-                    </form>
+                    <select name="year" style="border: 1px solid #dbe3e8; border-radius: 6px; padding: 2px 8px; font-size: 13px; font-weight: 600; color: #152238; background: #f8fafb; outline: none; cursor: pointer;">
+                        @foreach($availableYears as $availYear)
+                            <option value="{{ $availYear }}" {{ (int) $year === (int) $availYear ? 'selected' : '' }}>{{ $availYear }}</option>
+                        @endforeach
+                    </select>
                 @else
                     {{ $year }}
                 @endif
@@ -1528,27 +1519,46 @@
             <div class="itc-sum-value">
                 <i class="bi bi-calendar-range"></i>
                 @if($isAdmin)
-                    <form method="GET" action="{{ url()->current() }}" style="margin: 0; display: inline-block;">
-                        <input type="hidden" name="application_id" value="{{ $application->id }}">
-                        <input type="hidden" name="year" value="{{ $year }}">
-                        @if($isRcmView ?? false)
-                            <input type="hidden" name="source" value="rcm">
-                        @else
-                            <input type="hidden" name="source" value="{{ $source ?? 'dashboard' }}">
-                        @endif
-                        <select name="quarter" onchange="this.form.submit()" style="border: 1px solid #dbe3e8; border-radius: 6px; padding: 2px 8px; font-size: 13px; font-weight: 600; color: #152238; background: #f8fafb; outline: none; cursor: pointer;">
-                            @foreach(['q1' => 'Q1', 'q2' => 'Q2', 'q3' => 'Q3', 'q4' => 'Q4'] as $qVal => $qLabel)
-                                <option value="{{ $qVal }}" {{ $quarter === $qVal ? 'selected' : '' }}>{{ $qLabel }}</option>
-                            @endforeach
-                        </select>
-                    </form>
+                    <select name="quarter" style="border: 1px solid #dbe3e8; border-radius: 6px; padding: 2px 8px; font-size: 13px; font-weight: 600; color: #152238; background: #f8fafb; outline: none; cursor: pointer;">
+                        @foreach(['q1' => 'Q1', 'q2' => 'Q2', 'q3' => 'Q3', 'q4' => 'Q4'] as $qVal => $qLabel)
+                            <option value="{{ $qVal }}" {{ $quarter === $qVal ? 'selected' : '' }}>{{ $qLabel }}</option>
+                        @endforeach
+                    </select>
                 @else
                     {{ $quarterLabel }}
                 @endif
             </div>
         </div>
 
+        @if($isAdmin)
+            <div class="itc-sum-cell" style="display:flex; align-items:flex-end;">
+                <button
+                    type="submit"
+                    style="
+                        display:inline-flex;
+                        align-items:center;
+                        gap:6px;
+                        background:#15803d;
+                        color:#fff;
+                        border:none;
+                        border-radius:6px;
+                        padding:7px 18px;
+                        font-size:13px;
+                        font-weight:700;
+                        cursor:pointer;
+                    "
+                >
+                    <i class="bi bi-search"></i>
+                    Search
+                </button>
+            </div>
+        @endif
+
     </div>
+
+    @if($isAdmin)
+        </form>
+    @endif
 
 </div>
 

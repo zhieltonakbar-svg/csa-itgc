@@ -17,7 +17,7 @@
 <div class="col-12">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h5 style="font-weight:700; color:#1e293b; margin:0;">Users List</h5>
-        <button type="button" class="btn btn-primary" style="border-radius: 8px; font-weight: 600; padding: 8px 20px; background: linear-gradient(135deg, #2563eb, #1d4ed8); border: none;" onclick="openCreateUserModal()">
+        <button type="button" class="btn btn-primary" style="border-radius: 8px; font-weight: 600; padding: 8px 20px; background: linear-gradient(135deg, #16a34a, #15803d); border: none;" onclick="openCreateUserModal()">
             <i class="bi bi-person-plus-fill me-1"></i> Create User
         </button>
     </div>
@@ -75,7 +75,7 @@
                                 @if($user->isAdmin())
                                     <span class="text-muted" style="font-size: 12px; font-style: italic;">Admin</span>
                                 @else
-                                    <button type="button" class="btn btn-sm btn-outline-primary" style="border-radius: 8px; font-weight: 600;" 
+                                    <button type="button" class="btn btn-sm btn-outline-success" style="border-radius: 8px; font-weight: 600;" 
                                             onclick="openUserModal({{ $user->id }}, '{{ addslashes($user->name) }}', '{{ $user->upti_id }}', {{ $user->is_active ? 'true' : 'false' }})">
                                         <i class="bi bi-pencil-square"></i> Edit
                                     </button>
@@ -84,7 +84,7 @@
                                         <form action="{{ route('users.deactivate', $user->id) }}" method="POST" style="display:inline-block; margin-left:5px;">
                                             @csrf
                                             @method('PATCH')
-                                            <button type="submit" class="btn btn-sm btn-warning" style="border-radius: 8px; font-weight: 600;" onclick="return confirm('Deactivate this user?')">
+                                            <button type="submit" class="btn btn-sm btn-danger" style="border-radius: 8px; font-weight: 600;" onclick="return confirm('Deactivate this user?')">
                                                 <i class="bi bi-pause-circle"></i> Deactivate
                                             </button>
                                         </form>
@@ -191,7 +191,7 @@
             </div>
             <div class="modal-footer" style="background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 16px 24px;">
                 <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="border-radius: 8px; font-weight: 600; border: 1px solid #e2e8f0;">Cancel</button>
-                <button type="submit" class="btn btn-primary" style="border-radius: 8px; font-weight: 600; padding: 8px 24px; background: linear-gradient(135deg, #2563eb, #1d4ed8); border: none;">Create User</button>
+                <button type="submit" class="btn btn-primary" style="border-radius: 8px; font-weight: 600; padding: 8px 24px; background: linear-gradient(135deg, #16a34a, #15803d); border: none;">Create User</button>
             </div>
         </form>
     </div>
@@ -233,7 +233,7 @@
             </div>
             <div class="modal-footer" style="background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 16px 24px;">
                 <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="border-radius: 8px; font-weight: 600; border: 1px solid #e2e8f0;">Cancel</button>
-                <button type="submit" class="btn btn-primary" style="border-radius: 8px; font-weight: 600; padding: 8px 24px; background: linear-gradient(135deg, #2563eb, #1d4ed8); border: none;">Save Changes</button>
+                <button type="submit" class="btn btn-primary" style="border-radius: 8px; font-weight: 600; padding: 8px 24px; background: linear-gradient(135deg, #16a34a, #15803d); border: none;">Save Changes</button>
             </div>
         </form>
     </div>

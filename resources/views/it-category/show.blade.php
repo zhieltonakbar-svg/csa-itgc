@@ -1472,86 +1472,90 @@
             @endif
     @endif
 
-    <div class="itc-summary-grid">
+    <div style="display:flex; align-items:center; gap:20px; padding-right:24px;">
 
-        <div class="itc-sum-cell">
+        <div class="itc-summary-grid" style="flex:1;">
 
-            <span class="itc-sum-label">
-                Application
-            </span>
+            <div class="itc-sum-cell">
 
-            <div class="itc-sum-value">
+                <span class="itc-sum-label">
+                    Application
+                </span>
 
-                <i class="bi bi-window-stack"></i>
+                <div class="itc-sum-value">
 
-                @if($isAdmin)
-                    <select name="application_id" style="border: 1px solid #dbe3e8; border-radius: 6px; padding: 2px 8px; font-size: 13px; font-weight: 600; color: #152238; background: #f8fafb; outline: none; cursor: pointer; max-width: 220px;">
-                        @foreach($allApplications as $availApp)
-                            <option value="{{ $availApp->id }}" {{ (int) $application->id === (int) $availApp->id ? 'selected' : '' }}>{{ $availApp->name }}</option>
-                        @endforeach
-                    </select>
-                @else
-                    {{ $application->name }}
-                @endif
+                    <i class="bi bi-window-stack"></i>
+
+                    @if($isAdmin)
+                        <select name="application_id" style="border: 1px solid #dbe3e8; border-radius: 6px; padding: 2px 8px; font-size: 13px; font-weight: 600; color: #152238; background: #f8fafb; outline: none; cursor: pointer; max-width: 220px;">
+                            @foreach($allApplications as $availApp)
+                                <option value="{{ $availApp->id }}" {{ (int) $application->id === (int) $availApp->id ? 'selected' : '' }}>{{ $availApp->name }}</option>
+                            @endforeach
+                        </select>
+                    @else
+                        {{ $application->name }}
+                    @endif
+
+                </div>
 
             </div>
 
-        </div>
-
-        <div class="itc-sum-cell">
-            <span class="itc-sum-label">Year</span>
-            <div class="itc-sum-value">
-                <i class="bi bi-calendar3"></i>
-                @if($isAdmin)
-                    <select name="year" style="border: 1px solid #dbe3e8; border-radius: 6px; padding: 2px 8px; font-size: 13px; font-weight: 600; color: #152238; background: #f8fafb; outline: none; cursor: pointer;">
-                        @foreach($availableYears as $availYear)
-                            <option value="{{ $availYear }}" {{ (int) $year === (int) $availYear ? 'selected' : '' }}>{{ $availYear }}</option>
-                        @endforeach
-                    </select>
-                @else
-                    {{ $year }}
-                @endif
+            <div class="itc-sum-cell">
+                <span class="itc-sum-label">Year</span>
+                <div class="itc-sum-value">
+                    <i class="bi bi-calendar3"></i>
+                    @if($isAdmin)
+                        <select name="year" style="border: 1px solid #dbe3e8; border-radius: 6px; padding: 2px 8px; font-size: 13px; font-weight: 600; color: #152238; background: #f8fafb; outline: none; cursor: pointer;">
+                            @foreach($availableYears as $availYear)
+                                <option value="{{ $availYear }}" {{ (int) $year === (int) $availYear ? 'selected' : '' }}>{{ $availYear }}</option>
+                            @endforeach
+                        </select>
+                    @else
+                        {{ $year }}
+                    @endif
+                </div>
             </div>
-        </div>
 
-        <div class="itc-sum-cell">
-            <span class="itc-sum-label">Quarter</span>
-            <div class="itc-sum-value">
-                <i class="bi bi-calendar-range"></i>
-                @if($isAdmin)
-                    <select name="quarter" style="border: 1px solid #dbe3e8; border-radius: 6px; padding: 2px 8px; font-size: 13px; font-weight: 600; color: #152238; background: #f8fafb; outline: none; cursor: pointer;">
-                        @foreach(['q1' => 'Q1', 'q2' => 'Q2', 'q3' => 'Q3', 'q4' => 'Q4'] as $qVal => $qLabel)
-                            <option value="{{ $qVal }}" {{ $quarter === $qVal ? 'selected' : '' }}>{{ $qLabel }}</option>
-                        @endforeach
-                    </select>
-                @else
-                    {{ $quarterLabel }}
-                @endif
+            <div class="itc-sum-cell">
+                <span class="itc-sum-label">Quarter</span>
+                <div class="itc-sum-value">
+                    <i class="bi bi-calendar-range"></i>
+                    @if($isAdmin)
+                        <select name="quarter" style="border: 1px solid #dbe3e8; border-radius: 6px; padding: 2px 8px; font-size: 13px; font-weight: 600; color: #152238; background: #f8fafb; outline: none; cursor: pointer;">
+                            @foreach(['q1' => 'Q1', 'q2' => 'Q2', 'q3' => 'Q3', 'q4' => 'Q4'] as $qVal => $qLabel)
+                                <option value="{{ $qVal }}" {{ $quarter === $qVal ? 'selected' : '' }}>{{ $qLabel }}</option>
+                            @endforeach
+                        </select>
+                    @else
+                        {{ $quarterLabel }}
+                    @endif
+                </div>
             </div>
+
         </div>
 
         @if($isAdmin)
-            <div class="itc-sum-cell" style="display:flex; align-items:flex-end;">
-                <button
-                    type="submit"
-                    style="
-                        display:inline-flex;
-                        align-items:center;
-                        gap:6px;
-                        background:#15803d;
-                        color:#fff;
-                        border:none;
-                        border-radius:6px;
-                        padding:7px 18px;
-                        font-size:13px;
-                        font-weight:700;
-                        cursor:pointer;
-                    "
-                >
-                    <i class="bi bi-search"></i>
-                    Search
-                </button>
-            </div>
+            <button
+                type="submit"
+                style="
+                    display:inline-flex;
+                    align-items:center;
+                    gap:6px;
+                    background:#15803d;
+                    color:#fff;
+                    border:none;
+                    border-radius:6px;
+                    padding:9px 20px;
+                    font-size:13px;
+                    font-weight:700;
+                    cursor:pointer;
+                    flex-shrink:0;
+                    white-space:nowrap;
+                "
+            >
+                <i class="bi bi-search"></i>
+                Search
+            </button>
         @endif
 
     </div>

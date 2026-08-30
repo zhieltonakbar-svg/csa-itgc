@@ -647,7 +647,7 @@
                     name="quarter"
                 >
 
-                    @foreach(['q1', 'q2', 'q3', 'q4'] as $q)
+                    @foreach($availableQuartersForYear as $q)
 
                         <option
                             value="{{ $q }}"
@@ -748,7 +748,7 @@
 
         <div class="dashboard-application-box">
 
-            <div class="dashboard-application-head">
+            <div class="dashboard-application-head" style="display:flex; justify-content:space-between; align-items:flex-start;">
 
                 <div>
 
@@ -777,6 +777,17 @@
                     </div>
 
                 </div>
+
+                @if($user->isAdmin())
+                <div style="display: flex; gap: 8px;">
+                    <button type="button" onclick="openDeleteCategoryModal()" style="padding: 8px 16px; background: #dc2626; color: white; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); transition: all 0.2s;" onmouseover="this.style.background='#b91c1c';" onmouseout="this.style.background='#dc2626';">
+                        <i class="bi bi-trash"></i> Delete IT Category
+                    </button>
+                    <button type="button" onclick="openAddCategoryModal()" style="padding: 8px 16px; background: #0f172a; color: white; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+                        <i class="bi bi-plus-lg"></i> Add IT Category
+                    </button>
+                </div>
+                @endif
 
             </div>
 
@@ -909,4 +920,314 @@
 
 </div>
 
+@if(auth()->check() && auth()->user()->isAdmin())
+<!-- Add Category Modal -->
+<div id="addCategoryModal" style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,0.45); backdrop-filter:blur(3px); align-items:center; justify-content:center;">
+    <div style="background:#fff; border-radius:16px; width:100%; max-width:400px; margin:16px; box-shadow:0 20px 60px rgba(0,0,0,0.2); overflow:hidden;">
+        <div style="padding:20px 24px; border-bottom:1px solid #e5e7eb; display:flex; justify-content:space-between; align-items:center;">
+            <h5 style="margin:0; font-size:16px; font-weight:700; color:#1e293b;">Add IT Category</h5>
+            <button type="button" onclick="closeAddCategoryModal()" style="background:transparent; border:none; color:#64748b; font-size:18px; cursor:pointer;">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+        <div style="padding:24px;">
+            <label style="display:block; font-size:13px; font-weight:600; color:#374151; margin-bottom:8px;">IT Category Name <span style="color:#dc2626;">*</span></label>
+            <input type="text" id="ac-category-name" list="ac-category-list" autocomplete="off" placeholder="e.g. Computer Operations" style="width:100%; padding:10px 12px; border:1.5px solid #d1d5db; border-radius:8px; font-size:14px; outline:none; margin-bottom:16px;">
+            <datalist id="ac-category-list">
+                @php
+                    $existingCatIds = isset($selectedApplication) ? $selectedApplication->dashboard_categories->pluck('id')->toArray() : [];
+                @endphp
+                @foreach($allItCategories ?? [] as $cat)
+                    @if(!in_array($cat->id, $existingCatIds))
+                        <option value="{{ $cat->name }}">
+                    @endif
+                @endforeach
+            </datalist>
+
+            <label style="display:block; font-size:13px; font-weight:600; color:#374151; margin-bottom:8px;">Description <span style="font-weight:400; color:#6b7280;">(Optional)</span></label>
+            <textarea id="ac-category-description" rows="3" placeholder="Enter description for new category..." style="width:100%; padding:10px 12px; border:1.5px solid #d1d5db; border-radius:8px; font-size:14px; outline:none; resize:vertical;"></textarea>
+            
+            <div id="ac-error" style="display:none; color:#dc2626; font-size:12px; margin-top:8px;">Please enter a category name.</div>
+        </div>
+        <div style="padding:16px 24px; background:#f8fafc; border-top:1px solid #e5e7eb; display:flex; justify-content:flex-end; gap:10px;">
+            <button type="button" onclick="closeAddCategoryModal()" style="padding:8px 16px; background:#fff; border:1px solid #d1d5db; border-radius:8px; font-size:13px; font-weight:600; color:#475569; cursor:pointer;">Cancel</button>
+            <button type="button" id="btn-confirm-add-category" onclick="confirmAddCategory()" style="padding:8px 16px; background:#0f172a; color:white; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer;">Add</button>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Category Modal -->
+<div id="deleteCategoryModal" style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,0.45); backdrop-filter:blur(3px); align-items:center; justify-content:center;">
+    <div style="background:#fff; border-radius:16px; width:100%; max-width:400px; margin:16px; box-shadow:0 20px 60px rgba(0,0,0,0.2); overflow:hidden;">
+        <div style="padding:20px 24px; border-bottom:1px solid #e5e7eb; display:flex; justify-content:space-between; align-items:center;">
+            <h5 style="margin:0; font-size:16px; font-weight:700; color:#1e293b; display:flex; align-items:center; gap:8px;">
+                <i class="bi bi-trash text-danger"></i> Delete IT Category
+            </h5>
+            <button type="button" onclick="closeDeleteCategoryModal()" style="background:transparent; border:none; color:#64748b; font-size:18px; cursor:pointer;">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+        <div style="padding:24px; max-height:300px; overflow-y:auto;">
+            <label style="display:block; font-size:13px; font-weight:600; color:#374151; margin-bottom:12px;">Select categories to remove from this period:</label>
+            
+            <div style="margin-bottom:12px; padding-bottom:12px; border-bottom:1px solid #e5e7eb;">
+                <label style="display:flex; align-items:center; gap:8px; font-size:14px; font-weight:600; cursor:pointer; color:#0f172a;">
+                    <input type="checkbox" id="dc-select-all" onchange="dcToggleAll(this)" style="width:16px; height:16px; accent-color:#dc2626; cursor:pointer;">
+                    Select All
+                </label>
+            </div>
+
+            <div id="dc-checkboxes-container" style="display:flex; flex-direction:column; gap:10px;">
+                @if(isset($selectedApplication) && $selectedApplication->dashboard_categories->count() > 0)
+                    @foreach($selectedApplication->dashboard_categories as $cat)
+                    <label style="display:flex; align-items:center; gap:8px; font-size:14px; cursor:pointer; color:#333;">
+                        <input type="checkbox" class="dc-category-checkbox" value="{{ $cat->id }}" style="width:16px; height:16px; accent-color:#dc2626; cursor:pointer;">
+                        {{ $cat->name }}
+                    </label>
+                    @endforeach
+                @else
+                    <div style="font-size:13px; color:#6b7280; font-style:italic;">No IT Categories in this period.</div>
+                @endif
+            </div>
+            
+            <div id="dc-error" style="display:none; color:#dc2626; font-size:12px; margin-top:12px;">Please select at least one category.</div>
+            
+            <div style="margin-top:16px; padding:12px; background:#fef2f2; border:1px solid #fecaca; border-radius:8px; font-size:12px; color:#991b1b;">
+                <strong>Warning:</strong> Removing an IT Category will permanently delete <strong>all controls and evidence</strong> associated with it in this period. This action cannot be undone.
+            </div>
+        </div>
+        <div style="padding:16px 24px; background:#f8fafc; border-top:1px solid #e5e7eb; display:flex; justify-content:flex-end; gap:10px;">
+            <button type="button" onclick="closeDeleteCategoryModal()" style="padding:8px 16px; background:#fff; border:1px solid #d1d5db; border-radius:8px; font-size:13px; font-weight:600; color:#475569; cursor:pointer;">Cancel</button>
+            <button type="button" id="btn-confirm-delete-category" onclick="confirmDeleteCategory()" style="padding:8px 16px; background:#dc2626; color:white; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer;" {{ (isset($selectedApplication) && $selectedApplication->dashboard_categories->count() > 0) ? '' : 'disabled' }}>Delete</button>
+        </div>
+    </div>
+</div>
+@endif
+
 @endsection
+
+@push('scripts')
+<script>
+    var currentAppId = '{{ $applicationId ?? "" }}';
+    var currentYear = '{{ $year ?? "" }}';
+    var currentQuarter = '{{ $quarter ?? "" }}';
+
+    function openAddCategoryModal() {
+        document.getElementById('ac-category-name').value = '';
+        document.getElementById('ac-category-description').value = '';
+        document.getElementById('ac-error').style.display = 'none';
+        document.getElementById('addCategoryModal').style.display = 'flex';
+    }
+
+    function closeAddCategoryModal() {
+        document.getElementById('addCategoryModal').style.display = 'none';
+    }
+
+    function confirmAddCategory() {
+        var catName = document.getElementById('ac-category-name').value.trim();
+        var catDesc = document.getElementById('ac-category-description').value.trim();
+        if (!catName) {
+            document.getElementById('ac-error').style.display = 'block';
+            return;
+        }
+
+        var btn = document.getElementById('btn-confirm-add-category');
+        btn.disabled = true;
+        btn.innerHTML = 'Adding...';
+
+        fetch('{{ route("dashboard.addCategory") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({
+                application_id: currentAppId,
+                year: currentYear,
+                quarter: currentQuarter,
+                category_name: catName,
+                category_description: catDesc
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                window.location.reload();
+            } else {
+                alert('Error: ' + (data.message || 'Unknown error'));
+                btn.disabled = false;
+                btn.innerHTML = 'Add';
+            }
+        })
+        .catch(err => {
+            alert('Network error.');
+            btn.disabled = false;
+            btn.innerHTML = 'Add';
+        });
+    }
+
+    function openDeleteCategoryModal() {
+        document.querySelectorAll('.dc-category-checkbox').forEach(cb => cb.checked = false);
+        var selectAllCb = document.getElementById('dc-select-all');
+        if (selectAllCb) selectAllCb.checked = false;
+        document.getElementById('dc-error').style.display = 'none';
+        document.getElementById('deleteCategoryModal').style.display = 'flex';
+    }
+
+    function closeDeleteCategoryModal() {
+        document.getElementById('deleteCategoryModal').style.display = 'none';
+    }
+
+    function dcToggleAll(source) {
+        document.querySelectorAll('.dc-category-checkbox').forEach(cb => {
+            cb.checked = source.checked;
+        });
+    }
+
+    function confirmDeleteCategory() {
+        var selectedIds = [];
+        document.querySelectorAll('.dc-category-checkbox:checked').forEach(cb => {
+            selectedIds.push(cb.value);
+        });
+
+        if (selectedIds.length === 0) {
+            document.getElementById('dc-error').style.display = 'block';
+            return;
+        }
+
+        if (!confirm('Are you sure you want to remove the ' + selectedIds.length + ' selected categories from this period?\n\nAll controls and evidence for these categories will also be deleted!')) {
+            return;
+        }
+
+        var btn = document.getElementById('btn-confirm-delete-category');
+        btn.disabled = true;
+        btn.innerHTML = 'Deleting...';
+
+        fetch('{{ route("dashboard.removeCategory") }}', {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({
+                application_id: currentAppId,
+                year: currentYear,
+                quarter: currentQuarter,
+                it_category_ids: selectedIds
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                window.location.reload();
+            } else {
+                alert('Error: ' + (data.message || 'Unknown error'));
+                btn.disabled = false;
+                btn.innerHTML = 'Delete';
+            }
+        })
+        .catch(err => {
+            alert('Network error.');
+            btn.disabled = false;
+            btn.innerHTML = 'Delete';
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        var existingPeriods = @json($existingPeriods);
+        var appSelect = document.getElementById('dashboard-application');
+        var yearSelect = document.getElementById('dashboard-year');
+        var quarterSelect = document.getElementById('dashboard-quarter');
+        
+        var initialYear = '{{ $year }}';
+        var initialQuarter = '{{ $quarter }}';
+
+        function updateDropdowns() {
+            var selectedApp = appSelect.value ? parseInt(appSelect.value) : null;
+            var selectedYear = yearSelect.value ? parseInt(yearSelect.value) : parseInt(initialYear);
+            var selectedQuarter = quarterSelect.value || initialQuarter;
+
+            // 1. Filter Years based on Application
+            var availableYears = [];
+            existingPeriods.forEach(function (period) {
+                if (!selectedApp || period.application_id === selectedApp) {
+                    if (!availableYears.includes(period.year)) {
+                        availableYears.push(period.year);
+                    }
+                }
+            });
+
+            availableYears.sort(function(a, b){return b-a});
+            if (availableYears.length === 0) {
+                availableYears = [new Date().getFullYear()];
+            }
+
+            // Rebuild Year options
+            yearSelect.innerHTML = '';
+            var yearStillExists = false;
+            availableYears.forEach(function (y) {
+                var option = document.createElement('option');
+                option.value = y;
+                option.text = y;
+                if (y === selectedYear) {
+                    option.selected = true;
+                    yearStillExists = true;
+                }
+                yearSelect.appendChild(option);
+            });
+
+            if (!yearStillExists && yearSelect.options.length > 0) {
+                yearSelect.options[0].selected = true;
+                selectedYear = parseInt(yearSelect.value);
+            }
+
+            // 2. Filter Quarters based on Application AND Year
+            var availableQuarters = [];
+            existingPeriods.forEach(function (period) {
+                var appMatch = !selectedApp || period.application_id === selectedApp;
+                var yearMatch = period.year === selectedYear;
+                if (appMatch && yearMatch) {
+                    var q = period.quarter.toLowerCase();
+                    if (!availableQuarters.includes(q)) {
+                        availableQuarters.push(q);
+                    }
+                }
+            });
+
+            availableQuarters.sort();
+            if (availableQuarters.length === 0) {
+                availableQuarters = ['q1', 'q2', 'q3', 'q4'];
+            }
+
+            // Rebuild Quarter options
+            quarterSelect.innerHTML = '';
+            var quarterStillExists = false;
+            availableQuarters.forEach(function (q) {
+                var option = document.createElement('option');
+                option.value = q;
+                option.text = q.toUpperCase();
+                if (q === selectedQuarter) {
+                    option.selected = true;
+                    quarterStillExists = true;
+                }
+                quarterSelect.appendChild(option);
+            });
+
+            if (!quarterStillExists && quarterSelect.options.length > 0) {
+                quarterSelect.options[0].selected = true;
+            }
+        }
+
+        appSelect.addEventListener('change', updateDropdowns);
+        yearSelect.addEventListener('change', updateDropdowns);
+        
+        // Run once on load to ensure correctness based on potentially auto-selected application
+        // But only if there is an application selected, so it filters correctly from the start.
+        if (appSelect.value) {
+            updateDropdowns();
+        }
+    });
+</script>
+@endpush

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Application extends Model
 {
@@ -23,5 +24,21 @@ class Application extends Model
         return $this->belongsToMany(ItCategory::class, 'application_it_category')
                     ->withPivot('completion_status')
                     ->withTimestamps();
+    }
+
+    /**
+     * Controls linked to this application.
+     */
+    public function controls(): HasMany
+    {
+        return $this->hasMany(Control::class);
+    }
+
+    /**
+     * Explicit periods that have been added to this application.
+     */
+    public function periods(): HasMany
+    {
+        return $this->hasMany(ApplicationPeriod::class);
     }
 }

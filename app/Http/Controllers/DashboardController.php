@@ -14,22 +14,16 @@ class DashboardController extends Controller
     {
         $user = auth()->user();
 
-        $availableYears = Control::query()
-            ->whereNotNull('year')
-            ->select('year')
-            ->distinct()
-            ->orderByDesc('year')
+        $existingPeriods = \App\Models\ApplicationPeriod::select('application_id', 'year', 'quarter')->distinct()->get();
+
+        $availableYears = $existingPeriods
             ->pluck('year')
-            ->map(fn ($year) => (int) $year)
+            ->unique()
+            ->sortDesc()
             ->values();
 
         if ($availableYears->isEmpty()) {
-            $availableYears = collect([
-                now()->year,
-                now()->year - 1,
-                now()->year - 2,
-                now()->year - 3,
-            ]);
+            $availableYears = collect([now()->year]);
         }
 
         $year = (int) $request->input(
@@ -41,19 +35,27 @@ class DashboardController extends Controller
             $year = (int) $availableYears->first();
         }
 
+        $availableQuartersForYear = $existingPeriods
+            ->where('year', $year)
+            ->pluck('quarter')
+            ->map(fn($q) => strtolower($q))
+            ->unique()
+            ->sort()
+            ->values();
+
+        if ($availableQuartersForYear->isEmpty()) {
+            $availableQuartersForYear = collect(['q1', 'q2', 'q3', 'q4']);
+        }
+
         $quarter = strtolower(
             (string) $request->input(
                 'quarter',
-                'q1'
+                $availableQuartersForYear->first()
             )
         );
 
-        if (!in_array(
-            $quarter,
-            ['q1', 'q2', 'q3', 'q4'],
-            true
-        )) {
-            $quarter = 'q1';
+        if (!$availableQuartersForYear->contains($quarter)) {
+            $quarter = $availableQuartersForYear->first();
         }
 
         /*
@@ -175,11 +177,6 @@ class DashboardController extends Controller
             ]);
         }
 
-        $categories =
-            ItCategory::query()
-                ->orderBy('name')
-                ->get();
-
         $uptis =
             Upti::query()
                 ->orderBy('name')
@@ -192,8 +189,16 @@ class DashboardController extends Controller
             $dashboardCategories =
                 collect();
 
+            // Find the specific ApplicationPeriod
+            $applicationPeriod = \App\Models\ApplicationPeriod::where('application_id', $application->id)
+                ->where('year', $year)
+                ->where('quarter', $quarter)
+                ->first();
+
+            $categoriesForPeriod = $applicationPeriod ? $applicationPeriod->itCategories : collect();
+
             foreach (
-                $categories
+                $categoriesForPeriod
                 as $category
             ) {
                 $controlsQuery =
@@ -328,16 +333,20 @@ class DashboardController extends Controller
             );
         }
 
+        $allItCategories = \App\Models\ItCategory::orderBy('name')->get();
+
         return view(
             'dashboard',
             compact(
                 'user',
                 'applications',
-                'categories',
+                'allItCategories',
                 'uptis',
                 'year',
                 'quarter',
                 'availableYears',
+                'availableQuartersForYear',
+                'existingPeriods',
                 'applicationId',
                 'selectedApplication'
             )
@@ -903,5 +912,93 @@ class DashboardController extends Controller
                 'availableYears'
             )
         );
+    }
+
+    public function addCategoryToPeriod(Request $request)
+    {
+        if (!auth()->user()->isAdmin()) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized.'], 403);
+        }
+
+        $validated = $request->validate([
+            'application_id' => 'required|exists:applications,id',
+            'year' => 'required|integer',
+            'quarter' => 'required|string',
+            'category_name' => 'required|string|max:255',
+            'category_description' => 'nullable|string',
+        ]);
+
+        $category = \App\Models\ItCategory::where('name', $validated['category_name'])->first();
+        
+        if ($category) {
+            if (!empty($validated['category_description'])) {
+                $category->description = $validated['category_description'];
+                $category->save();
+            }
+        } else {
+            $category = \App\Models\ItCategory::create([
+                'name' => $validated['category_name'],
+                'icon' => 'bi-shield-check',
+                'description' => $validated['category_description'] ?: 'Assess and evaluate controls related to ' . strtolower($validated['category_name']) . '.'
+            ]);
+        }
+
+        $period = \App\Models\ApplicationPeriod::firstOrCreate([
+            'application_id' => $validated['application_id'],
+            'year' => $validated['year'],
+            'quarter' => $validated['quarter'],
+        ]);
+
+        $period->itCategories()->syncWithoutDetaching([$category->id]);
+
+        // Also add to global application_it_category if not exists
+        $application = \App\Models\Application::find($validated['application_id']);
+        $application->itCategories()->syncWithoutDetaching([
+            $category->id => ['completion_status' => 'not_complete']
+        ]);
+
+        return response()->json(['success' => true]);
+    }
+
+    public function removeCategoryFromPeriod(Request $request)
+    {
+        if (!auth()->user()->isAdmin()) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized.'], 403);
+        }
+        
+        $validated = $request->validate([
+            'application_id' => 'required|exists:applications,id',
+            'year' => 'required|integer',
+            'quarter' => 'required|string',
+            'it_category_ids' => 'required|array',
+            'it_category_ids.*' => 'exists:it_categories,id',
+        ]);
+
+        $period = \App\Models\ApplicationPeriod::where('application_id', $validated['application_id'])
+            ->where('year', $validated['year'])
+            ->where('quarter', $validated['quarter'])
+            ->first();
+
+        if ($period) {
+            $period->itCategories()->detach($validated['it_category_ids']);
+        }
+
+        // Delete all controls for these categories in this period
+        $controls = \App\Models\Control::where('application_id', $validated['application_id'])
+            ->where('year', $validated['year'])
+            ->where('quarter', $validated['quarter'])
+            ->whereIn('it_category_id', $validated['it_category_ids'])
+            ->get();
+
+        foreach ($controls as $control) {
+            foreach ($control->evidences as $evidence) {
+                if ($evidence->file_path && \Illuminate\Support\Facades\Storage::disk('public')->exists($evidence->file_path)) {
+                    \Illuminate\Support\Facades\Storage::disk('public')->delete($evidence->file_path);
+                }
+            }
+            $control->delete();
+        }
+
+        return response()->json(['success' => true]);
     }
 }

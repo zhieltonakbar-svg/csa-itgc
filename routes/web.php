@@ -69,6 +69,16 @@ Route::middleware('auth')->group(function () {
         'clearFilter'
     ])->name('dashboard.clearFilter');
 
+    Route::post('/dashboard/add-category', [
+        DashboardController::class,
+        'addCategoryToPeriod'
+    ])->name('dashboard.addCategory');
+
+    Route::delete('/dashboard/remove-category', [
+        DashboardController::class,
+        'removeCategoryFromPeriod'
+    ])->name('dashboard.removeCategory');
+
     /*
     |--------------------------------------------------------------------------
     | IT Category
@@ -287,6 +297,16 @@ Route::middleware('auth')->group(function () {
         \App\Http\Controllers\ApplicationController::class,
         'existingPeriods'
     ])->name('applications.existingPeriods');
+
+    Route::get('/applications/existing-periods-for-delete', [
+        \App\Http\Controllers\ApplicationController::class,
+        'existingPeriodsForDelete'
+    ])->name('applications.existingPeriodsForDelete');
+
+    Route::post('/applications/period', [
+        \App\Http\Controllers\ApplicationController::class,
+        'storePeriod'
+    ])->name('applications.storePeriod');
 
     Route::post('/applications', [
         \App\Http\Controllers\ApplicationController::class,

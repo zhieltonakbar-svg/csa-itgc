@@ -1745,13 +1745,20 @@ class ControlController extends Controller
 
         try {
             $validated = $request->validate([
-                'application_id' => 'required|exists:applications,id',
-                'year' => 'required|integer',
-                'quarter' => 'required|string|in:q1,q2,q3,q4',
+                'application_ids'   => 'required|array|min:1',
+                'application_ids.*' => 'required|exists:applications,id',
+                'year'              => 'required|integer',
+                'quarter'           => 'required|string|in:q1,q2,q3,q4',
             ]);
 
             DB::transaction(function () use ($validated) {
-                $controls = Control::where('application_id', $validated['application_id'])
+                // Delete ApplicationPeriod records
+                \App\Models\ApplicationPeriod::whereIn('application_id', $validated['application_ids'])
+                    ->where('year', $validated['year'])
+                    ->where('quarter', $validated['quarter'])
+                    ->delete();
+
+                $controls = Control::whereIn('application_id', $validated['application_ids'])
                     ->where('year', $validated['year'])
                     ->where('quarter', $validated['quarter'])
                     ->get();

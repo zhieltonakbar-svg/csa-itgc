@@ -17,14 +17,24 @@ class ApplicationController extends Controller
             abort(403, 'Unauthorized.');
         }
 
-        $applications = Application::with(['upti', 'itCategories'])->orderBy('created_at', 'asc')->get();
+        $applications = Application::with(['upti', 'itCategories', 'periods'])->orderBy('created_at', 'asc')->get();
         $uptis = \App\Models\Upti::orderBy('created_at', 'asc')->get();
         $itRcmCount = ItCategory::count();
-        return view('applications.index', compact('applications', 'uptis', 'itRcmCount'));
+
+        // Build a map: app_id → distinct [year, quarter] combinations that exist
+        $activeQuarters = $applications->mapWithKeys(function ($app) {
+            $quarters = $app->periods
+                ->map(fn($c) => $c->year . '-' . strtoupper($c->quarter))
+                ->unique()
+                ->values();
+            return [$app->id => $quarters];
+        });
+
+        return view('applications.index', compact('applications', 'uptis', 'itRcmCount', 'activeQuarters'));
     }
 
     /**
-     * Return year/quarter combinations that already have Controls
+     * Return year/quarter combinations that already have periods
      * for the given application (used by "Add Period" to disable
      * quarters that already exist for the chosen year).
      */
@@ -40,7 +50,7 @@ class ApplicationController extends Controller
             return response()->json(['success' => true, 'periods' => []]);
         }
 
-        $periods = \App\Models\Control::query()
+        $periods = \App\Models\ApplicationPeriod::query()
             ->where('application_id', $applicationId)
             ->select('year', 'quarter')
             ->distinct()
@@ -54,6 +64,47 @@ class ApplicationController extends Controller
 
         return response()->json([
             'success' => true,
+            'periods' => $periods,
+        ]);
+    }
+
+    /**
+     * Return distinct year/quarter combinations that actually have periods
+     * for the given application_id(s). Used by "Delete Period" to show only
+     * periods that exist (and the years available).
+     *
+     * Query params:
+     *   application_ids[]  – one or more application IDs (required)
+     */
+    public function existingPeriodsForDelete(Request $request)
+    {
+        if (!auth()->user()->isAdmin()) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized.'], 403);
+        }
+
+        $applicationIds = $request->query('application_ids', []);
+
+        if (empty($applicationIds)) {
+            return response()->json(['success' => true, 'years' => [], 'periods' => []]);
+        }
+
+        $rows = \App\Models\ApplicationPeriod::query()
+            ->whereIn('application_id', (array) $applicationIds)
+            ->select('year', 'quarter')
+            ->distinct()
+            ->orderBy('year', 'desc')
+            ->orderBy('quarter', 'asc')
+            ->get();
+
+        $years = $rows->pluck('year')->unique()->values()->map(fn($y) => (int) $y);
+        $periods = $rows->map(fn($r) => [
+            'year'    => (int) $r->year,
+            'quarter' => strtolower($r->quarter),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'years'   => $years,
             'periods' => $periods,
         ]);
     }
@@ -78,29 +129,53 @@ class ApplicationController extends Controller
             // Already exists, reactivate if inactive
             if (!$application->is_active) {
                 $application->update(['is_active' => true]);
+                if ($request->filled('upti_id')) {
+                    $application->update(['upti_id' => $request->upti_id]);
+                }
+                return response()->json(['success' => true, 'message' => 'Application reactivated.']);
             }
-            $isNew = false;
-        } else {
-            $application = Application::create([
-                'name'        => $request->name,
-                'is_active'   => true,
-            ]);
-
-            // Auto-attach all existing IT categories (empty data, fresh start)
-            $allCategories = ItCategory::all();
-            $syncData = [];
-            foreach ($allCategories as $cat) {
-                $syncData[$cat->id] = ['completion_status' => 'not_complete'];
-            }
-            $application->itCategories()->sync($syncData);
-            $isNew = true;
+            return response()->json(['success' => false, 'message' => 'Application already exists.'], 400);
         }
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Application stored successfully.',
-            'application' => $application
+        $application = Application::create([
+            'name' => $request->name,
+            'description' => $request->name,
+            'is_active' => true,
+            'upti_id' => $request->upti_id,
         ]);
+
+        $itCategories = ItCategory::all();
+        foreach ($itCategories as $category) {
+            $application->itCategories()->attach($category->id, [
+                'completion_status' => 'not_started',
+            ]);
+        }
+
+        return response()->json(['success' => true]);
+    }
+
+    /**
+     * Add a period to an application (store in application_periods)
+     */
+    public function storePeriod(Request $request)
+    {
+        if (!auth()->user()->isAdmin()) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized.'], 403);
+        }
+
+        $validated = $request->validate([
+            'application_id' => 'required|exists:applications,id',
+            'year' => 'required|integer',
+            'quarter' => 'required|string|in:q1,q2,q3,q4',
+        ]);
+
+        \App\Models\ApplicationPeriod::firstOrCreate([
+            'application_id' => $validated['application_id'],
+            'year' => $validated['year'],
+            'quarter' => $validated['quarter'],
+        ]);
+
+        return response()->json(['success' => true]);
     }
 
     /**

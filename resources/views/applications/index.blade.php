@@ -47,6 +47,7 @@
                                 <th style="padding: 16px 24px; color: #475569; font-weight: 600;">Application Name</th>
                                 <th style="padding: 16px 24px; color: #475569; font-weight: 600; width: 180px; text-align: center;">Total IT RCM</th>
                                 <th style="padding: 16px 24px; color: #475569; font-weight: 600; width: 180px;">UPTI Mapping</th>
+                                <th style="padding: 16px 24px; color: #475569; font-weight: 600; width: 220px;">Active Quarters</th>
                                 <th style="padding: 16px 24px; color: #475569; font-weight: 600; width: 120px; text-align: center;">Status</th>
                                 <th style="padding: 16px 24px; color: #475569; font-weight: 600; width: 200px; text-align: center;">Action</th>
                             </tr>
@@ -68,6 +69,25 @@
                                         <span class="badge bg-secondary rounded-pill" style="font-weight: 600;">{{ $app->upti->name }}</span>
                                     @else
                                         <span class="text-muted" style="font-size:12px; font-style:italic;">Unmapped</span>
+                                    @endif
+                                </td>
+                                <td style="padding: 16px 24px;">
+                                    @php $quarters = $activeQuarters[$app->id] ?? collect(); @endphp
+                                    @if($quarters->isEmpty())
+                                        <span style="font-size:12px; color:#94a3b8; font-style:italic;">No periods</span>
+                                    @else
+                                        <div style="display:flex; flex-wrap:wrap; gap:5px;">
+                                            @foreach($quarters->sort()->values() as $qLabel)
+                                            @php
+                                                [$yr, $q] = explode('-', $qLabel, 2);
+                                                $colors = ['Q1'=>['#dbeafe','#1d4ed8'],'Q2'=>['#dcfce7','#15803d'],'Q3'=>['#fef3c7','#b45309'],'Q4'=>['#f3e8ff','#7e22ce']];
+                                                [$bg,$fg] = $colors[$q] ?? ['#f1f5f9','#475569'];
+                                            @endphp
+                                            <span style="display:inline-flex; align-items:center; gap:3px; background:{{ $bg }}; color:{{ $fg }}; padding:3px 8px; border-radius:6px; font-size:11.5px; font-weight:700; white-space:nowrap;">
+                                                {{ $yr }} <span style="opacity:0.6;">·</span> {{ $q }}
+                                            </span>
+                                            @endforeach
+                                        </div>
                                     @endif
                                 </td>
                                 <td style="padding: 16px 24px; text-align: center;">
@@ -97,7 +117,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" style="padding: 48px; text-align: center; color: #64748b;">
+                                <td colspan="7" style="padding: 48px; text-align: center; color: #64748b;">
                                     <i class="bi bi-inbox" style="font-size: 32px; color: #cbd5e1; margin-bottom: 12px; display: block;"></i>
                                     No applications found.
                                 </td>
@@ -197,7 +217,7 @@
 {{-- 2. UPTI Modal (Add/Edit UPTI) --}}
 <div id="uptiModal" style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,0.45); backdrop-filter:blur(3px); align-items:center; justify-content:center;">
     <div style="background:#fff; border-radius:16px; width:100%; max-width:440px; margin:16px; box-shadow:0 20px 60px rgba(0,0,0,0.2); overflow:hidden;">
-        <div style="background:linear-gradient(135deg,#3b82f6,#2563eb); padding:20px 24px; display:flex; align-items:center; justify-content:space-between;">
+        <div style="background:linear-gradient(135deg,#059669,#047857); padding:20px 24px; display:flex; align-items:center; justify-content:space-between;">
             <h5 id="uptiModalTitle" style="margin:0; color:#fff; font-size:16px; font-weight:700;">Add UPTI</h5>
             <button type="button" onclick="closeUptiModal()" style="background:rgba(255,255,255,0.15); border:none; color:#fff; width:32px; height:32px; border-radius:6px; cursor:pointer; font-size:18px; display:flex; align-items:center; justify-content:center;">
                 <i class="bi bi-x-lg"></i>
@@ -207,12 +227,12 @@
             <input type="hidden" id="um-id">
             <div>
                 <label style="display:block; font-size:13px; font-weight:600; color:#374151; margin-bottom:6px;">UPTI Name <span style="color:#dc2626;">*</span></label>
-                <input type="text" id="um-name" placeholder="e.g. BSS, ESS" style="width:100%; padding:10px 12px; border:1.5px solid #d1d5db; border-radius:8px; font-size:13.5px; outline:none;" required>
+                <input type="text" id="um-name" placeholder="e.g. BSS, ESS" style="width:100%; padding:10px 12px; border:1.5px solid #d1d5db; border-radius:8px; font-size:13.5px; outline:none; transition: all 0.2s;" onfocus="this.style.borderColor='#10b981'; this.style.boxShadow='0 0 0 3px rgba(16,185,129,0.2)';" onblur="this.style.borderColor='#d1d5db'; this.style.boxShadow='none';" required>
             </div>
         </div>
         <div style="padding:16px 24px; background:#f8fafc; border-top:1px solid #e5e7eb; display:flex; align-items:center; justify-content:flex-end; gap:10px;">
             <button type="button" onclick="closeUptiModal()" style="padding:8px 18px; border:1px solid #d1d5db; background:#fff; border-radius:7px; font-size:13px; font-weight:600; color:#374151; cursor:pointer;">Cancel</button>
-            <button type="button" id="uptiModalSave" style="padding:8px 20px; background:#2563eb; color:#fff; border:none; border-radius:7px; font-size:13px; font-weight:600; cursor:pointer;">Save UPTI</button>
+            <button type="button" id="uptiModalSave" style="padding:8px 20px; background:#059669; color:#fff; border:none; border-radius:7px; font-size:13px; font-weight:600; cursor:pointer;">Save UPTI</button>
         </div>
     </div>
 </div>
@@ -280,7 +300,7 @@
 </div>
 
 <div id="deletePeriodModal" style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,0.45); backdrop-filter:blur(3px); align-items:center; justify-content:center;">
-    <div style="background:#fff; border-radius:16px; width:100%; max-width:440px; margin:16px; box-shadow:0 20px 60px rgba(0,0,0,0.2); overflow:hidden;">
+    <div style="background:#fff; border-radius:16px; width:100%; max-width:480px; margin:16px; box-shadow:0 20px 60px rgba(0,0,0,0.2); overflow:hidden;">
         <div style="background:linear-gradient(135deg,#dc2626,#b91c1c); padding:20px 24px; display:flex; align-items:center; justify-content:space-between;">
             <div style="display:flex; align-items:center; gap:12px;">
                 <div style="width:36px; height:36px; background:rgba(255,255,255,0.2); border-radius:8px; display:flex; align-items:center; justify-content:center;">
@@ -288,7 +308,7 @@
                 </div>
                 <div>
                     <h5 style="margin:0; color:#fff; font-size:15px; font-weight:700;">Delete Period</h5>
-                    <p style="margin:0; color:rgba(255,255,255,0.75); font-size:12px;">Permanently delete all controls.</p>
+                    <p style="margin:0; color:rgba(255,255,255,0.75); font-size:12px;">Permanently delete all controls for selected period.</p>
                 </div>
             </div>
             <button id="deletePeriodClose" type="button" style="background:rgba(255,255,255,0.15); border:none; color:#fff; width:32px; height:32px; border-radius:6px; cursor:pointer; font-size:18px; display:flex; align-items:center; justify-content:center;">
@@ -296,35 +316,47 @@
             </button>
         </div>
         <div style="padding:24px; display:flex; flex-direction:column; gap:16px;">
+
+            {{-- Application Single-Select --}}
             <div>
-                <label style="display:block; font-size:12.5px; font-weight:600; color:#374151; margin-bottom:6px;">Application <span style="color:#dc2626;">*</span></label>
-                <select id="dp-application" style="width:100%; padding:9px 12px; border:1.5px solid #d1d5db; border-radius:8px; font-size:13.5px; background:#fff; outline:none; cursor:pointer;">
-                    <option value="">— Select Application —</option>
+                <label style="display:block; font-size:12.5px; font-weight:600; color:#374151; margin-bottom:6px;">
+                    Application <span style="color:#dc2626;">*</span>
+                </label>
+                <select id="dp-app-select" style="width:100%; padding:9px 12px; border:1.5px solid #d1d5db; border-radius:8px; font-size:13.5px; background:#fff; outline:none; cursor:pointer;">
+                    <option value="">— Pilih aplikasi —</option>
                     @foreach($applications as $app)
                     <option value="{{ $app->id }}">{{ $app->name }}</option>
                     @endforeach
                 </select>
+                <div id="dp-app-error" style="display:none; font-size:11.5px; color:#dc2626; margin-top:6px;">
+                    <i class="bi bi-exclamation-circle"></i> Pilih aplikasi terlebih dahulu.
+                </div>
             </div>
+
+            {{-- Year (dinamis dari DB) --}}
             <div>
                 <label style="display:block; font-size:12.5px; font-weight:600; color:#374151; margin-bottom:6px;">Year <span style="color:#dc2626;">*</span></label>
-                <select id="dp-year" style="width:100%; padding:9px 12px; border:1.5px solid #d1d5db; border-radius:8px; font-size:13.5px; background:#fff; outline:none; cursor:pointer;">
-                    <option value="2026">2026</option>
-                    <option value="2025">2025</option>
-                    <option value="2024">2024</option>
-                    <option value="2023">2023</option>
+                <select id="dp-year" style="width:100%; padding:9px 12px; border:1.5px solid #d1d5db; border-radius:8px; font-size:13.5px; background:#fff; outline:none; cursor:pointer;" disabled>
+                    <option value="">— Pilih aplikasi dulu —</option>
                 </select>
             </div>
+
+            {{-- Quarter (dinamis, hanya yang ada di DB) --}}
             <div>
                 <label style="display:block; font-size:12.5px; font-weight:600; color:#374151; margin-bottom:6px;">Quarter <span style="color:#dc2626;">*</span></label>
-                <div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:8px;">
+                <div id="dp-quarter-grid" style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:8px;">
                     @foreach(['q1'=>'Q1','q2'=>'Q2','q3'=>'Q3','q4'=>'Q4'] as $val=>$lbl)
-                    <label style="display:flex; align-items:center; justify-content:center; gap:6px; padding:8px; border:1.5px solid #d1d5db; border-radius:8px; cursor:pointer; font-size:13px; font-weight:600; transition:all 0.15s; user-select:none;" id="dp-q-label-{{$val}}">
-                        <input type="radio" name="dp-quarter" value="{{$val}}" id="dp-q-{{$val}}" style="display:none;" {{ $val==='q1' ? 'checked' : '' }}>
+                    <label style="display:flex; align-items:center; justify-content:center; gap:6px; padding:8px; border:1.5px solid #e5e7eb; border-radius:8px; font-size:13px; font-weight:600; transition:all 0.15s; user-select:none; opacity:0.4; cursor:not-allowed; color:#9ca3af; background:#f9fafb;" id="dp-q-label-{{$val}}">
+                        <input type="radio" name="dp-quarter" value="{{$val}}" id="dp-q-{{$val}}" style="display:none;" disabled>
                         {{$lbl}}
                     </label>
                     @endforeach
                 </div>
+                <div id="dp-quarter-empty-msg" style="display:none; font-size:11.5px; color:#dc2626; margin-top:6px;">
+                    <i class="bi bi-exclamation-circle"></i> Tidak ada quarter yang tersedia untuk kombinasi ini.
+                </div>
             </div>
+
             <div style="background:#fef2f2; border:1px solid #fecaca; border-radius:8px; padding:10px 14px; font-size:12.5px; color:#991b1b; margin-top:4px;">
                 <i class="bi bi-exclamation-triangle-fill me-1"></i>
                 <strong>Warning:</strong> Deleting a period will permanently remove all controls and evidence uploaded for it.
@@ -338,6 +370,7 @@
         </div>
     </div>
 </div>
+
 
 @endif
 @endsection
@@ -680,13 +713,22 @@ document.getElementById('ap-year')?.addEventListener('input', function() {
     });
 });
 
-function openDeletePeriodModal() { document.getElementById('deletePeriodModal').style.display='flex'; }
-function closeDeletePeriodModal() { document.getElementById('deletePeriodModal').style.display='none'; }
+function openDeletePeriodModal() {
+    // reset state
+    document.getElementById('dp-app-select').value = '';
+    var yearSel = document.getElementById('dp-year');
+    yearSel.innerHTML = '<option value="">— Pilih aplikasi dulu —</option>';
+    yearSel.disabled = true;
+    dpResetQuarters();
+    document.getElementById('dp-app-error').style.display = 'none';
+    document.getElementById('deletePeriodModal').style.display = 'flex';
+}
+function closeDeletePeriodModal() { document.getElementById('deletePeriodModal').style.display = 'none'; }
 document.getElementById('btn-delete-period')?.addEventListener('click', openDeletePeriodModal);
 document.getElementById('deletePeriodClose')?.addEventListener('click', closeDeletePeriodModal);
 document.getElementById('deletePeriodCancel')?.addEventListener('click', closeDeletePeriodModal);
 
-// Visual feedback for the Q1/Q2/Q3/Q4 pill selectors (add + delete period)
+// Visual feedback for the Q1/Q2/Q3/Q4 pill selectors (add period only)
 function wireQuarterPills(prefix) {
     function updateAll() {
         ['q1','q2','q3','q4'].forEach(function(v) {
@@ -714,7 +756,191 @@ function wireQuarterPills(prefix) {
 
     updateAll();
 }
-wireQuarterPills('dp');
+wireQuarterPills('ap');
+
+// ---- Delete Period: Dynamic year & quarter from DB ----
+
+var dpPeriodsData = []; // [{year, quarter}, ...]
+
+function dpGetSelectedAppIds() {
+    var val = document.getElementById('dp-app-select').value;
+    return val ? [val] : [];
+}
+
+function dpResetQuarters() {
+    ['q1','q2','q3','q4'].forEach(function(v) {
+        var lbl = document.getElementById('dp-q-label-' + v);
+        var inp = document.getElementById('dp-q-' + v);
+        if (!lbl || !inp) return;
+        inp.checked = false;
+        inp.disabled = true;
+        lbl.style.opacity = '0.4';
+        lbl.style.cursor = 'not-allowed';
+        lbl.style.borderColor = '#e5e7eb';
+        lbl.style.background = '#f9fafb';
+        lbl.style.color = '#9ca3af';
+    });
+    document.getElementById('dp-quarter-empty-msg').style.display = 'none';
+}
+
+function dpApplyQuarters(year) {
+    dpResetQuarters();
+    if (!year) return;
+
+    var availableQuarters = dpPeriodsData
+        .filter(function(p) { return p.year === parseInt(year); })
+        .map(function(p) { return p.quarter; });
+
+    var hasAny = false;
+    ['q1','q2','q3','q4'].forEach(function(v) {
+        var lbl = document.getElementById('dp-q-label-' + v);
+        var inp = document.getElementById('dp-q-' + v);
+        if (!lbl || !inp) return;
+
+        if (availableQuarters.indexOf(v) !== -1) {
+            inp.disabled = false;
+            lbl.style.opacity = '1';
+            lbl.style.cursor = 'pointer';
+            lbl.style.borderColor = '#d1d5db';
+            lbl.style.background = '#fff';
+            lbl.style.color = '#111827';
+            hasAny = true;
+        }
+    });
+
+    document.getElementById('dp-quarter-empty-msg').style.display = hasAny ? 'none' : 'block';
+
+    // Wire click events
+    ['q1','q2','q3','q4'].forEach(function(v) {
+        var lbl = document.getElementById('dp-q-label-' + v);
+        var inp = document.getElementById('dp-q-' + v);
+        if (!lbl || !inp || inp.disabled) return;
+        lbl.onclick = function() {
+            if (inp.disabled) return;
+            inp.checked = true;
+            dpStyleQuarters();
+        };
+    });
+
+    // Auto-select first available
+    for (var i = 0; i < ['q1','q2','q3','q4'].length; i++) {
+        var qv = ['q1','q2','q3','q4'][i];
+        var inp = document.getElementById('dp-q-' + qv);
+        if (inp && !inp.disabled) {
+            inp.checked = true;
+            break;
+        }
+    }
+    dpStyleQuarters();
+}
+
+function dpStyleQuarters() {
+    ['q1','q2','q3','q4'].forEach(function(v) {
+        var lbl = document.getElementById('dp-q-label-' + v);
+        var inp = document.getElementById('dp-q-' + v);
+        if (!lbl || !inp || inp.disabled) return;
+        if (inp.checked) {
+            lbl.style.borderColor = '#dc2626';
+            lbl.style.background = '#fef2f2';
+            lbl.style.color = '#991b1b';
+        } else {
+            lbl.style.borderColor = '#d1d5db';
+            lbl.style.background = '#fff';
+            lbl.style.color = '#111827';
+        }
+    });
+}
+
+function dpFetchAndUpdate() {
+    var ids = dpGetSelectedAppIds();
+    var yearSel = document.getElementById('dp-year');
+
+    if (ids.length === 0) {
+        yearSel.innerHTML = '<option value="">— Pilih aplikasi dulu —</option>';
+        yearSel.disabled = true;
+        dpPeriodsData = [];
+        dpResetQuarters();
+        return;
+    }
+
+    var qs = ids.map(function(id) { return 'application_ids[]=' + encodeURIComponent(id); }).join('&');
+    fetch('{{ route("applications.existingPeriodsForDelete") }}?' + qs, {
+        headers: { 'Accept': 'application/json' }
+    })
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+        dpPeriodsData = (data && data.periods) ? data.periods : [];
+        var years = (data && data.years) ? data.years : [];
+
+        yearSel.innerHTML = '';
+        if (years.length === 0) {
+            yearSel.innerHTML = '<option value="">— Tidak ada data —</option>';
+            yearSel.disabled = true;
+            dpResetQuarters();
+            return;
+        }
+
+        yearSel.disabled = false;
+        years.forEach(function(y) {
+            var opt = document.createElement('option');
+            opt.value = y;
+            opt.textContent = y;
+            yearSel.appendChild(opt);
+        });
+
+        dpApplyQuarters(yearSel.value);
+    })
+    .catch(function() {
+        yearSel.innerHTML = '<option value="">— Error —</option>';
+        yearSel.disabled = true;
+        dpResetQuarters();
+    });
+}
+
+// Wire app select
+document.getElementById('dp-app-select')?.addEventListener('change', function() {
+    document.getElementById('dp-app-error').style.display = 'none';
+    dpFetchAndUpdate();
+});
+
+// Wire year change
+document.getElementById('dp-year')?.addEventListener('change', function() {
+    dpApplyQuarters(this.value);
+});
+
+document.getElementById('deletePeriodConfirm')?.addEventListener('click', function() {
+    var appIds = dpGetSelectedAppIds();
+    if (appIds.length === 0) {
+        document.getElementById('dp-app-error').style.display = 'block';
+        return;
+    }
+
+    var year = document.getElementById('dp-year').value;
+    if (!year) { alert('Pilih tahun terlebih dahulu.'); return; }
+
+    var checkedQ = document.querySelector('input[name="dp-quarter"]:checked:not(:disabled)');
+    if (!checkedQ) { alert('Pilih quarter yang tersedia.'); return; }
+
+    var appName = document.getElementById('dp-app-select').options[document.getElementById('dp-app-select').selectedIndex].text;
+    if (!confirm('Yakin ingin menghapus period ' + checkedQ.value.toUpperCase() + ' ' + year + ' untuk aplikasi ' + appName + '? Tindakan ini tidak dapat dibatalkan.')) return;
+
+    fetch('{{ route("controls.destroyPeriod") }}', {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': csrfToken,
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({ application_ids: appIds, year: parseInt(year), quarter: checkedQ.value })
+    })
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+        if (data.success) { location.reload(); }
+        else { alert('Gagal: ' + (data.message || 'Terjadi kesalahan.')); }
+    })
+    .catch(function() { alert('Network error.'); });
+});
 
 document.getElementById('addPeriodConfirm')?.addEventListener('click', function() {
     var year = document.getElementById('ap-year').value;
@@ -741,22 +967,31 @@ document.getElementById('addPeriodConfirm')?.addEventListener('click', function(
         quarter: checkedInput.value,
         application_id: appId
     });
-    window.location.href = '{{ route("dashboard") }}?' + params.toString();
-});
 
-document.getElementById('deletePeriodConfirm')?.addEventListener('click', function() {
-    var year = document.getElementById('dp-year').value;
-    var appId = document.getElementById('dp-application').value;
-    var quarter = 'q1';
-    dpQuarterRadios.forEach(function(r) { if(r.checked) quarter = r.value; });
-    if(!appId) return;
-    
-    fetch('{{ route("controls.destroyPeriod") }}', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'X-Requested-With': 'XMLHttpRequest' },
-        body: JSON.stringify({ application_id: appId, year: year, quarter: quarter })
-    }).then(res => res.json()).then(data => {
-        if(data.success) { location.reload(); }
+    fetch('{{ route("applications.storePeriod") }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': csrfToken,
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({
+            application_id: appId,
+            year: year,
+            quarter: checkedInput.value
+        })
+    })
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+        if (data.success) {
+            window.location.href = '{{ route("dashboard") }}?' + params.toString();
+        } else {
+            alert('Error: ' + (data.message || 'Failed to open period.'));
+        }
+    })
+    .catch(function() {
+        alert('Network error.');
     });
 });
 

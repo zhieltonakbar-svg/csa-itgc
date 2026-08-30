@@ -1522,8 +1522,8 @@
                     <i class="bi bi-calendar-range"></i>
                     @if($isAdmin)
                         <select name="quarter" style="border: 1px solid #dbe3e8; border-radius: 6px; padding: 2px 8px; font-size: 13px; font-weight: 600; color: #152238; background: #f8fafb; outline: none; cursor: pointer;">
-                            @foreach(['q1' => 'Q1', 'q2' => 'Q2', 'q3' => 'Q3', 'q4' => 'Q4'] as $qVal => $qLabel)
-                                <option value="{{ $qVal }}" {{ $quarter === $qVal ? 'selected' : '' }}>{{ $qLabel }}</option>
+                            @foreach($availableQuartersForYear as $qVal)
+                                <option value="{{ $qVal }}" {{ $quarter === $qVal ? 'selected' : '' }}>{{ strtoupper($qVal) }}</option>
                             @endforeach
                         </select>
                     @else

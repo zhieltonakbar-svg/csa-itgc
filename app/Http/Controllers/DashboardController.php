@@ -684,6 +684,59 @@ class DashboardController extends Controller
                     $applicationId
                 );
 
+        // Year/Quarter options are scoped to the CURRENTLY selected
+        // Application — sourced from ApplicationPeriod (what Admin
+        // actually opened), falling back to Controls for legacy data.
+        // Computed here (before the Controls query below) so the
+        // clamped $year/$quarter actually match what gets displayed.
+        $periodsForThisApp = \App\Models\ApplicationPeriod::where(
+            'application_id',
+            $application->id
+        )->get(['year', 'quarter']);
+
+        if ($periodsForThisApp->isEmpty()) {
+            $periodsForThisApp = Control::where(
+                'application_id',
+                $application->id
+            )
+                ->whereNotNull('year')
+                ->whereNotNull('quarter')
+                ->select('year', 'quarter')
+                ->distinct()
+                ->get();
+        }
+
+        $availableYears = $periodsForThisApp
+            ->pluck('year')
+            ->map(fn ($y) => (int) $y)
+            ->unique()
+            ->sortDesc()
+            ->values();
+
+        if ($availableYears->isEmpty()) {
+            $availableYears = collect([now()->year]);
+        }
+
+        if (!$availableYears->contains($year)) {
+            $year = (int) $availableYears->first();
+        }
+
+        $availableQuartersForYear = $periodsForThisApp
+            ->where('year', $year)
+            ->pluck('quarter')
+            ->map(fn ($q) => strtolower($q))
+            ->unique()
+            ->sort()
+            ->values();
+
+        if ($availableQuartersForYear->isEmpty()) {
+            $availableQuartersForYear = collect(['q1', 'q2', 'q3', 'q4']);
+        }
+
+        if (!$availableQuartersForYear->contains($quarter)) {
+            $quarter = $availableQuartersForYear->first();
+        }
+
         // Keep the sticky Dashboard search in sync when Admin
         // switches Application/Year/Quarter directly from this
         // page's Assessment Overview dropdowns.
@@ -855,8 +908,27 @@ class DashboardController extends Controller
                 );
         }
 
+        // Only offer applications that Admin has actually opened a
+        // period for (or, as a fallback for legacy data created
+        // before ApplicationPeriod existed, that already have
+        // Controls) — never an app with nothing configured yet.
+        $appIdsWithPeriods = \App\Models\ApplicationPeriod::query()
+            ->distinct()
+            ->pluck('application_id');
+
+        $appIdsWithControls = \App\Models\Control::query()
+            ->whereNotNull('application_id')
+            ->distinct()
+            ->pluck('application_id');
+
+        $validAppIds = $appIdsWithPeriods
+            ->merge($appIdsWithControls)
+            ->unique();
+
         $allApplications =
-            $allApplicationsQuery->get();
+            $allApplicationsQuery
+                ->whereIn('id', $validAppIds)
+                ->get();
 
         $allCategories =
             ItCategory::query()
@@ -878,24 +950,6 @@ class DashboardController extends Controller
         $isRcmView =
             optional($request->route())->getName() === 'rcm.controls';
 
-        $availableYears = \App\Models\Control::query()
-            ->whereNotNull('year')
-            ->select('year')
-            ->distinct()
-            ->orderByDesc('year')
-            ->pluck('year')
-            ->map(fn ($year) => (int) $year)
-            ->values();
-
-        if ($availableYears->isEmpty()) {
-            $availableYears = collect([
-                now()->year,
-                now()->year - 1,
-                now()->year - 2,
-                now()->year - 3,
-            ]);
-        }
-
         return view(
             'it-category.show',
             compact(
@@ -909,7 +963,8 @@ class DashboardController extends Controller
                 'allCategories',
                 'allUptis',
                 'isRcmView',
-                'availableYears'
+                'availableYears',
+                'availableQuartersForYear'
             )
         );
     }

@@ -20,30 +20,50 @@
 
         </div>
 
-        @if(auth()->user()->unreadNotifications->count())
+        <div class="d-flex gap-2">
 
-            <form
-                method="POST"
-                action="{{ route('notifications.readAll') }}"
-                id="markAllForm"
-            >
+            @if(auth()->user()->unreadNotifications->count())
 
-                @csrf
-
-                <button
-                    type="submit"
-                    class="btn btn-sm btn-outline-success"
+                <form
+                    method="POST"
+                    action="{{ route('notifications.readAll') }}"
+                    id="markAllForm"
                 >
 
-                    <i class="bi bi-check2-all"></i>
+                    @csrf
 
-                    Mark All as Read
+                    <button
+                        type="submit"
+                        class="btn btn-sm btn-outline-success"
+                    >
+
+                        <i class="bi bi-check2-all"></i>
+
+                        Mark All as Read
+
+                    </button>
+
+                </form>
+
+            @endif
+
+            @if($notifications->count())
+
+                <button
+                    type="button"
+                    id="btn-clear-all-notifications"
+                    class="btn btn-sm btn-outline-danger"
+                >
+
+                    <i class="bi bi-trash3"></i>
+
+                    Clear All
 
                 </button>
 
-            </form>
+            @endif
 
-        @endif
+        </div>
 
     </div>
 
@@ -128,20 +148,35 @@
 
                         </div>
 
-                        @if(!$notification->read_at)
+                        <div class="d-flex gap-1">
+
+                            @if(!$notification->read_at)
+
+                                <button
+                                    type="button"
+                                    class="btn btn-sm btn-light mark-notification-read"
+                                    data-id="{{ $notification->id }}"
+                                    title="Mark as read"
+                                >
+
+                                    <i class="bi bi-check2"></i>
+
+                                </button>
+
+                            @endif
 
                             <button
                                 type="button"
-                                class="btn btn-sm btn-light mark-notification-read"
+                                class="btn btn-sm btn-light delete-notification"
                                 data-id="{{ $notification->id }}"
-                                title="Mark as read"
+                                title="Delete this notification"
                             >
 
-                                <i class="bi bi-check2"></i>
+                                <i class="bi bi-trash3 text-danger"></i>
 
                             </button>
 
-                        @endif
+                        </div>
 
                     </div>
 
@@ -260,6 +295,111 @@ document.querySelectorAll(
     );
 
 });
+
+// ---- Delete a single notification ----
+document.querySelectorAll(
+    '.delete-notification'
+).forEach(function (button) {
+
+    button.addEventListener(
+        'click',
+        async function () {
+
+            const confirmed =
+                window.confirm(
+                    'Delete this notification? This cannot be undone.'
+                );
+
+            if (!confirmed) {
+                return;
+            }
+
+            const id =
+                this.dataset.id;
+
+            try {
+
+                const response =
+                    await fetch(
+                        `/notifications/${id}`,
+                        {
+                            method: 'DELETE',
+                            headers: {
+                                'X-CSRF-TOKEN':
+                                    document
+                                        .querySelector(
+                                            'meta[name="csrf-token"]'
+                                        )
+                                        ?.getAttribute(
+                                            'content'
+                                        ),
+                                'Accept': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest',
+                            },
+                        }
+                    );
+
+                if (response.ok) {
+                    window.location.reload();
+                }
+
+            } catch (error) {
+                console.error(error);
+            }
+
+        }
+    );
+
+});
+
+// ---- Clear all notifications ----
+document.getElementById(
+    'btn-clear-all-notifications'
+)?.addEventListener(
+    'click',
+    async function () {
+
+        const confirmed =
+            window.confirm(
+                'Delete ALL notifications? This cannot be undone.'
+            );
+
+        if (!confirmed) {
+            return;
+        }
+
+        try {
+
+            const response =
+                await fetch(
+                    '{{ route("notifications.clear") }}',
+                    {
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRF-TOKEN':
+                                document
+                                    .querySelector(
+                                        'meta[name="csrf-token"]'
+                                    )
+                                    ?.getAttribute(
+                                        'content'
+                                    ),
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest',
+                        },
+                    }
+                );
+
+            if (response.ok) {
+                window.location.reload();
+            }
+
+        } catch (error) {
+            console.error(error);
+        }
+
+    }
+);
 
 </script>
 

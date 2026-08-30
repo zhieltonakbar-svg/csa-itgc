@@ -272,6 +272,11 @@ Route::middleware('auth')->group(function () {
         'markRead'
     ])->name('notifications.markRead');
 
+    Route::post('/notifications/{id}/read', [
+        \App\Http\Controllers\NotificationController::class,
+        'markOneRead'
+    ])->name('notifications.markOneRead');
+
     Route::post('/notifications/read-all', [
         \App\Http\Controllers\NotificationController::class,
         'markAllRead'

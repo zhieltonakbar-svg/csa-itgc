@@ -41,6 +41,18 @@ class NotificationController extends Controller
         return redirect()->back()->with('success', 'All notification history successfully cleared.');
     }
     /**
+     * Mark a single notification as read (used by the per-row
+     * "Mark as read" button on the Notifications page).
+     */
+    public function markOneRead($id)
+    {
+        $notification = auth()->user()->notifications()->findOrFail($id);
+        $notification->markAsRead();
+
+        return response()->json(['success' => true]);
+    }
+
+    /**
      * Mark all unread notifications as read (JSON — used by the header bell via JS).
      */
     public function markRead()

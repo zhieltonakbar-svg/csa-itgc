@@ -518,6 +518,37 @@ document.getElementById('btn-delete-period')?.addEventListener('click', openDele
 document.getElementById('deletePeriodClose')?.addEventListener('click', closeDeletePeriodModal);
 document.getElementById('deletePeriodCancel')?.addEventListener('click', closeDeletePeriodModal);
 
+// Visual feedback for the Q1/Q2/Q3/Q4 pill selectors (add + delete period)
+function wireQuarterPills(prefix) {
+    function updateAll() {
+        ['q1','q2','q3','q4'].forEach(function(v) {
+            var l = document.getElementById(prefix + '-q-label-' + v);
+            var i = document.getElementById(prefix + '-q-' + v);
+            if (!l || !i) return;
+            if (i.checked) {
+                l.style.borderColor = '#059669';
+                l.style.background = '#ecfdf5';
+                l.style.color = '#047857';
+            } else {
+                l.style.borderColor = '#d1d5db';
+                l.style.background = '#fff';
+                l.style.color = '#111827';
+            }
+        });
+    }
+
+    ['q1','q2','q3','q4'].forEach(function(val) {
+        var input = document.getElementById(prefix + '-q-' + val);
+        if (input) {
+            input.addEventListener('change', updateAll);
+        }
+    });
+
+    updateAll();
+}
+wireQuarterPills('ap');
+wireQuarterPills('dp');
+
 document.getElementById('addPeriodConfirm')?.addEventListener('click', function() {
     var year = document.getElementById('ap-year').value;
     var appName = document.getElementById('ap-application').value;
@@ -531,8 +562,12 @@ document.getElementById('addPeriodConfirm')?.addEventListener('click', function(
         body: JSON.stringify({ name: appName })
     }).then(res => res.json()).then(data => {
         if(data.success) {
-            sessionStorage.setItem('dashboard_filter', JSON.stringify({ appId: data.application.id.toString(), year: year, quarter: quarter }));
-            window.location.href = '{{ route("dashboard") }}';
+            var params = new URLSearchParams({
+                year: year,
+                quarter: quarter,
+                application_id: data.application.id
+            });
+            window.location.href = '{{ route("dashboard") }}?' + params.toString();
         }
     });
 });

@@ -38,8 +38,52 @@
 
     $hasActiveSearch = !empty($sidebarFilterParams['application_id'] ?? null);
 
-    // Load all IT categories for the submenu (from DB)
-    $sidebarCategories = \App\Models\ItCategory::orderBy('name')->get();
+    // Load only the IT categories actually configured for the
+    // currently active period (Application + Year + Quarter),
+    // so categories Admin removed from a period disappear from
+    // everyone's sidebar too — not just the global category list.
+    $sidebarCategories = collect();
+
+    if ($hasActiveSearch) {
+
+        $period = \App\Models\ApplicationPeriod::where(
+            'application_id',
+            $sidebarFilterParams['application_id']
+        )
+            ->where('year', $sidebarFilterParams['year'] ?? null)
+            ->where('quarter', $sidebarFilterParams['quarter'] ?? null)
+            ->first();
+
+        if ($period) {
+
+            $sidebarCategories = $period->itCategories()
+                ->orderBy('name')
+                ->get();
+
+        } else {
+
+            // Fallback for periods created before the
+            // ApplicationPeriod table existed — derive the
+            // category list from the actual Controls instead.
+            $categoryIds = \App\Models\Control::where(
+                'application_id',
+                $sidebarFilterParams['application_id']
+            )
+                ->where('year', $sidebarFilterParams['year'] ?? null)
+                ->where('quarter', $sidebarFilterParams['quarter'] ?? null)
+                ->distinct()
+                ->pluck('it_category_id');
+
+            $sidebarCategories = \App\Models\ItCategory::whereIn(
+                'id',
+                $categoryIds
+            )
+                ->orderBy('name')
+                ->get();
+
+        }
+
+    }
 
 @endphp
 

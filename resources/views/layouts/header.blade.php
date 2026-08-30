@@ -49,7 +49,7 @@
                 
                 @forelse($recentNotifications as $notif)
                 <li style="{{ empty($notif->read_at) ? 'background-color: #f8fafc;' : '' }}">
-                    <a class="dropdown-item py-2 border-bottom" href="{{ route('notifications.index') }}" style="white-space: normal; padding-left: 15px; padding-right: 15px; background: transparent;">
+                    <a class="dropdown-item py-2 border-bottom" href="{{ $notif->data['url'] ?? route('notifications.index') }}" style="white-space: normal; padding-left: 15px; padding-right: 15px; background: transparent;">
                         <div class="d-flex align-items-start">
                             <div class="text-primary me-2 mt-1"><i class="bi bi-info-circle-fill"></i></div>
                             <div>

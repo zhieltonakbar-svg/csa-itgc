@@ -969,7 +969,7 @@ class ControlController extends Controller
                         "Control {$control->it_control_id} has been submitted. Please review it.",
 
                     'ongoing_approval' =>
-                        "Control {$control->it_control_id} has been reviewed by the Manager. Please approve it.",
+                        "Control {$control->it_control_id} has been reviewed by the Manager. Please make a final decision.",
 
                     'return_to_officer' =>
                         "{$rejectingRole} rejected Control {$control->it_control_id}. Please review the notes and fix it.",

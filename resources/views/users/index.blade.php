@@ -75,7 +75,7 @@
                                 @if($user->isAdmin())
                                     <span class="text-muted" style="font-size: 12px; font-style: italic;">Admin</span>
                                 @else
-                                    <button type="button" class="btn btn-sm btn-outline-success" style="border-radius: 8px; font-weight: 600;" 
+                                    <button type="button" class="btn btn-sm btn-outline-success" style="border-radius: 8px; font-weight: 600; font-size: 12px; padding: 4px 10px;" 
                                             onclick="openUserModal({{ $user->id }}, '{{ addslashes($user->name) }}', '{{ $user->upti_id }}', {{ $user->is_active ? 'true' : 'false' }})">
                                         <i class="bi bi-pencil-square"></i> Edit
                                     </button>
@@ -84,7 +84,7 @@
                                         <form action="{{ route('users.deactivate', $user->id) }}" method="POST" style="display:inline-block; margin-left:5px;">
                                             @csrf
                                             @method('PATCH')
-                                            <button type="submit" class="btn btn-sm btn-danger" style="border-radius: 8px; font-weight: 600;" onclick="return confirm('Deactivate this user?')">
+                                            <button type="submit" class="btn btn-sm btn-danger" style="border-radius: 8px; font-weight: 600; font-size: 12px; padding: 4px 10px;" onclick="return confirm('Deactivate this user?')">
                                                 <i class="bi bi-pause-circle"></i> Deactivate
                                             </button>
                                         </form>
@@ -92,14 +92,14 @@
                                         <form action="{{ route('users.activate', $user->id) }}" method="POST" style="display:inline-block; margin-left:5px;">
                                             @csrf
                                             @method('PATCH')
-                                            <button type="submit" class="btn btn-sm btn-success" style="border-radius: 8px; font-weight: 600;" onclick="return confirm('Activate this user?')">
+                                            <button type="submit" class="btn btn-sm btn-success" style="border-radius: 8px; font-weight: 600; font-size: 12px; padding: 4px 10px;" onclick="return confirm('Activate this user?')">
                                                 <i class="bi bi-check-circle"></i> Activate
                                             </button>
                                         </form>
                                         <form action="{{ route('users.destroy', $user->id) }}" method="POST" style="display:inline-block; margin-left:5px;">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn btn-sm btn-danger" style="border-radius: 8px; font-weight: 600;" onclick="return confirm('Permanently delete this user?')">
+                                            <button type="submit" class="btn btn-sm btn-danger" style="border-radius: 8px; font-weight: 600; font-size: 12px; padding: 4px 10px;" onclick="return confirm('Permanently delete this user?')">
                                                 <i class="bi bi-trash"></i> Delete
                                             </button>
                                         </form>

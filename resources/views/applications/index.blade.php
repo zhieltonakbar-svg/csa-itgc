@@ -45,7 +45,7 @@
                             <tr>
                                 <th style="padding: 16px 24px; color: #475569; font-weight: 600; width: 50px;">#</th>
                                 <th style="padding: 16px 24px; color: #475569; font-weight: 600;">Application Name</th>
-                                <th style="padding: 16px 24px; color: #475569; font-weight: 600; width: 160px; text-align: center;">Total IT Category</th>
+                                <th style="padding: 16px 24px; color: #475569; font-weight: 600; width: 160px; text-align: center;">Total IT RCM</th>
                                 <th style="padding: 16px 24px; color: #475569; font-weight: 600; width: 180px;">UPTI Mapping</th>
                                 <th style="padding: 16px 24px; color: #475569; font-weight: 600; width: 220px;">Active Quarters</th>
                                 <th style="padding: 16px 24px; color: #475569; font-weight: 600; width: 120px; text-align: center;">Status</th>

@@ -4,28 +4,26 @@
 
 @section('content')
 <div class="welcome-hero" style="padding: 24px 32px; background: linear-gradient(135deg, #0f172a, #1e293b); border-radius: 16px; margin-bottom: 24px; position: relative; overflow: hidden;">
-    <div style="position: relative; z-index: 2; display: flex; align-items: center; justify-content: space-between; flex-wrap:wrap; gap:16px;">
-        <div>
-            <h1 style="color: #fff; font-size: 24px; font-weight: 700; margin: 0 0 8px 0; letter-spacing: -0.5px;">App Management</h1>
-            <p style="color: #94a3b8; font-size: 14px; margin: 0; max-width: 600px; line-height: 1.5;">
-                Manage the list of applications, UPTI, and their mappings.
-            </p>
-        </div>
-        <div style="display:flex; flex-direction:column; gap:10px; align-items:stretch;">
-            <button type="button" id="btn-add-period"
-                    style="display:inline-flex; align-items:center; justify-content:center; gap:7px; background:linear-gradient(135deg,#059669,#047857); color:#fff; border:none; padding:8px 16px; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; transition:all 0.2s; white-space:nowrap; flex-shrink:0;">
-                <i class="bi bi-calendar-plus-fill"></i> Add Period
-            </button>
-            <button type="button" id="btn-delete-period"
-                    style="display:inline-flex; align-items:center; justify-content:center; gap:7px; background:linear-gradient(135deg,#dc2626,#b91c1c); color:#fff; border:none; padding:8px 16px; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; transition:all 0.2s; white-space:nowrap; flex-shrink:0;">
-                <i class="bi bi-trash-fill"></i> Delete Period
-            </button>
-        </div>
+    <div style="position: relative; z-index: 2;">
+        <h1 style="color: #fff; font-size: 24px; font-weight: 700; margin: 0 0 8px 0; letter-spacing: -0.5px;">App Management</h1>
+        <p style="color: #94a3b8; font-size: 14px; margin: 0; max-width: 600px; line-height: 1.5;">
+            Manage the list of applications, UPTI, and their mappings.
+        </p>
     </div>
 </div>
 
 
     <div class="col-12">
+        <div class="d-flex justify-content-end align-items-center gap-2 mb-2">
+            <button type="button" id="btn-add-period"
+                    style="display:inline-flex; align-items:center; justify-content:center; gap:7px; background:linear-gradient(135deg,#059669,#047857); color:#fff; border:none; padding:7px 14px; border-radius:8px; font-size:12.5px; font-weight:600; cursor:pointer; white-space:nowrap;">
+                <i class="bi bi-calendar-plus-fill"></i> Add Period
+            </button>
+            <button type="button" id="btn-delete-period"
+                    style="display:inline-flex; align-items:center; justify-content:center; gap:7px; background:linear-gradient(135deg,#dc2626,#b91c1c); color:#fff; border:none; padding:7px 14px; border-radius:8px; font-size:12.5px; font-weight:600; cursor:pointer; white-space:nowrap;">
+                <i class="bi bi-trash-fill"></i> Delete Period
+            </button>
+        </div>
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h5 style="font-weight:700; color:#1e293b; margin:0;">Applications List</h5>
             <div style="display:flex; gap:10px; align-items:center;">

@@ -173,6 +173,23 @@ class ApplicationController extends Controller
             ]);
         }
 
+        /*
+         * Give every new Application a starting period matching the
+         * real-world current Year + Q1, pre-populated with all IT
+         * Categories — so it immediately shows "Active Quarters" and
+         * a "Total IT RCM" count just like every other application,
+         * instead of starting out completely empty.
+         */
+        $initialPeriod = \App\Models\ApplicationPeriod::firstOrCreate([
+            'application_id' => $application->id,
+            'year' => now()->year,
+            'quarter' => 'q1',
+        ]);
+
+        $initialPeriod->itCategories()->syncWithoutDetaching(
+            $itCategories->pluck('id')
+        );
+
         return response()->json(['success' => true]);
     }
 

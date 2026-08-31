@@ -333,14 +333,11 @@ class DashboardController extends Controller
             );
         }
 
-        $allItCategories = \App\Models\ItCategory::orderBy('name')->get();
-
         return view(
             'dashboard',
             compact(
                 'user',
                 'applications',
-                'allItCategories',
                 'uptis',
                 'year',
                 'quarter',

@@ -69,16 +69,6 @@ Route::middleware('auth')->group(function () {
         'clearFilter'
     ])->name('dashboard.clearFilter');
 
-    Route::post('/dashboard/add-category', [
-        DashboardController::class,
-        'addCategoryToPeriod'
-    ])->name('dashboard.addCategory');
-
-    Route::delete('/dashboard/remove-category', [
-        DashboardController::class,
-        'removeCategoryFromPeriod'
-    ])->name('dashboard.removeCategory');
-
     /*
     |--------------------------------------------------------------------------
     | IT Category

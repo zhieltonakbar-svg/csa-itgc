@@ -186,11 +186,38 @@ class ApplicationController extends Controller
             'quarter' => 'required|string|in:q1,q2,q3,q4',
         ]);
 
-        \App\Models\ApplicationPeriod::firstOrCreate([
+        $period = \App\Models\ApplicationPeriod::firstOrCreate([
             'application_id' => $validated['application_id'],
             'year' => $validated['year'],
             'quarter' => $validated['quarter'],
         ]);
+
+        /*
+         * Auto-copy IT Categories from the most recent existing
+         * period of this same Application, so a new period isn't
+         * born empty — Admin no longer manually curates categories
+         * per period (that feature was removed).
+         */
+        if ($period->itCategories()->count() === 0) {
+            $previousPeriod = \App\Models\ApplicationPeriod::where(
+                'application_id',
+                $validated['application_id']
+            )
+                ->where('id', '!=', $period->id)
+                ->orderByDesc('year')
+                ->orderByDesc('quarter')
+                ->first();
+
+            $categoryIds = $previousPeriod
+                ? $previousPeriod->itCategories()->pluck('it_categories.id')
+                : \App\Models\ItCategory::pluck('id');
+
+            if ($categoryIds->isNotEmpty()) {
+                $period->itCategories()->syncWithoutDetaching(
+                    $categoryIds
+                );
+            }
+        }
 
         return response()->json(['success' => true]);
     }

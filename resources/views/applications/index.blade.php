@@ -26,11 +26,6 @@
         </div>
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h5 style="font-weight:700; color:#1e293b; margin:0;">Applications List</h5>
-            <div style="display:flex; gap:10px; align-items:center;">
-                <button class="btn btn-sm btn-outline-dark" style="border-radius:8px; font-weight:600;" onclick="openUptiModal()">
-                    <i class="bi bi-plus-lg"></i> Add UPTI
-                </button>
-            </div>
         </div>
         <div class="card border-0 shadow-sm" style="border-radius: 16px; overflow: hidden;">
             <div class="card-body p-0">
@@ -123,7 +118,7 @@
                 </div>
                 <div style="display:flex; justify-content:center; padding:18px 0;">
                     <button type="button" onclick="openAppModal()" title="Add Application"
-                            style="width:48px; height:48px; border-radius:50%; background:#2d9e55; color:#fff; border:none; display:flex; align-items:center; justify-content:center; font-size:20px; cursor:pointer; box-shadow:0 6px 16px rgba(45,158,85,0.35);">
+                            style="width:48px; height:48px; border-radius:50%; background:#2d9e55; color:#fff; border:none; display:flex; align-items:center; justify-content:center; font-size:20px; cursor:pointer;">
                         <i class="bi bi-plus-lg"></i>
                     </button>
                 </div>
@@ -134,6 +129,9 @@
     <div class="col-12 mt-4">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h5 style="font-weight:700; color:#1e293b; margin:0;">UPTI List</h5>
+            <button class="btn btn-sm btn-outline-dark" style="border-radius:8px; font-weight:600;" onclick="openUptiModal()">
+                <i class="bi bi-plus-lg"></i> Add UPTI
+            </button>
         </div>
         <div class="card border-0 shadow-sm" style="border-radius: 16px; overflow: visible;">
             <div class="card-body p-0">

@@ -14,9 +14,9 @@
 
 
     <div class="col-12">
-        <div class="d-flex justify-content-end align-items-center gap-2 mb-2">
+        <div class="d-flex justify-content-end align-items-center gap-2" style="margin-bottom:8px;">
             <button type="button" id="btn-add-period"
-                    style="display:inline-flex; align-items:center; justify-content:center; gap:7px; background:#2d9e55; color:#fff; border:none; padding:7px 14px; border-radius:8px; font-size:12.5px; font-weight:600; cursor:pointer; white-space:nowrap;">
+                    style="display:inline-flex; align-items:center; justify-content:center; gap:7px; background:#198754; color:#fff; border:none; padding:7px 14px; border-radius:8px; font-size:12.5px; font-weight:600; cursor:pointer; white-space:nowrap;">
                 <i class="bi bi-calendar-plus-fill"></i> Add Period
             </button>
             <button type="button" id="btn-delete-period"
@@ -118,7 +118,7 @@
                 </div>
                 <div style="display:flex; justify-content:center; padding:18px 0;">
                     <button type="button" onclick="openAppModal()" title="Add Application"
-                            style="width:48px; height:48px; border-radius:50%; background:#2d9e55; color:#fff; border:none; display:flex; align-items:center; justify-content:center; font-size:20px; cursor:pointer;">
+                            style="width:48px; height:48px; border-radius:50%; background:#198754; color:#fff; border:none; display:flex; align-items:center; justify-content:center; font-size:20px; cursor:pointer;">
                         <i class="bi bi-plus-lg"></i>
                     </button>
                 </div>
@@ -184,7 +184,7 @@
 {{-- 1. App Modal (Add/Edit Application) --}}
 <div id="appModal" style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,0.45); backdrop-filter:blur(3px); align-items:center; justify-content:center;">
     <div style="background:#fff; border-radius:16px; width:100%; max-width:440px; margin:16px; box-shadow:0 20px 60px rgba(0,0,0,0.2); overflow:hidden;">
-        <div style="background:#2d9e55; padding:20px 24px; display:flex; align-items:center; justify-content:space-between;">
+        <div style="background:#198754; padding:20px 24px; display:flex; align-items:center; justify-content:space-between;">
             <h5 id="appModalTitle" style="margin:0; color:#fff; font-size:16px; font-weight:700;">Add Application</h5>
             <button type="button" onclick="closeAppModal()" style="background:rgba(255,255,255,0.15); border:none; color:#fff; width:32px; height:32px; border-radius:6px; cursor:pointer; font-size:18px; display:flex; align-items:center; justify-content:center;">
                 <i class="bi bi-x-lg"></i>
@@ -215,7 +215,7 @@
         </div>
         <div style="padding:16px 24px; background:#f8fafc; border-top:1px solid #e5e7eb; display:flex; align-items:center; justify-content:flex-end; gap:10px;">
             <button type="button" onclick="closeAppModal()" style="padding:8px 18px; border:1px solid #d1d5db; background:#fff; border-radius:7px; font-size:13px; font-weight:600; color:#374151; cursor:pointer;">Cancel</button>
-            <button type="button" id="appModalSave" style="padding:8px 20px; background:#2d9e55; color:#fff; border:none; border-radius:7px; font-size:13px; font-weight:600; cursor:pointer;">Save Application</button>
+            <button type="button" id="appModalSave" style="padding:8px 20px; background:#198754; color:#fff; border:none; border-radius:7px; font-size:13px; font-weight:600; cursor:pointer;">Save Application</button>
         </div>
     </div>
 </div>
@@ -246,7 +246,7 @@
 {{-- Add Period / Delete Period Modals --}}
 <div id="addPeriodModal" style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,0.45); backdrop-filter:blur(3px); align-items:center; justify-content:center;">
     <div style="background:#fff; border-radius:16px; width:100%; max-width:440px; margin:16px; box-shadow:0 20px 60px rgba(0,0,0,0.2); overflow:hidden;">
-        <div style="background:#2d9e55; padding:20px 24px; display:flex; align-items:center; justify-content:space-between;">
+        <div style="background:#198754; padding:20px 24px; display:flex; align-items:center; justify-content:space-between;">
             <div style="display:flex; align-items:center; gap:12px;">
                 <div style="width:36px; height:36px; background:rgba(255,255,255,0.2); border-radius:8px; display:flex; align-items:center; justify-content:center;">
                     <i class="bi bi-calendar-plus-fill" style="color:#fff; font-size:16px;"></i>
@@ -298,7 +298,7 @@
         </div>
         <div style="padding:16px 24px; background:#f8fafc; border-top:1px solid #e5e7eb; display:flex; align-items:center; justify-content:flex-end; gap:10px;">
             <button id="addPeriodCancel" type="button" style="padding:8px 18px; border:1px solid #d1d5db; background:#fff; border-radius:7px; font-size:13px; font-weight:600; color:#374151; cursor:pointer;">Cancel</button>
-            <button id="addPeriodConfirm" type="button" style="padding:8px 20px; background:#2d9e55; color:#fff; border:none; border-radius:7px; font-size:13px; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:8px;">
+            <button id="addPeriodConfirm" type="button" style="padding:8px 20px; background:#198754; color:#fff; border:none; border-radius:7px; font-size:13px; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:8px;">
                 <i class="bi bi-arrow-right-circle-fill"></i> Open Period
             </button>
         </div>
@@ -674,9 +674,9 @@ function updateAddPeriodQuarterStyles() {
         var i = document.getElementById('ap-q-' + v);
         if (!l || !i) return;
         if (i.checked) {
-            l.style.borderColor = '#2d9e55';
+            l.style.borderColor = '#198754';
             l.style.background = '#ecfdf5';
-            l.style.color = '#238046';
+            l.style.color = '#146c43';
         } else if (!i.disabled) {
             l.style.borderColor = '#d1d5db';
             l.style.background = '#fff';
@@ -743,9 +743,9 @@ function wireQuarterPills(prefix) {
             var i = document.getElementById(prefix + '-q-' + v);
             if (!l || !i) return;
             if (i.checked) {
-                l.style.borderColor = '#2d9e55';
+                l.style.borderColor = '#198754';
                 l.style.background = '#ecfdf5';
-                l.style.color = '#238046';
+                l.style.color = '#146c43';
             } else {
                 l.style.borderColor = '#d1d5db';
                 l.style.background = '#fff';

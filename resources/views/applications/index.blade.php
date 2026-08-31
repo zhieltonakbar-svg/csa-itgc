@@ -45,7 +45,7 @@
                             <tr>
                                 <th style="padding: 16px 24px; color: #475569; font-weight: 600; width: 50px;">#</th>
                                 <th style="padding: 16px 24px; color: #475569; font-weight: 600;">Application Name</th>
-                                <th style="padding: 16px 24px; color: #475569; font-weight: 600; width: 200px; text-align: center;">Total IT RCM</th>
+                                <th style="padding: 16px 24px; color: #475569; font-weight: 600; width: 160px; text-align: center;">Total IT Category</th>
                                 <th style="padding: 16px 24px; color: #475569; font-weight: 600; width: 180px;">UPTI Mapping</th>
                                 <th style="padding: 16px 24px; color: #475569; font-weight: 600; width: 220px;">Active Quarters</th>
                                 <th style="padding: 16px 24px; color: #475569; font-weight: 600; width: 120px; text-align: center;">Status</th>
@@ -60,18 +60,9 @@
                                     {{ $app->name }}
                                 </td>
                                 <td style="padding: 16px 24px; text-align: center; color: #475569; font-weight: 600;">
-                                    @php $periodCounts = $categoryCountsByPeriod[$app->id] ?? collect(); @endphp
-                                    @if($periodCounts->isEmpty())
-                                        <span style="font-size: 12px; color: #94a3b8; font-style: italic;">No periods</span>
-                                    @else
-                                        <div style="display:flex; flex-direction:column; gap:4px; align-items:center;">
-                                            @foreach($periodCounts as $pc)
-                                                <span style="background: #f1f5f9; padding: 3px 10px; border-radius: 6px; font-size: 11.5px; white-space: nowrap;">
-                                                    {{ $pc['label'] }}: <strong>{{ $pc['count'] }}</strong>
-                                                </span>
-                                            @endforeach
-                                        </div>
-                                    @endif
+                                    <span style="background: #f1f5f9; padding: 4px 10px; border-radius: 6px; font-size: 13px;">
+                                        {{ $categoryCountsByPeriod[$app->id]->first()['count'] ?? 0 }}
+                                    </span>
                                 </td>
                                 <td style="padding: 16px 24px;">
                                     @if($app->upti)

@@ -30,9 +30,6 @@
                 <button class="btn btn-sm btn-outline-dark" style="border-radius:8px; font-weight:600;" onclick="openUptiModal()">
                     <i class="bi bi-plus-lg"></i> Add UPTI
                 </button>
-                <button class="btn btn-sm btn-dark" style="border-radius:8px; font-weight:600;" onclick="openAppModal()">
-                    <i class="bi bi-plus-lg"></i> Add Application
-                </button>
             </div>
         </div>
         <div class="card border-0 shadow-sm" style="border-radius: 16px; overflow: hidden;">
@@ -96,7 +93,7 @@
                                     @endif
                                 </td>
                                 <td style="padding: 16px 24px; text-align: center;">
-                                    <button type="button" class="btn btn-sm btn-outline-primary" style="border-radius: 8px; font-weight: 600; margin-right:5px;" onclick="openAppModal({{ $app->id }}, '{{ addslashes($app->name) }}', '{{ $app->upti_id }}')">
+                                    <button type="button" class="btn btn-sm btn-outline-primary" style="border-radius: 8px; font-weight: 600; margin-right:5px;" onclick="openAppModal({{ $app->id }}, '{{ addslashes($app->name) }}', '{{ $app->upti_id }}', {{ $app->is_active ? 1 : 0 }})">
                                         <i class="bi bi-pencil-square"></i> Edit
                                     </button>
                                     @if($app->is_active)
@@ -123,6 +120,12 @@
                         @endforelse
                         </tbody>
                     </table>
+                </div>
+                <div style="display:flex; justify-content:center; padding:18px 0;">
+                    <button type="button" onclick="openAppModal()" title="Add Application"
+                            style="width:48px; height:48px; border-radius:50%; background:#1d4ed8; color:#fff; border:none; display:flex; align-items:center; justify-content:center; font-size:20px; cursor:pointer; box-shadow:0 6px 16px rgba(29,78,216,0.35);">
+                        <i class="bi bi-plus-lg"></i>
+                    </button>
                 </div>
             </div>
         </div>
@@ -202,6 +205,13 @@
                     @foreach($uptis as $u)
                         <option value="{{ $u->id }}">{{ $u->name }}</option>
                     @endforeach
+                </select>
+            </div>
+            <div>
+                <label style="display:block; font-size:13px; font-weight:600; color:#374151; margin-bottom:6px;">Status</label>
+                <select id="am-status" style="width:100%; padding:10px 12px; border:1.5px solid #d1d5db; border-radius:8px; font-size:13.5px; outline:none; cursor:pointer;">
+                    <option value="1">Active</option>
+                    <option value="0">Inactive</option>
                 </select>
             </div>
         </div>
@@ -381,13 +391,13 @@ var csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('
 var appModal = document.getElementById('appModal');
 var amId = document.getElementById('am-id');
 var amName = document.getElementById('am-name');
-function openAppModal(id = '', name = '', upti = '') {
+function openAppModal(id = '', name = '', upti = '', isActive = 1) {
     if(!appModal) return;
     document.getElementById('appModalTitle').textContent = id ? 'Edit Application' : 'Add Application';
     amId.value = id;
     amName.value = name;
     document.getElementById('am-upti').value = upti;
-    document.getElementById('am-upti-wrapper').style.display = id ? 'block' : 'none';
+    document.getElementById('am-status').value = (isActive === true || isActive === 1 || isActive === '1') ? '1' : '0';
     appModal.style.display = 'flex';
     amName.focus();
 }
@@ -397,6 +407,7 @@ document.getElementById('appModalSave')?.addEventListener('click', function() {
     var id = amId.value;
     var name = amName.value.trim();
     var upti_id = document.getElementById('am-upti').value;
+    var is_active = document.getElementById('am-status').value;
     if(!name) { alert('Name is required.'); return; }
     
     var url = id ? `{{ url('applications') }}/${id}` : `{{ route('applications.store') }}`;
@@ -410,7 +421,7 @@ document.getElementById('appModalSave')?.addEventListener('click', function() {
             'X-CSRF-TOKEN': csrfToken,
             'X-Requested-With': 'XMLHttpRequest',
         },
-        body: JSON.stringify({ name: name, upti_id: upti_id })
+        body: JSON.stringify({ name: name, upti_id: upti_id, is_active: is_active })
     })
     .then(res => res.json())
     .then(data => {

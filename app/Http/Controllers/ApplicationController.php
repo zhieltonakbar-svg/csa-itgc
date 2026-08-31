@@ -138,7 +138,12 @@ class ApplicationController extends Controller
 
         $request->validate([
             'name' => 'required|string|max:255',
+            'is_active' => 'nullable',
         ]);
+
+        $isActive = $request->has('is_active')
+            ? filter_var($request->is_active, FILTER_VALIDATE_BOOLEAN)
+            : true;
 
         $application = Application::where('name', $request->name)->first();
 
@@ -157,14 +162,14 @@ class ApplicationController extends Controller
         $application = Application::create([
             'name' => $request->name,
             'description' => $request->name,
-            'is_active' => true,
+            'is_active' => $isActive,
             'upti_id' => $request->upti_id,
         ]);
 
         $itCategories = ItCategory::all();
         foreach ($itCategories as $category) {
             $application->itCategories()->attach($category->id, [
-                'completion_status' => 'not_started',
+                'completion_status' => 'not_complete',
             ]);
         }
 
@@ -234,9 +239,16 @@ class ApplicationController extends Controller
         $request->validate([
             'name' => 'sometimes|required|string|max:255',
             'upti_id' => 'nullable|exists:uptis,id',
+            'is_active' => 'nullable',
         ]);
 
-        $application->update($request->only(['name', 'upti_id']));
+        $updateData = $request->only(['name', 'upti_id']);
+
+        if ($request->has('is_active')) {
+            $updateData['is_active'] = filter_var($request->is_active, FILTER_VALIDATE_BOOLEAN);
+        }
+
+        $application->update($updateData);
 
         return response()->json([
             'success' => true,

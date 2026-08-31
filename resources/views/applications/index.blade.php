@@ -13,18 +13,18 @@
 </div>
 
     <div class="col-12">
-        <div class="d-flex justify-content-end align-items-center gap-2" style="margin-bottom:0;">
-            <button type="button" id="btn-add-period"
-                    style="display:inline-flex; align-items:center; justify-content:center; gap:7px; background:#198754; color:#fff; border:none; padding:7px 14px; border-radius:8px; font-size:12.5px; font-weight:600; cursor:pointer; white-space:nowrap;">
-                <i class="bi bi-calendar-plus-fill"></i> Add Period
-            </button>
-            <button type="button" id="btn-delete-period"
-                    style="display:inline-flex; align-items:center; justify-content:center; gap:7px; background:linear-gradient(135deg,#dc2626,#b91c1c); color:#fff; border:none; padding:7px 14px; border-radius:8px; font-size:12.5px; font-weight:600; cursor:pointer; white-space:nowrap;">
-                <i class="bi bi-trash-fill"></i> Delete Period
-            </button>
-        </div>
-        <div class="d-flex justify-content-between align-items-center mb-2">
+        <div class="d-flex justify-content-between align-items-center mb-3">
             <h5 style="font-weight:700; color:#1e293b; margin:0;">Applications List</h5>
+            <div class="d-flex align-items-center gap-2">
+                <button type="button" id="btn-add-period"
+                        style="display:inline-flex; align-items:center; justify-content:center; gap:7px; background:#198754; color:#fff; border:none; padding:7px 14px; border-radius:8px; font-size:12.5px; font-weight:600; cursor:pointer; white-space:nowrap;">
+                    <i class="bi bi-calendar-plus-fill"></i> Add Period
+                </button>
+                <button type="button" id="btn-delete-period"
+                        style="display:inline-flex; align-items:center; justify-content:center; gap:7px; background:linear-gradient(135deg,#dc2626,#b91c1c); color:#fff; border:none; padding:7px 14px; border-radius:8px; font-size:12.5px; font-weight:600; cursor:pointer; white-space:nowrap;">
+                    <i class="bi bi-trash-fill"></i> Delete Period
+                </button>
+            </div>
         </div>
         <div class="card border-0 shadow-sm" style="border-radius: 16px; overflow: hidden;">
             <div class="card-body p-0">

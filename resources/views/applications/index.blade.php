@@ -3,7 +3,7 @@
 @section('title', 'App Management')
 
 @section('content')
-<div class="welcome-hero" style="padding: 24px 32px; background: linear-gradient(135deg, #0f172a, #1e293b); border-radius: 16px; margin-bottom: 24px; position: relative; overflow: hidden;">
+<div class="welcome-hero" style="padding: 24px 32px; background: linear-gradient(135deg, #0f172a, #1e293b); border-radius: 16px; margin-bottom: 14px; position: relative; overflow: hidden;">
     <div style="position: relative; z-index: 2;">
         <h1 style="color: #fff; font-size: 24px; font-weight: 700; margin: 0 0 8px 0; letter-spacing: -0.5px;">App Management</h1>
         <p style="color: #94a3b8; font-size: 14px; margin: 0; max-width: 600px; line-height: 1.5;">
@@ -12,9 +12,8 @@
     </div>
 </div>
 
-
     <div class="col-12">
-        <div class="d-flex justify-content-end align-items-center gap-2" style="margin-bottom:8px;">
+        <div class="d-flex justify-content-end align-items-center gap-2" style="margin-bottom:4px;">
             <button type="button" id="btn-add-period"
                     style="display:inline-flex; align-items:center; justify-content:center; gap:7px; background:#198754; color:#fff; border:none; padding:7px 14px; border-radius:8px; font-size:12.5px; font-weight:600; cursor:pointer; white-space:nowrap;">
                 <i class="bi bi-calendar-plus-fill"></i> Add Period
@@ -24,7 +23,7 @@
                 <i class="bi bi-trash-fill"></i> Delete Period
             </button>
         </div>
-        <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="d-flex justify-content-between align-items-center mb-2">
             <h5 style="font-weight:700; color:#1e293b; margin:0;">Applications List</h5>
         </div>
         <div class="card border-0 shadow-sm" style="border-radius: 16px; overflow: hidden;">
@@ -126,7 +125,7 @@
         </div>
     </div>
 
-    <div class="col-12 mt-4">
+    <div class="col-12" style="margin-top:12px;">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h5 style="font-weight:700; color:#1e293b; margin:0;">UPTI List</h5>
             <button class="btn btn-sm btn-outline-dark" style="border-radius:8px; font-weight:600;" onclick="openUptiModal()">

@@ -6476,10 +6476,9 @@
         const isReject =
             toStatus === 'return_to_officer';
 
-        // Only the Senior Manager's final Approve (-> completed)
-        // needs the Hasil Review rating.
+        // Manager's Approve (-> ongoing_approval) needs the Review Result rating.
         const needsReviewResult =
-            toStatus === 'completed';
+            toStatus === 'ongoing_approval';
 
         let result;
 
@@ -6494,10 +6493,10 @@
                         `
                             <div style="text-align:left; margin-bottom:10px;">
                                 <label style="font-size:13px; font-weight:600; display:block; margin-bottom:6px;">
-                                    Hasil Review <span style="color:#dc3545;">*</span>
+                                    Review Result <span style="color:#dc3545;">*</span>
                                 </label>
                                 <select id="swal-review-result" class="swal2-input" style="margin:0; width:100%;">
-                                    <option value="">-- Select Hasil Review --</option>
+                                    <option value="">-- Select Review Result --</option>
                                     <option value="effective">Effective</option>
                                     <option value="partially_effective">Partially Effective</option>
                                     <option value="ineffective">Ineffective</option>
@@ -6544,7 +6543,7 @@
                             if (!reviewResult) {
 
                                 Swal.showValidationMessage(
-                                    'Please select the Hasil Review first.'
+                                    'Please select the Review Result first.'
                                 );
 
                                 return false;

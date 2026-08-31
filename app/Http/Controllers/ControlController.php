@@ -835,14 +835,14 @@ class ControlController extends Controller
             }
 
             if (
-                $user->isApprover() &&
-                $toStatus === 'completed'
+                $user->isReviewer() &&
+                $toStatus === 'ongoing_approval'
             ) {
                 if (empty($validated['review_result'])) {
                     return response()->json([
                         'success' => false,
                         'message' =>
-                            'Please select the Hasil Review (Effective / Partially Effective / Ineffective) before approving.',
+                            'Please select the Review Result (Effective / Partially Effective / Ineffective) before approving.',
                     ], 422);
                 }
 

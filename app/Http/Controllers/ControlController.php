@@ -1215,6 +1215,9 @@ class ControlController extends Controller
             'itCategory',
         ]);
 
+        $uptiId =
+            $control->application?->upti_id;
+
         $officerEvidence =
             $control->evidences
                 ->where(
@@ -1224,12 +1227,27 @@ class ControlController extends Controller
                 )
                 ->first();
 
-        $officerName =
-            $officerEvidence?->uploaded_by
-            ?? '( Officer / Creator )';
+        if ($officerEvidence?->uploaded_by) {
 
-        $uptiId =
-            $control->application?->upti_id;
+            $officerName =
+                $officerEvidence->uploaded_by;
+
+        } else {
+
+            $officerUser =
+                User::query()
+                    ->where('role', 'creator')
+                    ->when(
+                        $uptiId,
+                        fn ($q) => $q->where('upti_id', $uptiId)
+                    )
+                    ->first();
+
+            $officerName =
+                $officerUser?->name
+                ?? '( Officer / Creator )';
+
+        }
 
         $reviewer =
             User::query()

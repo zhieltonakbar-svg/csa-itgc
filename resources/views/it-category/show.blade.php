@@ -1866,17 +1866,35 @@
 
                             if ($isRcmView ?? false) {
 
+                                $rowUptiModel =
+                                    $allUptis->firstWhere('name', $ctrl->upti);
+
                                 $officerEvidence =
                                     $ctrl->evidences
                                         ->where('file_type', '!=', 'Berita Acara')
                                         ->first();
 
-                                $officerName =
-                                    $officerEvidence?->uploaded_by
-                                    ?? '—';
+                                if ($officerEvidence?->uploaded_by) {
 
-                                $rowUptiModel =
-                                    $allUptis->firstWhere('name', $ctrl->upti);
+                                    $officerName =
+                                        $officerEvidence->uploaded_by;
+
+                                } else {
+
+                                    $rowOfficer =
+                                        \App\Models\User::query()
+                                            ->where('role', 'creator')
+                                            ->when(
+                                                $rowUptiModel,
+                                                fn ($q) => $q->where('upti_id', $rowUptiModel->id)
+                                            )
+                                            ->first();
+
+                                    $officerName =
+                                        $rowOfficer?->name
+                                        ?? '—';
+
+                                }
 
                                 $rowReviewer =
                                     \App\Models\User::query()

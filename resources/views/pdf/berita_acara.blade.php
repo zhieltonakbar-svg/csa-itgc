@@ -4,7 +4,7 @@
     <meta charset="utf-8">
 
     <title>
-        Official Report - {{ $control->it_control_id }}
+        Berita Acara - {{ $control->it_control_id }}
     </title>
 
     <style>
@@ -212,7 +212,7 @@
 
             <td class="header-title">
                 <h1>
-                    Official Report
+                    Berita Acara
                 </h1>
             </td>
 
@@ -222,15 +222,15 @@
                         <td colspan="2" class="company-name">PT. Telkom Infrastruktur Indonesia</td>
                     </tr>
                     <tr>
-                        <td style="font-weight:bold; width:38%;">Document No.</td>
+                        <td style="font-weight:bold; width:38%;">No. Dokumen</td>
                         <td>{{ $docNumber }}</td>
                     </tr>
                     <tr>
-                        <td style="font-weight:bold;">Version</td>
+                        <td style="font-weight:bold;">Versi</td>
                         <td>1.0</td>
                     </tr>
                     <tr>
-                        <td style="font-weight:bold;">Classification</td>
+                        <td style="font-weight:bold;">Klasifikasi</td>
                         <td>Internal</td>
                     </tr>
                 </table>
@@ -241,28 +241,28 @@
     <div class="header-bottom-rule"></div>
 
     {{-- ============================================================
-         A. DOCUMENT INFORMATION
+         A. INFORMASI DOKUMEN
          ============================================================ --}}
     <table class="info-table">
         <tr>
-            <td colspan="4" class="section-title">A. Document Information</td>
+            <td colspan="4" class="section-title">A. Informasi Dokumen</td>
         </tr>
         <tr>
             <td class="label">Unit</td>
             <td class="value">{{ $control->upti ?? '-' }}</td>
-            <td class="label">Control Period</td>
+            <td class="label">Periode Kontrol</td>
             <td class="value">{{ $control->keterangan_frekuensi ?? '-' }}</td>
         </tr>
         <tr>
-            <td class="label">Control No. (IT RCM)</td>
+            <td class="label">No. Kontrol (IT RCM)</td>
             <td class="value">{{ $control->it_control_id ?? '-' }}</td>
-            <td class="label">Document Date</td>
+            <td class="label">Tanggal Dokumen</td>
             <td class="value">{{ \Carbon\Carbon::now()->format('d/m/Y') }}</td>
         </tr>
         <tr>
-            <td class="label">Control Description</td>
+            <td class="label">Deskripsi Kontrol</td>
             <td class="value">{{ $control->control_description ?? '-' }}</td>
-            <td class="label">Review Period</td>
+            <td class="label">Periode Review</td>
             <td class="value">
                 {{ strtoupper($control->quarter ?? '-') }}
                 {{ $control->year ?? '' }}
@@ -271,32 +271,32 @@
     </table>
 
     {{-- ============================================================
-         B. CONTROL EXECUTION
+         B. PELAKSANAAN KONTROL
          ============================================================ --}}
     <table class="info-table">
         <tr>
-            <td colspan="2" class="section-title">B. Control Execution</td>
+            <td colspan="2" class="section-title">B. Pelaksanaan Kontrol</td>
         </tr>
         <tr>
-            <td class="label" style="width:22%;">Scope</td>
+            <td class="label" style="width:22%;">Lingkup</td>
             <td class="value" style="width:78%;">{{ optional($control->application)->name ?? '-' }}</td>
         </tr>
         <tr>
-            <td class="label">Execution Notes</td>
+            <td class="label">Catatan Pelaksanaan Kontrol</td>
             <td class="value">{{ $executionNotes ?? '-' }}</td>
         </tr>
     </table>
 
     {{-- ============================================================
-         C. SUPPORTING EVIDENCE
+         C. EVIDENCE PENDUKUNG
          ============================================================ --}}
     <table class="evidence-table info-table">
         <tr>
-            <td colspan="2" class="section-title">C. Supporting Evidence</td>
+            <td colspan="2" class="section-title">C. Evidence Pendukung</td>
         </tr>
         <tr>
             <th class="no-col">No.</th>
-            <th>Evidence Name / Description</th>
+            <th>Nama / Deskripsi Evidence</th>
         </tr>
         @forelse($evidences as $i => $ev)
             <tr>
@@ -312,14 +312,14 @@
     </table>
 
     {{-- ============================================================
-         D. REVIEW RESULT
+         D. HASIL REVIEW
          ============================================================ --}}
     <table class="info-table">
         <tr>
-            <td colspan="2" class="section-title">D. Review Result</td>
+            <td colspan="2" class="section-title">D. Hasil Review</td>
         </tr>
         <tr class="checkbox-row">
-            <td class="checkbox-label">Review Result</td>
+            <td class="checkbox-label">Hasil Review</td>
             <td class="value">
                 <span class="checkbox-box">{{ $control->review_result === 'effective' ? 'X' : '' }}</span> <i>Effective</i> &nbsp;&nbsp;
                 <span class="checkbox-box">{{ $control->review_result === 'partially_effective' ? 'X' : '' }}</span> <i>Partially Effective</i> &nbsp;&nbsp;
@@ -327,51 +327,51 @@
             </td>
         </tr>
         <tr>
-            <td class="checkbox-label">Reviewer Notes</td>
+            <td class="checkbox-label">Catatan Reviewer</td>
             <td class="value">{{ $control->reviewer_notes ?: '-' }}</td>
         </tr>
         <tr>
-            <td class="checkbox-label">Approver Notes</td>
+            <td class="checkbox-label">Catatan Approver</td>
             <td class="value">{{ $control->approver_notes ?: '-' }}</td>
         </tr>
     </table>
 
     {{-- ============================================================
-         E. STATEMENT AND SIGNATURES
+         E. PERNYATAAN DAN TANDA TANGAN
          ============================================================ --}}
     <table class="info-table">
         <tr>
-            <td class="section-title">E. Statement and Signatures</td>
+            <td class="section-title">E. Pernyataan dan Tanda Tangan</td>
         </tr>
     </table>
 
     <p class="statement">
-        By signing this document, the undersigned parties declare that the IT control
-        has been executed, reviewed, and approved based on the evidence attached,
-        and in accordance with applicable IT policies and procedures.
+        Dengan ditandatanganinya dokumen ini, para pihak menyatakan bahwa pelaksanaan
+        kontrol IT telah dilaksanakan, direview, dan disetujui berdasarkan evidence
+        yang dilampirkan, serta sesuai dengan kebijakan dan prosedur IT yang berlaku.
     </p>
 
     <table class="signatures">
         <tr>
-            <td class="sig-header">Prepared By:</td>
-            <td class="sig-header">Reviewed By:</td>
-            <td class="sig-header">Approved By:</td>
+            <td class="sig-header">Dibuat Oleh:</td>
+            <td class="sig-header">Direview Oleh:</td>
+            <td class="sig-header">Disetujui Oleh:</td>
         </tr>
         <tr>
             <td class="sig-space">
-                <div class="sig-ttd">( Signature )</div>
+                <div class="sig-ttd">( TTD )</div>
                 <div class="sig-date">
                     {{ optional($control->submitted_at)->format('d/m/Y') ?? '-' }}
                 </div>
             </td>
             <td class="sig-space">
-                <div class="sig-ttd">( Signature )</div>
+                <div class="sig-ttd">( TTD )</div>
                 <div class="sig-date">
                     {{ optional($control->reviewed_at)->format('d/m/Y') ?? '-' }}
                 </div>
             </td>
             <td class="sig-space">
-                <div class="sig-ttd">( Signature )</div>
+                <div class="sig-ttd">( TTD )</div>
                 <div class="sig-date">
                     {{ optional($control->approved_at)->format('d/m/Y') ?? '-' }}
                 </div>
@@ -379,27 +379,27 @@
         </tr>
         <tr>
             <td>
-                <strong>Name:</strong>
+                <strong>Nama :</strong>
                 {{ $officerName !== '( Officer / Creator )' ? $officerName : '.....................' }}
             </td>
             <td>
-                <strong>Name:</strong>
+                <strong>Nama :</strong>
                 {{ $reviewerName !== '( Manager / Reviewer )' ? $reviewerName : '.....................' }}
             </td>
             <td>
-                <strong>Name:</strong>
+                <strong>Nama :</strong>
                 {{ $approverName !== '( Senior Manager / Approver )' ? $approverName : '.....................' }}
             </td>
         </tr>
         <tr>
-            <td><strong>Position:</strong> Officer</td>
-            <td><strong>Position:</strong> Manager</td>
-            <td><strong>Position:</strong> Senior Manager</td>
+            <td><strong>Jabatan :</strong> Officer</td>
+            <td><strong>Jabatan :</strong> Manager</td>
+            <td><strong>Jabatan :</strong> Senior Manager</td>
         </tr>
     </table>
 
     <div class="footer-note">
-        Printed on: {{ \Carbon\Carbon::now()->format('d F Y, H:i') }} (Server Time)
+        Dicetak pada: {{ \Carbon\Carbon::now()->locale('id')->translatedFormat('d F Y, H:i') }} WIB
     </div>
 
 </body>

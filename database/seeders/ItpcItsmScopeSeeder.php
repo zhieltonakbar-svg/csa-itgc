@@ -98,7 +98,7 @@ class ItpcItsmScopeSeeder extends Seeder
                 ['email' => $email],
                 [
                     'name' => $name,
-                    'password' => Hash::make('password'),
+                    'password' => Hash::make('password123'),
                     'role' => $role,
                     'upti_id' => $upti->id,
                     'is_active' => true,

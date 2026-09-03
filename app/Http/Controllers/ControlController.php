@@ -1336,9 +1336,9 @@ class ControlController extends Controller
                 ->implode(', ');
 
         $executionNotes =
-            "Kontrol dilaksanakan oleh {$executionOfficerName} pada {$executionDate}."
+            "Control executed by {$executionOfficerName} on {$executionDate}."
             . ($evidenceFileNames !== ''
-                ? " File: {$evidenceFileNames}."
+                ? " File(s): {$evidenceFileNames}."
                 : '');
 
         $logoPath =

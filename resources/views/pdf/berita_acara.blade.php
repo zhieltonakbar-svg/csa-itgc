@@ -361,19 +361,19 @@
             <td class="sig-space">
                 <div class="sig-ttd">( TTD )</div>
                 <div class="sig-date">
-                    {{ optional($control->submitted_at)->format('d/m/Y') ?? '-' }}
+                    {{ optional($control->submitted_at)->format('d/m/Y H:i') ?? '-' }}
                 </div>
             </td>
             <td class="sig-space">
                 <div class="sig-ttd">( TTD )</div>
                 <div class="sig-date">
-                    {{ optional($control->reviewed_at)->format('d/m/Y') ?? '-' }}
+                    {{ optional($control->reviewed_at)->format('d/m/Y H:i') ?? '-' }}
                 </div>
             </td>
             <td class="sig-space">
                 <div class="sig-ttd">( TTD )</div>
                 <div class="sig-date">
-                    {{ optional($control->approved_at)->format('d/m/Y') ?? '-' }}
+                    {{ optional($control->approved_at)->format('d/m/Y H:i') ?? '-' }}
                 </div>
             </td>
         </tr>
